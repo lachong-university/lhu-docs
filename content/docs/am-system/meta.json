@@ -1,0 +1,18 @@
+{
+  "title": "Hệ thống AM Portal",
+  "description": "https://am.lhu.edu.vn",
+  "icon": "Sprout",
+  "root": true,
+  "pages": [
+    "index",
+    "---Quản lý dữ liệu---",
+    "data-management/dai-hoc",
+    "data-management/lt-vb2",
+    "data-management/cao-hoc",
+    "---Quản lý nhập học---",
+    "enrollment/analysis",
+    "enrollment/incentives-enrollment",
+    "enrollment/online-enrollment",
+    "enrollment/printer"
+  ]
+}

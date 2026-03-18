@@ -1,12 +1,28 @@
 import { docs } from 'collections/server';
-import { type InferPageType, loader } from 'fumadocs-core/source';
+import { type InferPageType, loader, update } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+import { i18n } from './i18n';
+
+
+
+// const filteredSource = update(docs.toFumadocsSource())
+//   .files((files) =>
+//     files.filter((file) => {
+//       // keep meta files (e.g. `meta.json`)
+//       if (file.type === 'meta') return true;
+//       // access file data (type-safe)
+//       return file.data.permission === 'public';
+//     }),
+//   )
+//   .build();
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
+  i18n,
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),
   plugins: [lucideIconsPlugin()],
+
 });
 
 export function getPageImage(page: InferPageType<typeof source>) {

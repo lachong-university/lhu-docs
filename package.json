@@ -9,7 +9,9 @@
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "dbuild": "docker build -t 172.0.0.112:5000/lhdocs .",
+    "prod": "docker build -t 172.0.0.112:5000/lhdocs . && docker push 172.0.0.112:5000/lhdocs"
   },
   "dependencies": {
     "fumadocs-core": "16.6.17",

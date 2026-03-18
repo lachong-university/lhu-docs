@@ -1,0 +1,7 @@
+{
+  "title": "Hệ thống Canvas ASU",
+  "description": "https://canvas.lhu.edu.vn",
+  "icon": "GraduationCap",
+  "root": true,
+  "pages": ["---Chứng thực---", "./auth/login"]
+}
