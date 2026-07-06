@@ -1,0 +1,6 @@
+{
+  "title": "AI & Tools",
+  "icon": "Bot",
+  "root": true,
+  "pages": ["cau-hinh-codex"]
+}
