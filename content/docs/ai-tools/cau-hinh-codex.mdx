@@ -1,0 +1,166 @@
+---
+title: Cài đặt Codex & kết nối 9router
+description: Hướng dẫn cài đặt và cấu hình Codex
+---
+
+## 1. Chuẩn bị trước khi cài
+
+Trước khi bắt đầu, cần có:
+
+- Máy tính đã cài **Node.js** (phiên bản 18 trở lên). Nếu chưa có, tải tại: [https://nodejs.org](https://nodejs.org) (chọn bản LTS, cài như phần mềm thông thường).
+- Truy cập [https://ai.lhu.edu.vn/9router/my-api-key](https://ai.lhu.edu.vn/9router/my-api-key) để lấy API Key
+
+![API Key](/codex-tut/image14.png)
+
+⚠️ **Lưu ý bảo mật:** API Key không chia sẻ ra ngoài, không đăng lên GitHub công khai, không chụp màn hình có key rồi gửi qua nhóm chat công khai.
+
+---
+
+## 2. Cài đặt Codex — chọn 1 trong 2 cách
+
+Codex có 2 hình thức cài, dùng cách nào cũng đọc chung cấu hình ở Bước 3 bên dưới. Bạn nào ngại dùng dòng lệnh có thể chọn **Codex Desktop**; bạn nào quen terminal thì dùng **Codex CLI**.
+
+### Cách 1 — Codex CLI (dòng lệnh)
+
+Mở **Terminal** (Windows: PowerShell hoặc CMD; macOS: Terminal) và chạy lệnh:
+
+```bash
+npm install -g @openai/codex
+```
+
+Sau khi cài xong, kiểm tra bằng lệnh:
+
+```bash
+codex --version
+```
+
+Nếu hiện ra số phiên bản (ví dụ `codex-cli 0.x.x`) là cài thành công.
+
+### Cách 2 — Codex Desktop (ứng dụng giao diện, không cần gõ lệnh)
+
+Đây là ứng dụng desktop chính thức của OpenAI, có giao diện quản lý nhiều tác vụ Codex cùng lúc, phù hợp cho các anh chị chưa quen dòng lệnh.
+
+1. Truy cập trang tải chính thức: [https://developers.openai.com/codex/app](https://developers.openai.com/codex/app)
+2. Chọn bản phù hợp với máy:
+   - **macOS (Apple Silicon)** hoặc **macOS (Intel)** — tùy loại chip máy Mac
+   - **Windows** — cũng có thể cài qua Microsoft Store (tìm "Codex")
+3. Cài đặt như phần mềm thông thường (Next → Next → Finish).
+4. Mở app, không cần đăng nhập.
+5. Codex Desktop sẽ tự đọc cấu hình từ `~/.codex/` giống Codex CLI — nếu bạn đã cài CLI trước và cấu hình ở Bước 3, app sẽ tự nhận, không cần cấu hình lại.
+
+💡 Codex Desktop và Codex CLI dùng chung 1 bộ cấu hình (`~/.codex/auth.json` và `config.toml`), nên chỉ cần làm Bước 3 một lần.
+
+---
+
+## 3. Cấu hình kết nối đến 9Router
+
+Codex lưu cấu hình tại thư mục `~/.codex/` trong máy (thư mục ẩn nằm trong thư mục cá nhân của bạn — trên Windows là `C:\Users\<tên-profile>\.codex\`, trên macOS/Linux là `~/.codex/`).
+
+Nếu thư mục `.codex` chưa tồn tại, hãy chạy lệnh `codex` một lần (gõ `codex` rồi Enter, sau đó gõ `/quit` hoặc `Ctrl+C` để thoát) — Codex sẽ tự tạo thư mục này.
+
+![codex folder](/codex-tut/image4.png)
+
+### Bước 3.1 — Tạo file auth.json
+
+Vào thư mục `~/.codex/`, tạo (hoặc mở nếu đã có) file tên `auth.json`
+
+![auth.json 1](/codex-tut/image1.png)
+![auth.json 2](/codex-tut/image11.png)
+![auth.json 3](/codex-tut/image9.png)
+
+Dán nội dung sau, thay `sk-xxxxx-xxx-xxxxx` bằng API Key vừa copy ở Bước 1:
+
+```json
+{
+  "auth_mode": "apikey",
+  "OPENAI_API_KEY": "sk-xxxxx-xxx-xxxxx"
+}
+```
+
+![auth.json 4](/codex-tut/image7.png)
+
+Sau đó Lưu lại (Ctrl + S).
+
+Tiếp tục tạo file `config.toml` ở bước 3.2
+
+### Bước 3.2 — Tạo file config.toml
+
+Cùng trong thư mục `~/.codex/`, tạo (hoặc mở nếu đã có) file tên `config.toml`
+
+![config.toml 1](/codex-tut/image1.png)
+![config.toml 2](/codex-tut/image5.png)
+![config.toml 3](/codex-tut/image8.png)
+
+Mở file `config.toml`, dán nội dung sau vào, sau đó lưu lại:
+
+```toml
+model = "cx/gpt-5.5"
+model_reasoning_effort = "medium"
+personality = "pragmatic"
+model_provider = "9router"
+
+[model_providers.9router]
+name = "9router.trongnc.com"
+base_url = "https://9router.trongnc.com/v1"
+wire_api = "responses"
+
+[agents.subagent]
+model = "cx/gpt-5.5"
+```
+
+![config.toml 4](/codex-tut/image6.png)
+
+### Bước 3.3 — Kiểm tra kết nối
+
+Mở **Terminal** và chạy lệnh:
+
+```
+codex
+```
+
+![test connection 1](/codex-tut/image13.png)
+Hãy gõ thử `hello`. Nếu nhận được phản hồi, nghĩa là bạn đã kết nối thành công đến 9Router! 🎉
+![test connection 2](/codex-tut/image15.png)
+
+---
+
+## 4. Cài đặt theo từng công cụ (VS Code / Cursor / Antigravity)
+
+Sau khi đã hoàn tất Bước 3, cấu hình `~/.codex/` dùng chung cho **tất cả** các công cụ bên dưới — bạn không cần lặp lại việc nhập API Key ở từng nơi.
+
+### 4.1. Visual Studio Code
+
+1. Mở VS Code → vào tab **Extensions** (biểu tượng ô vuông bên trái, hoặc `Ctrl+Shift+X`).
+2. Gõ tìm **"Codex"** (extension chính thức của OpenAI).
+3. Nhấn **Install**.
+
+![VS Code 1](/codex-tut/image16.png)
+![VS Code 2](/codex-tut/image18.png)
+
+4. Mở panel chat Codex (thường nằm ở sidebar bên phải) để bắt đầu dùng.
+
+![VS Code 3](/codex-tut/image2.png)
+![VS Code 4](/codex-tut/image17.png)
+![VS Code 5](/codex-tut/image3.png)
+
+### 4.2. Antigravity
+
+Antigravity không có mục cấu hình Custom Provider riêng — cách dùng Codex trên Antigravity là **cài extension Codex** (giống cách làm với VS Code), vì Antigravity cũng dùng nền tảng extension tương tự.
+
+1. Mở Antigravity → vào tab **Extensions**.
+2. Gõ tìm từ khóa **"openai"** trên kho extension **Open VSX (VSX)**.
+3. Tìm extension **Codex** (của OpenAI) trong kết quả tìm kiếm → nhấn **Install**.
+
+![Antigravity 1](/codex-tut/image10.png)
+
+4. Sau khi cài xong, extension sẽ tự đọc cấu hình từ thư mục `~/.codex/` đã thiết lập ở Bước 3 (file `auth.json` và `config.toml`) — không cần nhập lại API Key hay Base URL trong Antigravity.
+5. Mở panel chat Codex từ sidebar để bắt đầu dùng.
+
+![Antigravity 2](/codex-tut/image2.png)
+![Antigravity 3](/codex-tut/image12.png)
+
+---
+
+## 5. Một vài lưu ý khi dùng chung
+
+- Đây là **tài nguyên dùng chung của cả phòng** — nếu dùng đồng thời cùng lúc nhiều người, đôi khi có thể gặp giới hạn tốc độ (rate limit) tạm thời, cứ thử lại sau vài giây.
