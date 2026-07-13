@@ -1,0 +1,29 @@
+{
+  "title": "Hệ thống thông tin ME",
+  "description": "https://me.lhu.edu.vn",
+  "icon": "Info",
+  "root": true,
+  "pages": [
+    "index",
+    "---Tổng quan---",
+    "tong-quan/1-gioi-thieu-he-thong",
+    "tong-quan/2-doi-tuong-su-dung",
+    "tong-quan/3-dieu-kien-truy-cap",
+    "tong-quan/4-quy-dinh-icon",
+    "---Cài App ME---",
+    "cai-app-me/1-cai-app-me",
+    "cai-app-me/2-dang-nhap",
+    "cai-app-me/3-doi-mat-khau",
+    "cai-app-me/4-quen-mat-khau",
+    "---Chức năng hệ thống---",
+    "chuc-nang-he-thong/1-dang-bai-viet",
+    "chuc-nang-he-thong/2-trang-ca-nhan",
+    "chuc-nang-he-thong/3-ban-tin-truong-va-don-vi",
+    "chuc-nang-he-thong/4-ung-dung-cua-toi",
+    "chuc-nang-he-thong/5-tro-giup-va-thiet-lap",
+    "chuc-nang-he-thong/6-tim-kiem",
+    "chuc-nang-he-thong/7-thong-bao",
+    "chuc-nang-he-thong/8-nhan-tin",
+    "chuc-nang-he-thong/9-su-kien"
+  ]
+}
