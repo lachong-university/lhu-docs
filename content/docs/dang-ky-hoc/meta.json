@@ -1,0 +1,18 @@
+{
+  "title": "Đăng ký học",
+  "description": "Hướng dẫn sử dụng chức năng đăng ký học",
+  "icon": "BookOpenCheck",
+  "root": true,
+  "pages": [
+    "index",
+    "---TỔNG QUAN---",
+    "tong-quan/1-gioi-thieu",
+    "tong-quan/2-doi-tuong-su-dung",
+    "tong-quan/3-dieu-kien-truy-cap",
+    "---HỆ THỐNG---",
+    "he-thong/1-dang-nhap-he-thong",
+    "he-thong/2-dang-ky-hoc-tin-chi",
+    "he-thong/3-dang-ky-hoc-lai-hoac-mon-chua-hoc",
+    "he-thong/4-xem-ket-qua-dang-ky"
+  ]
+}
