@@ -1,0 +1,12 @@
+{
+  "title": "Tài khoản sinh viên",
+  "description": "Hướng dẫn sử dụng tài khoản sinh viên",
+  "icon": "UserRound",
+  "root": true,
+  "pages": [
+    "gioi-thieu",
+    "dang-nhap-and-cap-nhat-thong-tin",
+    "dang-xuat-and-kiem-tra-phien",
+    "quen-mat-khau"
+  ]
+}

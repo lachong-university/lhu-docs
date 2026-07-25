@@ -1,0 +1,14 @@
+{
+  "title": "Tra cứu thông tin",
+  "description": "Hướng dẫn tra cứu thông tin",
+  "icon": "Search",
+  "root": true,
+  "pages": [
+    "index",
+    "he-thong-tra-cuu",
+    "tra-cuu-lich-thi-dinh-huong-chuyen-nganh-duoc-cho-sinh-vien-duoc",
+    "tra-cuu-lich-thi-giao-duc-quoc-phong",
+    "tra-cuu-ket-qua-thi-danh-gia-nang-luc-tieng-anh",
+    "tra-cuu-ket-qua-thi-cao-hoc"
+  ]
+}
