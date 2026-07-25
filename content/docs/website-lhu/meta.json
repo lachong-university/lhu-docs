@@ -1,20 +1,20 @@
 {
   "title": "Website LHU",
-  "description": "H??ng d?n s? d?ng trang ch? LHU",
+  "description": "Hướng dẫn sử dụng trang chủ LHU",
   "icon": "Fullscreen",
   "root": true,
   "pages": [
-    "---T?NG QUAN---",
+    "---TỔNG QUAN---",
     "1-tong-quan/1-huong-dan-su-dung-trang-chu-lhu",
     "1-tong-quan/2-doi-tuong-su-dung",
     "1-tong-quan/3-chuc-nang",
     "1-tong-quan/4-icon-va-chuc-nang",
-    "---THAM QUAN 3D VR V? C?C LI?N K?T KH?C---",
+    "---THAM QUAN 3D VR VÀ CÁC LIÊN KẾT KHÁC---",
     "2-tham-quan-3d-vr-va-cac-lien-ket-khac/1-tham-quan-truong-lhu-tu-xa",
     "2-tham-quan-3d-vr-va-cac-lien-ket-khac/2-giao-dien-website-tham-quan",
     "2-tham-quan-3d-vr-va-cac-lien-ket-khac/3-icon-va-chuc-nang",
     "2-tham-quan-3d-vr-va-cac-lien-ket-khac/4-cac-lien-ket-khac",
-    "---K?T N?I V? LI?N H?---",
+    "---KẾT NỐI VÀ LIÊN HỆ---",
     "3-ket-noi-va-lien-he/1-ket-noi",
     "3-ket-noi-va-lien-he/2-lien-he"
   ]
