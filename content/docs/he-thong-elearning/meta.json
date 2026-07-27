@@ -1,0 +1,30 @@
+{
+  "title": "Hệ thống Elearning",
+  "description": "Hướng dẫn sử dụng hệ thống Elearning",
+  "icon": "GraduationCap",
+  "root": true,
+  "pages": [
+    "---TỔNG QUAN---",
+    "index",
+    "tong-quan/2-doi-tuong-su-dung",
+    "tong-quan/3-dieu-kien-va-truy-cap",
+    "---HƯỚNG DẪN---",
+    "huong-dan/1-dang-ky",
+    "huong-dan/2-dang-nhap",
+    "huong-dan/3-giao-dien-trang-hoc-tap",
+    "huong-dan/4-giao-dien-trang-khoa-hoc",
+    "huong-dan/5-giao-dien-trang-ca-nhan",
+    "huong-dan/6-giao-dien-trang-theo-doi-diem",
+    "---CHỨC NĂNG---",
+    "chuc-nang/1-hoat-dong-hoc-thong-qua-tai-lieu",
+    "chuc-nang/2-hoat-dong-bai-giang-dien-tu-ket-hop-kiem-tra-kien-thuc",
+    "chuc-nang/3-hoat-dong-thao-luan",
+    "chuc-nang/4-hoat-dong-lam-bai-tap-tu-luan",
+    "chuc-nang/5-hoat-dong-lam-bai-tap-trac-nghiem",
+    "---HỎI - ĐÁP---",
+    "hoi-dap/1-quen-mat-khau-vao-he-thong-hoc-truc-tuyen-phai-lam-the-nao",
+    "hoi-dap/2-khong-thay-ten-khoa-hoc-cua-lop-minh-mac-du-cac-ban-khac-trong-lop-deu-thay-em-phai-lam-the-nao",
+    "hoi-dap/3-co-the-theo-doi-diem-cua-bai-tap-nhu-the-nao-o-dau",
+    "hoi-dap/4-lam-bai-tap-tu-luan-sau-do-bam-nop-bai-upload-tap-tin-tuy-nhien-khong-the-nop-bai-duoc"
+  ]
+}
