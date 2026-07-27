@@ -1,0 +1,10 @@
+{
+  "title": "Tra cứu điểm thi",
+  "description": "Hướng dẫn tra cứu điểm thi",
+  "icon": "SearchCheck",
+  "root": true,
+  "pages": [
+    "tong-quan",
+    "he-thong"
+  ]
+}
