@@ -4,13 +4,7 @@
   "icon": "ClipboardCheck",
   "root": true,
   "pages": [
-    "---TỔNG QUAN---",
-    "index",
-    "tong-quan/gioi-thieu",
-    "tong-quan/1-thiet-bi-su-dung-lam-bai-thi",
-    "tong-quan/2-mot-so-cau-hoi-thuong-gap",
-    "tong-quan/3-co-the-ban-chua-biet",
-    "---HƯỚNG DẪN CHI TIẾT---",
+    "tong-quan",
     "huong-dan-chi-tiet"
   ]
 }
