@@ -1,0 +1,10 @@
+{
+  "title": "Đánh giá điểm rèn luyện",
+  "description": "Hướng dẫn đánh giá điểm rèn luyện",
+  "icon": "ClipboardCheck",
+  "root": true,
+  "pages": [
+    "tong-quan",
+    "he-thong"
+  ]
+}
