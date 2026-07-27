@@ -1,0 +1,16 @@
+{
+  "title": "Thi trắc nghiệm trực tuyến",
+  "description": "Hướng dẫn sử dụng thi trắc nghiệm trực tuyến",
+  "icon": "ClipboardCheck",
+  "root": true,
+  "pages": [
+    "---TỔNG QUAN---",
+    "index",
+    "tong-quan/gioi-thieu",
+    "tong-quan/1-thiet-bi-su-dung-lam-bai-thi",
+    "tong-quan/2-mot-so-cau-hoi-thuong-gap",
+    "tong-quan/3-co-the-ban-chua-biet",
+    "---HƯỚNG DẪN CHI TIẾT---",
+    "huong-dan-chi-tiet"
+  ]
+}
