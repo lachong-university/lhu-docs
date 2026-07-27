@@ -1,0 +1,10 @@
+{
+  "title": "Đăng ký xét tốt nghiệp",
+  "description": "Hướng dẫn đăng ký xét tốt nghiệp",
+  "icon": "GraduationCap",
+  "root": true,
+  "pages": [
+    "gioi-thieu",
+    "huong-dan"
+  ]
+}
