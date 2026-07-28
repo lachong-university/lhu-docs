@@ -1,0 +1,15 @@
+{
+  "title": "Quản lý văn bản LHU",
+  "description": "Hướng dẫn quản lý văn bản lhu",
+  "icon": "FileText",
+  "root": true,
+  "pages": [
+    "index",
+    "cong-van-don-vi",
+    "cong-van-duoc-chia-se",
+    "cap-so",
+    "bao-cao",
+    "thu-muc",
+    "quan-ly-danh-muc"
+  ]
+}
