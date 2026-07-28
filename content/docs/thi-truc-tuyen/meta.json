@@ -1,0 +1,12 @@
+{
+  "title": "Thi Trực Tuyến",
+  "description": "Hướng dẫn thi trực tuyến",
+  "icon": "MonitorCheck",
+  "root": true,
+  "pages": [
+    "index",
+    "thi-trac-nghiem",
+    "ky-thi-tu-luan",
+    "bai-thi-tu-luan"
+  ]
+}
