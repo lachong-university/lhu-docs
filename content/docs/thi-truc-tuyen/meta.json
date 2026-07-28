@@ -4,8 +4,11 @@
   "icon": "MonitorCheck",
   "root": true,
   "pages": [
+    "---GIỚI THIỆU---",
     "index",
+    "---THI TRẮC NGHIỆM---",
     "thi-trac-nghiem",
+    "---THI TỰ LUẬN---",
     "ky-thi-tu-luan",
     "bai-thi-tu-luan"
   ]
