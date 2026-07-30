@@ -1,0 +1,11 @@
+{
+  "title": "Đăng ký cấp giấy chứng nhận",
+  "description": "Hướng dẫn đăng ký cấp giấy chứng nhận",
+  "icon": "FileText",
+  "root": true,
+  "pages": [
+    "index",
+    "dang-ky-cap-giay-chung-nhan",
+    "cau-hoi-thuong-gap"
+  ]
+}
