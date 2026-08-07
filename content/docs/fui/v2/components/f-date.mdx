@@ -1,0 +1,190 @@
+---
+title: f-date
+description: Nhập ngày — gõ theo mask dd/mm/yyyy hoặc chọn từ lịch
+icon: Calendar
+---
+
+Dùng `f-date` thay cho `v-text-field` cộng logic parse ngày tự viết. Nó bọc `v-text-field` và
+`v-date-picker` lại: gõ trực tiếp theo mask, hoặc bấm icon lịch để chọn.
+
+## Demo
+
+<FuiPreview template="f-date" height={300} />
+
+## Props
+
+<TypeTable
+  type={{
+    value: {
+      description: "Giá trị ngày. Dùng qua v-model. Chấp nhận nhiều định dạng khi khởi tạo.",
+      type: "String",
+    },
+    label: { description: "Nhãn của ô nhập.", type: "String" },
+    required: {
+      description: "Bắt buộc nhập. Ảnh hưởng tới validate form khi bấm f-button.",
+      type: "Boolean",
+      default: "true",
+    },
+    dateAdd: {
+      description: "Đặt sẵn ngày tương đối so với hôm nay, tính bằng ngày. -7 = một tuần trước, 0 = hôm nay.",
+      type: "Number",
+    },
+  }}
+/>
+
+**Event**: `input` — phát ra ngày đã chuẩn hoá, hoặc `null` khi ô trống.
+
+### Default FUI tự thêm
+
+```json
+{
+  ":picker": { "locale": "vi" },
+  ":hide-details": true,
+  ":outlined": true,
+  ":dense": true
+}
+```
+
+Lịch đã sẵn tiếng Việt. Mọi prop khác rơi xuống `v-text-field` bên dưới.
+
+## Cách dùng
+
+<Tabs items={['Tối giản', 'Đầy đủ']}>
+
+<Tab value="Tối giản">
+```json
+{
+  "el": "f-date",
+  "w": 3,
+  "attr": { "v-model": "form.ngaySinh", "label": "Ngày sinh" }
+}
+```
+</Tab>
+
+<Tab value="Đầy đủ">
+JSON đang chạy trong demo ở trên:
+
+```json
+{
+  "prop": "row",
+  "cols": [
+    { "el": "f-date", "w": 3, "attr": {
+        "v-model": "form.tuNgay", "label": "Từ ngày",
+        ":required": false, ":date-add": -7 } },
+
+    { "el": "f-date", "w": 3, "attr": {
+        "v-model": "form.denNgay", "label": "Đến ngày",
+        ":required": false, ":date-add": 0 } },
+
+    { "el": "f-date", "w": 3, "attr": {
+        "v-model": "form.ngaySinh", "label": "Ngày sinh (bắt buộc)",
+        ":required": true } }
+  ]
+}
+```
+</Tab>
+
+</Tabs>
+
+## Mẫu hay dùng
+
+<Tabs items={['Khoảng ngày mặc định', 'Lọc và tự tải lại', 'Trong form CRUD']}>
+
+<Tab value="Khoảng ngày mặc định">
+Báo cáo thường mở sẵn 7 ngày gần nhất:
+
+```json
+{
+  "prop": "row",
+  "cols": [
+    { "el": "f-date", "w": 3, "attr": {
+        "v-model": "filter.tuNgay", "label": "Từ ngày",
+        ":required": false, ":date-add": -7 } },
+    { "el": "f-date", "w": 3, "attr": {
+        "v-model": "filter.denNgay", "label": "Đến ngày",
+        ":required": false, ":date-add": 0 } }
+  ]
+}
+```
+`date-add` chỉ đặt giá trị **ban đầu** — người dùng đổi sau đó thì nó không can thiệp nữa.
+</Tab>
+
+<Tab value="Lọc và tự tải lại">
+```json
+"watch": {
+  "filter.tuNgay":  { "CALL": "apiBaoCao" },
+  "filter.denNgay": { "CALL": "apiBaoCao" }
+}
+```
+
+```json
+{
+  "apiBaoCao": {
+    "API": "/api/baocao/doanhthu",
+    "IN": { "TuNgay": "filter.tuNgay", "DenNgay": "filter.denNgay" },
+    "OUT": "dsBaoCao"
+  }
+}
+```
+</Tab>
+
+<Tab value="Trong form CRUD">
+`f-date` dùng được trong `:update-form` của `f-table`:
+
+```json
+":update-form": [
+  { "el": "v-text-field", "attr": { "v-model": "HoTen", "label": "Họ tên", ":required": true } },
+  { "el": "f-date", "attr": { "v-model": "NgayVao", "label": "Ngày vào làm" } }
+]
+```
+Bên trong `:update-form`, `v-model` trỏ thẳng vào field của dòng đang sửa — không có prefix
+`form.`.
+</Tab>
+
+</Tabs>
+
+## Cạm bẫy
+
+<Callout type="warn">
+**`required` mặc định là `true`.** Ô lọc không bắt buộc thì phải khai rõ `":required": false`,
+nếu không người dùng sẽ không bấm được nút Lưu nào trên trang cho tới khi điền ngày vào.
+</Callout>
+
+<Callout type="warn">
+**Không khai `:required` thì `:rules` bị xoá.** Runtime chạy
+`if (!c.attr[":required"]) delete c.attr[":rules"]`. Nghĩa là `":required": false` không phải
+"không validate" — nó là "bỏ hẳn rule". Cần rule riêng thì phải có `:required` đi kèm.
+</Callout>
+
+<Callout>
+Ô nhập giới hạn 10 ký tự và chỉ nhận số cùng dấu phân cách — gõ chữ vào sẽ bị chặn. Người dùng
+paste ngày từ chỗ khác vẫn được, component tự chuẩn hoá.
+</Callout>
+
+## Component liên quan
+
+- `f-time` — cùng cơ chế, dành cho giờ. Props `value`, `label`, `timeAdd`, `required`; phát
+  `input` với chuỗi `HH:mm`
+- `f-time-counter` — đếm ngược hoặc đồng hồ thời gian thực; phát `time-end` khi về 0
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON trong khối
+`<fui-app lang="json">` của `index.vue`).
+
+Hãy dựng cho tôi thanh lọc báo cáo gồm: khoảng ngày (mặc định 7 ngày gần nhất), một dropdown
+chọn phòng ban, và bảng kết quả tự tải lại khi đổi bất kỳ điều kiện lọc nào.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-date` cho ô ngày, không dùng `v-text-field` rồi tự parse
+- Ô lọc phải đặt `":required": false` — mặc định của `f-date` là `true` và sẽ chặn việc submit form
+- Dùng `:date-add` để đặt giá trị ban đầu (-7 và 0), đừng tính ngày trong `data[]`
+- Mỗi field lọc có một `watch` gọi lại action tải dữ liệu
+- Chuỗi cố định **không có dấu cách** phải bọc backtick ở đầu, ví dụ `` "`active" ``
+- Event viết đầy đủ `v-on:click`, không dùng `@click`
+- Chia cột bằng khoá `w` (1–12), không dùng `style="width:..."`
+- Không tự thêm `class` hay `style` để làm đẹp
+
+Trả về `data[]`, `watch` và `controls` hoàn chỉnh.
+</AiPrompt>

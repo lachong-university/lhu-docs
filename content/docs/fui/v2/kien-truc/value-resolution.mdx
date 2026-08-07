@@ -1,0 +1,171 @@
+---
+title: Quy tắc phân giải giá trị
+description: Vì sao "active" không phải chuỗi "active" — luật quan trọng nhất của FUI
+icon: TriangleAlert
+---
+
+Đây là nguồn lỗi số một khi viết FUI. Đọc kỹ một lần sẽ tiết kiệm rất nhiều thời gian debug.
+
+FUI dùng hàm `getVueData(value, src)` để diễn giải **mọi giá trị chuỗi** trong `data[]` và trong
+`IN` mapping. Cách bạn *viết* chuỗi quyết định nó được *hiểu* thế nào.
+
+## Bảng quy tắc
+
+| Bạn viết | FUI xử lý | Kết quả |
+|---|---|---|
+| Số, boolean, `null`, object, mảng | Giữ nguyên | Giá trị gốc |
+| Chuỗi bắt đầu bằng `` ` `` | Lodash template | Chuỗi sau khi render |
+| Chuỗi có `{{ }}` | Lodash template có nội suy | Chuỗi sau khi render |
+| Chuỗi **có dấu cách** | Lodash template → trả về nguyên văn | Chính chuỗi đó |
+| Chuỗi **không có dấu cách** | **Eval như biểu thức JS** | Giá trị của biểu thức |
+| `""` | Giữ nguyên | `""` |
+
+<Callout type="error">
+**Chuỗi không có dấu cách bị eval như JavaScript.**
+
+`"val1"` cho ra *giá trị của biến* `val1`, **không phải** chuỗi `"val1"`.
+Muốn chuỗi thật, viết `` "`val1" ``.
+</Callout>
+
+## Ví dụ đối chiếu
+
+```json
+"data": [
+  {
+    "a": "Hang So",                        // có dấu cách → chuỗi "Hang So"
+    "b": 3,                                // số → 3
+    "c": true,                             // boolean → true
+    "d": null,                             // null → null
+
+    "e": "val1",                           // KHÔNG dấu cách → eval → giá trị biến val1
+    "f": "val4.prop2",                     // eval → vueData.val4.prop2
+    "g": "val5[1]",                        // eval → phần tử thứ 2 của mảng val5
+    "h": "[val1]",                         // eval → tạo mảng [giá trị của val1]
+    "i": "[1,2,3].map(x=>x*2)",            // eval → [2,4,6]
+
+    "j": "`Xin chào {{user.UserName}}",     // backtick → "Xin chào Tuấn"
+    "k": "tổng là {{a+b}} item",            // {{ }} → "tổng là 3 item"
+    "l": "`active"                          // backtick → chuỗi "active"
+  }
+]
+```
+
+## Khi nào phải nhớ tới quy tắc này
+
+Hầu như lúc nào cũng vướng ở ba chỗ sau.
+
+<Tabs items={['Gán mã / ID cố định', 'Tham số IN của API', 'Giá trị mặc định']}>
+
+<Tab value="Gán mã / ID cố định">
+
+Mã, id, tên cửa sổ, đường dẫn — đều là chuỗi không dấu cách:
+
+```json
+// ❌ SAI — eval biến winUser (không tồn tại) → undefined
+{ "windowID": "winUser" }
+
+// ✅ ĐÚNG
+{ "windowID": "`winUser" }
+```
+
+Cách khác cũng đúng: bọc nháy đơn bên trong — `"'winUser'"`.
+
+</Tab>
+
+<Tab value="Tham số IN của API">
+
+```json
+// ❌ SAI — "DangHoatDong" bị eval
+{
+  "API": "/api/user/list",
+  "IN": { "TrangThai": "DangHoatDong", "GroupID": "sGroup" },
+  "OUT": "dsUser"
+}
+
+// ✅ ĐÚNG — hằng bọc backtick, biến để nguyên
+{
+  "API": "/api/user/list",
+  "IN": { "TrangThai": "`DangHoatDong", "GroupID": "sGroup" },
+  "OUT": "dsUser"
+}
+```
+
+Ở đây `"sGroup"` **cố ý** để trần — ta muốn *giá trị* của biến `sGroup`. Cùng một cú pháp phục
+vụ hai ý định khác nhau, nên phải chủ động chọn.
+
+</Tab>
+
+<Tab value="Giá trị mặc định">
+
+```json
+// ❌ SAI
+{ "IF": "typeof template == 'undefined'", "THEN": { "template": "f-button" } }
+
+// ✅ ĐÚNG
+{ "IF": "typeof template == 'undefined'", "THEN": { "template": "`f-button" } }
+```
+
+</Tab>
+
+</Tabs>
+
+## Nội suy `{{ }}`
+
+`{{ }}` dùng lodash template, nên chứa được **bất kỳ biểu thức JS nào**:
+
+```json
+"label": "Còn {{items.length}} bản ghi",
+"title": "Ngày {{moment().format('DD/MM/YYYY')}}",
+"flag":  "Là mảng: {{Array.isArray(myList)}}"
+```
+
+## Key bên trái cũng được phân giải
+
+Không chỉ giá trị — key cũng hỗ trợ đường dẫn sâu, và FUI tự tạo object/mảng trung gian:
+
+```json
+"data": [
+  {
+    "val":             "Hang So",   // biến đơn
+    "obj.prop":        "val1",      // → vueData.obj.prop
+    "obj.nested.deep": true,        // nhiều cấp
+    "arr[0].name":     "`Tuan",     // index cố định
+    "arr[val2].name":  "`abc",      // index động: val2 = 3 → arr[3]
+    "#PARENT.field":   "val1",      // ghi sang cửa sổ cha
+    "#Win1.field":     "val1"       // ghi sang iframe Win1
+  }
+]
+```
+
+Key bắt đầu bằng `#` thì FUI gọi `setWindowData` thay vì ghi vào `vueData`.
+
+## Prefix `vueData.` — hai ngữ cảnh khác nhau
+
+Đây là chỗ hay gây bối rối vì cùng một biến lại viết hai kiểu.
+
+| Viết ở đâu | Chạy bằng gì | Prefix |
+|---|---|---|
+| `v-if`, `:items`, `v-model` trong `controls` | Vue template | **Nên** dùng `vueData.` |
+| `IF`, `EXE`, `THEN` trong `data[]` | Lodash template (`with`) | **Không** cần prefix |
+
+```json
+// Trong controls
+{ "col": { "v-if": "vueData.user.SystemRight > 1" } }
+
+// Trong data[] — cùng biến đó, không prefix
+{ "IF": "user.SystemRight > 1", "THEN": { "CALL": "loadAdmin" } }
+```
+
+<Callout>
+Trong `attr`, prefix `vueData.` còn có tác dụng phụ: nó báo cho runtime rằng biến này **đã tồn
+tại**, đừng tự khai báo lại. Không có prefix mà biến chưa tồn tại thì FUI tự tạo — `:items` sẽ
+thành `[]`, các key khác thành `undefined`.
+</Callout>
+
+## Cách tự kiểm tra nhanh
+
+Nếu một giá trị ra `undefined` mà bạn không hiểu tại sao, hỏi ba câu này theo thứ tự:
+
+1. Chuỗi đó **có dấu cách không**? Không có → nó đang bị eval.
+2. Bạn **muốn chuỗi hay muốn biến**? Muốn chuỗi → thêm backtick đầu.
+3. Biến đó **đã tồn tại lúc dòng này chạy chưa**? `data[]` chạy tuần tự từ trên xuống.

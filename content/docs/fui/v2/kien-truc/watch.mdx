@@ -1,0 +1,183 @@
+---
+title: watch
+description: Theo dõi state để chạy action — bộ lọc phân tầng, deep-watch, tránh vòng lặp
+icon: Eye
+---
+
+`watch` là object ánh xạ **tên biến → action**. Biến đổi giá trị thì action chạy.
+
+```json
+"watch": {
+  "sGroup":      { "CALL": "getUser" },
+  "sDepartment": { "CALL": "getUser" },
+  "sModuleID":   [ { "CALL": "getSysRight" }, { "CALL": "getFunctionRight" } ]
+}
+```
+
+Một biến cần nhiều action thì truyền mảng.
+
+<Callout>
+Khai báo một biến trong `watch` còn có tác dụng phụ hữu ích: runtime **khai báo trước** biến đó
+trên `vueData` trước khi `new Vue()`, nên nó chắc chắn reactive. Đây là cách làm cho một tham
+số URL trở thành reactive.
+</Callout>
+
+## Sáu nguyên tắc
+
+<Steps>
+
+<Step>
+### Chỉ watch key đầu vào nhỏ nhất
+
+Watch ID hoặc từng field lọc (`provinceID`, `filter.status`), đừng watch cả object lớn nếu
+không cần.
+</Step>
+
+<Step>
+### Tách action theo tầng
+
+`handleProvinceChange` chỉ reset dữ liệu cấp dưới rồi gọi `apiLoadDistricts`. Mỗi tầng một
+việc.
+</Step>
+
+<Step>
+### `deep-watch` phải chọn lọc
+
+Chỉ dùng cho object lọc nhỏ. **Không** deep-watch mảng lớn như `items` hay `tableData`.
+</Step>
+
+<Step>
+### Đừng để watcher tự tạo vòng lặp
+
+Không watch biến output của chính action đó. Không watch `items` rồi trong callback lại ghi
+vào `items`.
+</Step>
+
+<Step>
+### Kiểm tra đầu vào trước khi gọi API
+
+Dùng `IF`/`THEN` — chưa chọn tỉnh thì đừng gọi API huyện.
+</Step>
+
+<Step>
+### Debounce và chống race đặt ở `<script>`
+
+Watcher chỉ điều phối. Logic chống response cũ ghi đè response mới thuộc về hàm helper.
+</Step>
+
+</Steps>
+
+## Bộ lọc phân tầng
+
+Ví dụ kinh điển: Tỉnh → Huyện → Xã.
+
+```json
+{
+  "data": [
+    {
+      "formData": { "provinceID": null, "districtID": null, "wardID": null },
+      "provinceList": [],
+      "districtList": [],
+      "wardList": []
+    },
+    {
+      "apiLoadProvinces": { "API": "/api/location/provinces", "OUT": "provinceList" },
+      "apiLoadDistricts": {
+        "API": "/api/location/districts",
+        "IN":  { "ProvinceID": "formData.provinceID" },
+        "OUT": "districtList"
+      },
+      "apiLoadWards": {
+        "API": "/api/location/wards",
+        "IN":  { "DistrictID": "formData.districtID" },
+        "OUT": "wardList"
+      }
+    },
+    {
+      "handleProvinceChange": [
+        {
+          "districtList": [],
+          "wardList": [],
+          "formData.districtID": null,
+          "formData.wardID": null
+        },
+        { "IF": "formData.provinceID", "THEN": { "CALL": "apiLoadDistricts" } }
+      ]
+    },
+    { "CALL": "apiLoadProvinces" }
+  ],
+
+  "watch": {
+    "formData.provinceID": { "CALL": "handleProvinceChange" },
+    "formData.districtID": { "CALL": "handleDistrictChange" }
+  }
+}
+```
+
+Điểm mấu chốt: **reset cấp dưới trước, gọi API sau**. Bỏ bước reset thì người dùng đổi tỉnh
+xong vẫn thấy huyện cũ trong dropdown.
+
+## Đồng bộ thanh URL
+
+`pushRouter` đổi URL mà không tải lại trang — hữu ích khi muốn trạng thái lọc chia sẻ được
+bằng link:
+
+```json
+"watch": {
+  "pid": [
+    { "CALL": "getItems" },
+    { "EXE": "pushRouter('/duong-dan?pid=' + pid)" }
+  ]
+}
+```
+
+Có thể rẽ nhánh theo giá trị:
+
+```json
+"watch": {
+  "childID": {
+    "IF": "_.isNull(childID) || _.isUndefined(childID)",
+    "THEN": { "EXE": "pushRouter('/duong-dan?pid=' + pid)" },
+    "ELSE": { "EXE": "pushRouter('/duong-dan?pid=' + pid + '&childID=' + childID)" }
+  }
+}
+```
+
+## Watch nested key
+
+Dùng dot notation, không cần deep-watch:
+
+```json
+"watch": {
+  "filter.trangThai": { "CALL": "apiDanhSach" },
+  "filter.tuNgay":    { "CALL": "apiDanhSach" }
+}
+```
+
+Chỉ khi thật sự cần bắt **mọi** thay đổi bên trong một object nhỏ mới dùng `deep-watch`.
+
+## Bẫy thường gặp
+
+<Accordions>
+
+<Accordion title="Watcher không chạy">
+Biến chưa tồn tại lúc `new Vue()` chạy thì Vue không thể theo dõi. Khai báo nó trong `data[]`
+trước — hoặc chính việc có mặt trong `watch` đã đủ để runtime khai báo trước.
+</Accordion>
+
+<Accordion title="API bị gọi hai lần khi trang load">
+Vừa có `{ "CALL": "apiDanhSach" }` tự chạy trong `data[]`, vừa có watch trên một biến được gán
+trong cùng `data[]`. Bỏ bớt một trong hai.
+</Accordion>
+
+<Accordion title="Vòng lặp vô hạn">
+Action ghi vào chính biến đang được watch. Ví dụ watch `items` rồi trong `CALLBACK` lại gán
+`items`. Watch biến *đầu vào*, đừng watch biến *đầu ra*.
+</Accordion>
+
+<Accordion title="Race condition khi gõ nhanh">
+Mỗi lần gõ là một request; response cũ về sau có thể ghi đè response mới. Chuyển sang debounce
+trong khối `<script>` rồi gọi bằng `FUN`.
+</Accordion>
+
+</Accordions>

@@ -1,0 +1,4013 @@
+{
+  "_generated": "Sinh tự động bởi lhu-docs/scripts/extract-fui-components.mjs — đừng sửa tay.",
+  "_source": "resource/skills/fui-skill/scripts/",
+  "extractedAt": "2026-08-07T04:07:06.541Z",
+  "packageVersion": "1.3.4",
+  "skillVersion": "1.5.0",
+  "skillLastUpdated": "2026-07-29",
+  "versions": {
+    "v2": {
+      "loaded": [
+        {
+          "file": "scripts/component.js",
+          "registered": 25,
+          "lines": 3039
+        },
+        {
+          "file": "scripts/componentTable.js",
+          "registered": 14,
+          "lines": 1218
+        },
+        {
+          "file": "scripts/fechart.js",
+          "registered": 1,
+          "lines": 748
+        }
+      ],
+      "components": {
+        "f-label": {
+          "props": [
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "text",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "color",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": {
+            ":outlined": true
+          },
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-box": {
+          "props": [
+            {
+              "name": "rowFormat",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "edit",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "saveclick",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buildDataItems"
+          ],
+          "computed": [],
+          "defaultAttr": {
+            ":outlined": true
+          },
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-header": {
+          "props": [
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": {},
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-title": {
+          "props": [
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": {},
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-radiobox": {
+          "props": [
+            {
+              "name": "label",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": "Array",
+              "default": [],
+              "required": null
+            },
+            {
+              "name": "itemValue",
+              "type": "String",
+              "default": "value",
+              "required": null
+            },
+            {
+              "name": "itemText",
+              "type": "String",
+              "default": "text",
+              "required": null
+            }
+          ],
+          "emits": [
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": {
+            "class": "mt-1",
+            ":hide-details": true,
+            ":required": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]"
+          },
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-menu": {
+          "props": [
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "menuAttr",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buttonclick",
+            "dataFix"
+          ],
+          "computed": [],
+          "defaultAttr": {
+            "elevation": "1",
+            ":depressed": true,
+            "color": "primary"
+          },
+          "defaultCol": {
+            "align": null
+          },
+          "requiredImports": null
+        },
+        "f-search": {
+          "props": [
+            {
+              "name": "api",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "apiData",
+              "type": "Object",
+              "default": {},
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": "Array",
+              "default": [],
+              "required": null
+            }
+          ],
+          "emits": [
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onChange",
+            "querySelections"
+          ],
+          "computed": [],
+          "defaultAttr": {
+            ":cache-items": true,
+            ":outlined": true,
+            ":dense": true,
+            ":hide-no-data": true,
+            ":hide-details": true,
+            ":auto-select-first": true
+          },
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-button": {
+          "props": [
+            {
+              "name": "label",
+              "type": "String",
+              "default": "OK",
+              "required": null
+            },
+            {
+              "name": "checkvalid",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "ctrlhotkey",
+              "type": "Number",
+              "default": 0,
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "action",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "includeData",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buttonclick",
+            "keydownHotKey"
+          ],
+          "computed": [],
+          "defaultAttr": {
+            "elevation": 0,
+            "color": "primary"
+          },
+          "defaultCol": {
+            "align": null
+          },
+          "requiredImports": null
+        },
+        "f-slider": {
+          "props": [
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "itemAttr",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-file-upload": {
+          "props": [
+            {
+              "name": "label",
+              "type": "String",
+              "default": "file upload",
+              "required": null
+            },
+            {
+              "name": "url",
+              "type": "String",
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "autoclose",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": "String",
+              "default": "mdi-cloud-upload-outline",
+              "required": null
+            },
+            {
+              "name": "filters",
+              "type": "Object",
+              "default": {
+                "max_file_size": "5mb",
+                "mime_types": [
+                  {
+                    "title": "All files",
+                    "extensions": "*"
+                  }
+                ]
+              },
+              "required": null
+            },
+            {
+              "name": "resize",
+              "type": "Object",
+              "default": {
+                "width": 1900,
+                "height": 1600,
+                "quality": 80
+              },
+              "required": null
+            },
+            {
+              "name": "onclose",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "uploaderInit"
+          ],
+          "computed": [],
+          "defaultAttr": {
+            "elevation": 1,
+            ":depressed": true,
+            "color": "primary"
+          },
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/plupload-2.3.7/plupload.full.min.js"
+          ]
+        },
+        "f-qrcode": {
+          "props": [
+            {
+              "name": "value",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "logo",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "color",
+              "type": "String",
+              "default": "#000",
+              "required": null
+            },
+            {
+              "name": "size",
+              "type": "Number",
+              "default": 300,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "qrBuild"
+          ],
+          "computed": [],
+          "defaultAttr": {},
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/qrcode/qrcode.min.js"
+          ]
+        },
+        "f-qrcode-reader": {
+          "props": [
+            {
+              "name": "value",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": "Đọc QRCode",
+              "required": null
+            },
+            {
+              "name": "width",
+              "type": "Number",
+              "default": -50,
+              "required": null
+            }
+          ],
+          "emits": [
+            "input",
+            "update"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onDecode",
+            "onInit",
+            "pause",
+            "timeout",
+            "unpause"
+          ],
+          "computed": [],
+          "defaultAttr": {},
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/qrcode/qrcode-reader.min.js"
+          ]
+        },
+        "f-image-update": {
+          "props": [
+            {
+              "name": "value",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": "image upload",
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "default": "Cập nhật hình",
+              "required": null
+            },
+            {
+              "name": "apiUpload",
+              "type": "String",
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": "String",
+              "default": "mdi-camera",
+              "required": null
+            },
+            {
+              "name": "imageType",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "size",
+              "type": "Object",
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "quality",
+              "type": null,
+              "default": 0.9,
+              "required": null
+            },
+            {
+              "name": "dialogWidth",
+              "type": "Number",
+              "default": 500,
+              "required": null
+            },
+            {
+              "name": "dialogHeight",
+              "type": "Number",
+              "default": 350,
+              "required": null
+            },
+            {
+              "name": "imageBoxAttr",
+              "type": "Object",
+              "default": {
+                "class": "d-flex flex-column align-center",
+                "style": "position: relative; line-height: 0; width: 100%; height: 300px; outline: 1px solid #c0c0c0; overflow: hidden;"
+              },
+              "required": null
+            },
+            {
+              "name": "imageAttr",
+              "type": "Object",
+              "default": {
+                "style": "max-width: 100%; max-height: 100%;"
+              },
+              "required": null
+            },
+            {
+              "name": "buttonAttr",
+              "type": "Object",
+              "default": {
+                "depressed": "",
+                "tile": "",
+                "style": "position: absolute; outline: 1px solid #c0c0c0; bottom: 0px; right: 0px; margin: 0 auto; left: 0; border-radius: 0;"
+              },
+              "required": null
+            },
+            {
+              "name": "croperAttr",
+              "type": "Object",
+              "default": {
+                "stencil-props": {
+                  "aspectRatio": 1
+                },
+                "default-size": {
+                  "width": 3333,
+                  "height": 3333
+                },
+                "transitions": true,
+                "image-restriction": "fit-area"
+              },
+              "required": null
+            }
+          ],
+          "emits": [
+            "update"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "flip",
+            "getMimeType",
+            "onClickFileUpload",
+            "onSaved",
+            "readFile",
+            "reset",
+            "rotate"
+          ],
+          "computed": [],
+          "defaultAttr": {
+            "elevation": 1,
+            "color": "primary",
+            ":text": true
+          },
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/vue-advanced-cropper/index.umd.js",
+            "/include/vue-advanced-cropper/style.css"
+          ]
+        },
+        "f-date": {
+          "props": [
+            {
+              "name": "value",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "dateAdd",
+              "type": "Number",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "required",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            }
+          ],
+          "emits": [
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "handleClick",
+            "handleDatePickerInput",
+            "handleFocus",
+            "handleKeydown",
+            "handlePaste",
+            "initializeDate",
+            "isValidDate",
+            "restrictToNumbers",
+            "selectField",
+            "updateDisplayValue"
+          ],
+          "computed": [
+            "formattedDate"
+          ],
+          "defaultAttr": {
+            ":picker": {
+              "locale": "vi"
+            },
+            ":hide-details": true,
+            ":outlined": true,
+            ":dense": true
+          },
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-time": {
+          "props": [
+            {
+              "name": "value",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "timeAdd",
+              "type": "Number",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "required",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            }
+          ],
+          "emits": [
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "handleClick",
+            "handleFocus",
+            "handleKeydown",
+            "handlePaste",
+            "handleTimePickerInput",
+            "initializeTime",
+            "isValidTime",
+            "restrictToNumbers",
+            "selectField",
+            "updateDisplayValue"
+          ],
+          "computed": [
+            "formattedTime"
+          ],
+          "defaultAttr": {
+            ":hide-details": true,
+            ":outlined": true,
+            ":dense": true
+          },
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-time-counter": {
+          "props": [
+            {
+              "name": "value",
+              "type": "Number",
+              "default": 0,
+              "required": null
+            },
+            {
+              "name": "type",
+              "type": "Number",
+              "default": 0,
+              "required": null
+            },
+            {
+              "name": "labelFormat",
+              "type": "Object",
+              "default": {
+                "class": "text-caption black--text"
+              },
+              "required": null
+            },
+            {
+              "name": "format",
+              "type": "Object",
+              "default": {
+                "label": "",
+                "day": " ngày",
+                "hour": " giờ",
+                "minute": " phút",
+                "second": " giây"
+              },
+              "required": null
+            }
+          ],
+          "emits": [
+            "input",
+            "time-end"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "formatDateTime",
+            "startCountDown"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "fp-profile": {
+          "props": [
+            {
+              "name": "urlAppList",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "urlSignout",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "urlChangePassword",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "urlAccount",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "urlAvatar",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "color",
+              "type": null,
+              "default": "primary",
+              "required": null
+            },
+            {
+              "name": "openOnHover",
+              "type": null,
+              "default": false,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "clickChangePass",
+            "clickSignout"
+          ],
+          "computed": [
+            "avatarImg"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "header-bar": {
+          "props": [
+            {
+              "name": "menu",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "menuLeft",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": null,
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "logo",
+              "type": null,
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "expand",
+              "type": null,
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "menuStyle",
+              "type": null,
+              "default": {
+                "topmenu": {
+                  "bgcolor": "primary",
+                  "textcolor": "white"
+                },
+                "leftmenu": {
+                  "bgcolor": "primary",
+                  "textcolor": "white"
+                }
+              },
+              "required": null
+            },
+            {
+              "name": "component",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "userProfile",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "activeColor",
+              "type": null,
+              "default": "rgba(255,255,255,0.15)",
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "checkright",
+            "injectScrollbarStyles",
+            "isActiveUrl",
+            "on_of_menu",
+            "scrollToActiveMenu"
+          ],
+          "computed": [
+            "isMobile"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-chart": {
+          "props": [
+            {
+              "name": "data",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "type",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "options",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "reverseData",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buildChart"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/chart/chart.min.js"
+          ]
+        },
+        "f-window": {
+          "props": [
+            {
+              "name": "id",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-editor": {
+          "props": [
+            {
+              "name": "value",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "imageapi",
+              "type": "String",
+              "default": "https://fap.vn",
+              "required": null
+            },
+            {
+              "name": "height",
+              "type": "Number",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "toolbar",
+              "type": "String",
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/ckeditor5/build/ckeditor.js"
+          ]
+        },
+        "f-editor-dialog": {
+          "props": [
+            {
+              "name": "value",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "imageapi",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "width",
+              "type": "Number",
+              "default": 800,
+              "required": null
+            },
+            {
+              "name": "toolbar",
+              "type": "String",
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "cleanWhitespace",
+            "closeDialog",
+            "getData"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/ckeditor5/build/ckeditor.js"
+          ]
+        },
+        "f-dialog": {
+          "props": [
+            {
+              "name": "value",
+              "type": "Boolean",
+              "default": false,
+              "required": null
+            },
+            {
+              "name": "data",
+              "type": "Object",
+              "default": {},
+              "required": null
+            },
+            {
+              "name": "dataOut",
+              "type": "Object",
+              "default": {},
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "controls",
+              "type": "Array",
+              "default": [],
+              "required": null
+            },
+            {
+              "name": "watch",
+              "type": "Object",
+              "default": {},
+              "required": null
+            },
+            {
+              "name": "button",
+              "type": null,
+              "default": [],
+              "required": null
+            },
+            {
+              "name": "disableValidate",
+              "type": "Boolean",
+              "default": false,
+              "required": null
+            },
+            {
+              "name": "width",
+              "type": "Number",
+              "default": 800,
+              "required": null
+            },
+            {
+              "name": "openAction",
+              "type": "Object",
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:data-out"
+          ],
+          "slots": [],
+          "hasTemplate": false,
+          "methods": [
+            "buildButton",
+            "buttonclick",
+            "formvalidate",
+            "setDefaultData",
+            "watchDialog"
+          ],
+          "computed": [],
+          "defaultAttr": {
+            ":outlined": true,
+            ":dense": true
+          },
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-pdfmake": {
+          "props": [
+            {
+              "name": "data",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": {
+            "width": "100%",
+            "height": "500px"
+          },
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/pdfmake/pdfmake.min.js",
+            "/include/pdfmake/print.min.js",
+            "/include/pdfmake/vfs_fonts.js"
+          ]
+        },
+        "f-excel-reader": {
+          "props": [
+            {
+              "name": "dateFormat",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "headerFormat",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "rawFormat",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "action",
+              "type": "Object",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": "Load Excel",
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": "String",
+              "default": "mdi-grid",
+              "required": null
+            }
+          ],
+          "emits": [
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onButtonClick",
+            "onchange",
+            "readExcelFile"
+          ],
+          "computed": [],
+          "defaultAttr": {
+            "elevation": "1",
+            ":depressed": true,
+            "color": "primary"
+          },
+          "defaultCol": {
+            "align": null
+          },
+          "requiredImports": null
+        },
+        "f-table": {
+          "props": [
+            {
+              "name": "value",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "headers",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "updateForm",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "updateFormAttr",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "updateApi",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "excel",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "showSearch",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "sumFormat",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "disabledHover",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "returnObject",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "itemKey",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "itemsPerPage",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "disabledUpdate",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "hideDefaultFooter",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "template",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "headercomponent",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "height",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "fixedHeader",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": false,
+          "methods": [
+            "addnew",
+            "buildAutoHeaders",
+            "customSearch",
+            "deleteItem",
+            "editItem",
+            "itemSelect",
+            "itemSelectRebuild",
+            "newBtnClick",
+            "onSearchBlur",
+            "removeResize",
+            "save",
+            "sumByColumn",
+            "toExcel",
+            "toggleSearch",
+            "updateFillHeight",
+            "updateSearch"
+          ],
+          "computed": [
+            "_hideDefaultFooter",
+            "dataOut",
+            "edit",
+            "formTitle",
+            "headerCols",
+            "heightNum",
+            "sumText",
+            "tableFixedHeader",
+            "tableHeight"
+          ],
+          "defaultAttr": {
+            ":excel": false,
+            ":show-search": true,
+            ":return-object": true,
+            ":allow-hover": false,
+            ":fixed-header": true,
+            ":disable-sort": false,
+            ":dense": true,
+            ":hide-default-footer": true,
+            ":items-per-page": 50,
+            ":footer-props": "{'items-per-page-options':[50, 100, 150, 200, -1]}",
+            "mobile-breakpoint": "0"
+          },
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-html": {
+          "props": [],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-label": {
+          "props": [],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-num": {
+          "props": [
+            {
+              "name": "value",
+              "type": "Number",
+              "default": 0,
+              "required": null
+            },
+            {
+              "name": "hidezero",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "format",
+              "type": "String",
+              "default": "",
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-time": {
+          "props": [
+            {
+              "name": "format",
+              "type": "String",
+              "default": "DD/MM/YYYY",
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-boolean": {
+          "props": [
+            {
+              "name": "value",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "colorTrue",
+              "type": null,
+              "default": "primary",
+              "required": null
+            },
+            {
+              "name": "colorFalse",
+              "type": null,
+              "default": "red",
+              "required": null
+            },
+            {
+              "name": "iconTrue",
+              "type": null,
+              "default": "mdi-check",
+              "required": null
+            },
+            {
+              "name": "iconFalse",
+              "type": null,
+              "default": "mdi-close",
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-check": {
+          "props": [
+            {
+              "name": "value",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "falseValue",
+              "type": null,
+              "default": false,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onchange"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-text": {
+          "props": [
+            {
+              "name": "value",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onchange"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-select": {
+          "props": [
+            {
+              "name": "value",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onchange"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-combobox": {
+          "props": [
+            {
+              "name": "value",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "text",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": "Array",
+              "default": [],
+              "required": null
+            },
+            {
+              "name": "api",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "apiData",
+              "type": "Object",
+              "default": {},
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onchange",
+            "querySelections"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-menu": {
+          "props": [
+            {
+              "name": "iconText",
+              "type": null,
+              "default": "mdi-menu",
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": null,
+              "default": [],
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onSelect"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-link": {
+          "props": [
+            {
+              "name": "id",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "target",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "url",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "onclose",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onclick"
+          ],
+          "computed": [
+            "_url"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "t-button": {
+          "props": [
+            {
+              "name": "text",
+              "type": null,
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "color",
+              "type": null,
+              "default": "primary",
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "target",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "wid",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "url",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "onclose",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "quset",
+              "type": null,
+              "default": [],
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "clickButton"
+          ],
+          "computed": [
+            "_url"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-sheet": {
+          "props": [
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "columns",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "rowKey",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "height",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "allowAdd",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "allowDelete",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "readonly",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "updateApi",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "saveExtra",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "defaultItem",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "deleteApi",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "change",
+            "save",
+            "saved"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "addRow",
+            "autoColDefs",
+            "buildColDefs",
+            "buildOriginalData",
+            "changeCellStyle",
+            "deleteRow",
+            "deleteSelected",
+            "destroyGrid",
+            "discardAll",
+            "exportExcel",
+            "getChangedList",
+            "getChangedRows",
+            "initGrid",
+            "parseByType",
+            "refresh",
+            "saveAll",
+            "updateFillHeight"
+          ],
+          "computed": [
+            "changedCount",
+            "gridStyle",
+            "heightNum"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/ag-grid/ag-grid.min.css",
+            "/include/ag-grid/ag-theme-alpine.min.css",
+            "/include/ag-grid/ag-grid-community.min.js"
+          ]
+        },
+        "f-echart": {
+          "props": [
+            {
+              "name": "config",
+              "type": "Object",
+              "default": {},
+              "required": null
+            },
+            {
+              "name": "option",
+              "type": "Object",
+              "default": {},
+              "required": null
+            }
+          ],
+          "emits": [
+            "chart-click",
+            "drilldown",
+            "finished",
+            "legend-change",
+            "rendered"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "bindEvents",
+            "buildOption",
+            "enhanceSeriesStyle",
+            "exportImage",
+            "extractDataRows",
+            "getInstance",
+            "injectDvStyles",
+            "refresh",
+            "renderChart",
+            "resizeChart",
+            "teardown",
+            "toggleDataView"
+          ],
+          "computed": [
+            "canShowDataView",
+            "dvTitle",
+            "heightStyle",
+            "tableCols",
+            "tableData"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/chart/echarts.min.js",
+            "/include/chart/fechart.js"
+          ]
+        }
+      },
+      "importOnly": {
+        "v-text-field": {
+          "attr": {
+            ":tile": true,
+            ":outlined": true,
+            ":dense": true,
+            ":required": true,
+            ":hide-details": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]"
+          },
+          "col": null,
+          "import": null
+        },
+        "v-textarea": {
+          "attr": {
+            ":outlined": true,
+            ":dense": true,
+            ":required": false,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]"
+          },
+          "col": null,
+          "import": null
+        },
+        "v-combobox": {
+          "attr": {
+            ":tile": true,
+            ":outlined": true,
+            ":dense": true,
+            ":hide-details": true,
+            ":required": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]",
+            ":menu-props": "{ offsetY: true }"
+          },
+          "col": null,
+          "import": null
+        },
+        "v-select": {
+          "attr": {
+            ":tile": true,
+            ":outlined": true,
+            ":dense": true,
+            ":hide-details": true,
+            ":required": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]",
+            ":menu-props": "{ offsetY: true }"
+          },
+          "col": null,
+          "import": null
+        },
+        "v-autocomplete": {
+          "attr": {
+            ":outlined": true,
+            ":dense": true,
+            ":hide-details": true,
+            ":required": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]",
+            ":auto-select-first": true
+          },
+          "col": null,
+          "import": null
+        },
+        "v-checkbox": {
+          "attr": {
+            "class": "mt-1",
+            ":hide-details": true
+          },
+          "col": null,
+          "import": null
+        },
+        "v-switch": {
+          "attr": {
+            ":dense": true,
+            ":hide-details": true,
+            "class": "my-1 mx-0"
+          },
+          "col": null,
+          "import": null
+        },
+        "v-card": {
+          "attr": {
+            ":outlined": true
+          },
+          "col": null,
+          "import": null
+        },
+        "v-alert": {
+          "attr": {
+            ":dense": true,
+            ":hide-details": true
+          },
+          "col": null,
+          "import": null
+        },
+        "v-jsoneditor": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/jsonEditor/v-jsoneditor.min.js"
+          ]
+        },
+        "v-btn": {
+          "attr": {
+            "elevation": 0
+          },
+          "col": null,
+          "import": null
+        },
+        "f-account-manager": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/client.min.js",
+            "/component_login.js"
+          ]
+        },
+        "f-json-tree": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/jsontree/jsontreeview.css",
+            "/include/jsontree/jsontreeview.js"
+          ]
+        },
+        "f-code-editor": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/monaco-editor/min/vs/loader.js"
+          ]
+        },
+        "f-q-and-a": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js",
+            "/include/QandA/q-and-a-ckedit.css",
+            "/include/vue-context-menu.js",
+            "/include/ckeditor5/build/ckeditor.js",
+            "/include/plupload-2.3.7/plupload.full.min.js",
+            "/include/audio/vueaudio.js",
+            "/include/QandA/QandA.js"
+          ]
+        },
+        "f-etest-review": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js",
+            "/include/QandA/q-and-a-ckedit.css",
+            "/include/vue-context-menu.js",
+            "/include/audio/vueaudio.js",
+            "/include/QandA/QandA.js"
+          ]
+        },
+        "f-audio": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/audio/vueaudio.js"
+          ]
+        },
+        "f-audio-recorder": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/audio/vueaudio.js"
+          ]
+        },
+        "f-google-login": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/component_login.js",
+            "https://apis.google.com/js/platform.js"
+          ]
+        }
+      }
+    },
+    "v3": {
+      "loaded": [
+        {
+          "file": "scripts/component-3.0.js",
+          "registered": 22,
+          "lines": 2457
+        },
+        {
+          "file": "scripts/componentTable-3.0.js",
+          "registered": 13,
+          "lines": 1356
+        }
+      ],
+      "components": {
+        "FDynamicComponent": {
+          "props": [
+            {
+              "name": "componentData",
+              "type": "Object",
+              "default": {},
+              "required": null
+            },
+            {
+              "name": "data",
+              "type": "Object",
+              "default": {},
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:dataOut"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "updateDataOut"
+          ],
+          "computed": [
+            "dynamicComponent"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FLabel": {
+          "props": [
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "text",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "color",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FBox": {
+          "props": [
+            {
+              "name": "rowFormat",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "edit",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "saveclick",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:modelValue"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buildDataItems",
+            "buildHeader"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FHeader": {
+          "props": [
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FTitle": {
+          "props": [
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FRadiobox": {
+          "props": [
+            {
+              "name": "label",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": "Array",
+              "default": [],
+              "required": null
+            },
+            {
+              "name": "itemValue",
+              "type": "String",
+              "default": "value",
+              "required": null
+            },
+            {
+              "name": "itemText",
+              "type": "String",
+              "default": "text",
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:modelValue"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FMenu": {
+          "props": [
+            {
+              "name": "label",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": "Array",
+              "default": [],
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "origin",
+              "type": "String",
+              "default": "top center",
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buttonclick",
+            "dataFix"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FSearch": {
+          "props": [
+            {
+              "name": "api",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "apiData",
+              "type": "Object",
+              "default": {},
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": "Array",
+              "default": [],
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onChange"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FButton": {
+          "props": [
+            {
+              "name": "label",
+              "type": "String",
+              "default": "OK",
+              "required": null
+            },
+            {
+              "name": "checkvalid",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "ctrlhotkey",
+              "type": "Number",
+              "default": 0,
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "action",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "includeData",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buttonclick",
+            "keydownHotKey"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FFileUpload": {
+          "props": [
+            {
+              "name": "label",
+              "type": "String",
+              "default": "file upload",
+              "required": null
+            },
+            {
+              "name": "url",
+              "type": "String",
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "autoclose",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": "String",
+              "default": "mdi-cloud-upload-outline",
+              "required": null
+            },
+            {
+              "name": "filters",
+              "type": "Object",
+              "default": {
+                "max_file_size": "5mb",
+                "mime_types": [
+                  {
+                    "title": "All files",
+                    "extensions": "*"
+                  }
+                ]
+              },
+              "required": null
+            },
+            {
+              "name": "resize",
+              "type": "Object",
+              "default": {
+                "width": 1900,
+                "height": 1600,
+                "quality": 80
+              },
+              "required": null
+            },
+            {
+              "name": "onclose",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:modelValue"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "uploaderInit"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FImageUpdate": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": "image upload",
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "default": "Cập nhật hình",
+              "required": null
+            },
+            {
+              "name": "apiUpload",
+              "type": "String",
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": "String",
+              "default": "mdi-camera",
+              "required": null
+            },
+            {
+              "name": "size",
+              "type": "Object",
+              "default": {
+                "height": 800,
+                "width": 800
+              },
+              "required": null
+            },
+            {
+              "name": "dialogWidth",
+              "type": null,
+              "default": 450,
+              "required": null
+            },
+            {
+              "name": "imageBoxAttr",
+              "type": "Object",
+              "default": {
+                "class": "d-flex flex-column align-center",
+                "style": "position: relative;"
+              },
+              "required": null
+            },
+            {
+              "name": "imageAttr",
+              "type": "Object",
+              "default": {
+                "class": "mb-2",
+                "style": "outline: 1px solid #c0c0c0;"
+              },
+              "required": null
+            },
+            {
+              "name": "buttonAttr",
+              "type": "Object",
+              "default": {
+                "depressed": "",
+                "tile": "",
+                "color": "primary"
+              },
+              "required": null
+            },
+            {
+              "name": "croperAttr",
+              "type": "Object",
+              "default": {
+                "stencil-props": {
+                  "aspectRatio": 0.75
+                },
+                "transitions": true,
+                "image-restriction": "fit-area"
+              },
+              "required": null
+            }
+          ],
+          "emits": [
+            "update"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "flip",
+            "onClickFileUpload",
+            "onSaved",
+            "readFile",
+            "rotate"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FDate": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "dateAdd",
+              "type": "Number | String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "required",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:modelValue"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "handleClick",
+            "handleDatePickerInput",
+            "handleFocus",
+            "handleKeydown",
+            "handlePaste",
+            "initializeDate",
+            "isValidDate",
+            "restrictToNumbers",
+            "selectField",
+            "updateDisplayValue"
+          ],
+          "computed": [
+            "formattedDate"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FTime": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": "Select Time",
+              "required": null
+            },
+            {
+              "name": "timeAdd",
+              "type": "Number | String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "required",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:modelValue"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "handleClick",
+            "handleFocus",
+            "handleKeydown",
+            "handlePaste",
+            "handleTimePickerInput",
+            "initializeTime",
+            "isValidTime",
+            "restrictToNumbers",
+            "selectField",
+            "updateDisplayValue"
+          ],
+          "computed": [
+            "formattedTime"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FpProfile": {
+          "props": [
+            {
+              "name": "urlAppList",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "urlSignout",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "urlChangePassword",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "urlAccount",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "urlAvatar",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "color",
+              "type": null,
+              "default": "primary",
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "clickChangePass",
+            "clickSignout"
+          ],
+          "computed": [
+            "avatarImg"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "HeaderBar": {
+          "props": [
+            {
+              "name": "menu",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "menuLeft",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": null,
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "logo",
+              "type": null,
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "expand",
+              "type": null,
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "menuStyle",
+              "type": null,
+              "default": {
+                "topmenu": {
+                  "bgcolor": "primary",
+                  "textcolor": "white"
+                },
+                "leftmenu": {
+                  "bgcolor": "primary",
+                  "textcolor": "white"
+                }
+              },
+              "required": null
+            },
+            {
+              "name": "component",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "userProfile",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "activeColor",
+              "type": null,
+              "default": "rgba(255,255,255,0.15)",
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "checkright",
+            "injectScrollbarStyles",
+            "isActiveUrl",
+            "on_of_menu",
+            "scrollToActiveMenu"
+          ],
+          "computed": [
+            "isMobile"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "f-chart": {
+          "props": [
+            {
+              "name": "data",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "type",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "options",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "reverseData",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buildChart"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": [
+            "/include/chart/chart.min.js"
+          ]
+        },
+        "FWindow": {
+          "props": [
+            {
+              "name": "winData",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "closeDialog"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FEditor": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "imageapi",
+              "type": "String",
+              "default": "https://fap.vn",
+              "required": null
+            },
+            {
+              "name": "height",
+              "type": "Number | String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "toolbar",
+              "type": "Array",
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:modelValue"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FEditorDialog": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": "Object",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "imageapi",
+              "type": "String",
+              "default": "https://fap.vn",
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "closeDialog",
+            "getData"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FDialog": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": "Boolean",
+              "default": false,
+              "required": null
+            },
+            {
+              "name": "data",
+              "type": "Object",
+              "default": {},
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "controls",
+              "type": "Array",
+              "default": [],
+              "required": null
+            },
+            {
+              "name": "watch",
+              "type": "Object",
+              "default": {},
+              "required": null
+            },
+            {
+              "name": "button",
+              "type": null,
+              "default": [],
+              "required": null
+            },
+            {
+              "name": "disableValidate",
+              "type": "Boolean",
+              "default": false,
+              "required": null
+            },
+            {
+              "name": "width",
+              "type": "Number",
+              "default": 800,
+              "required": null
+            },
+            {
+              "name": "dialogModel",
+              "type": "String",
+              "default": "",
+              "required": null
+            },
+            {
+              "name": "openAction",
+              "type": "Object",
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:data",
+            "update:modelValue"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buildButton",
+            "updateDataOut"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FPdfmake": {
+          "props": [
+            {
+              "name": "data",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FExcelReader": {
+          "props": [
+            {
+              "name": "dateFormat",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "headerFormat",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "rawFormat",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "action",
+              "type": "Object",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "default": "Load Excel",
+              "required": null
+            },
+            {
+              "name": "iconText",
+              "type": "String",
+              "default": "mdi-grid",
+              "required": null
+            }
+          ],
+          "emits": [
+            "update:modelValue"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onButtonClick",
+            "onchange",
+            "readExcelFile"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FTableItemComponent": {
+          "props": [
+            {
+              "name": "template",
+              "type": null,
+              "default": null,
+              "required": true
+            },
+            {
+              "name": "data",
+              "type": "Object",
+              "default": {},
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "buildTemplateString",
+            "fixAttrValueObject"
+          ],
+          "computed": [
+            "dynamicComponent"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FTable": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "headers",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "updateForm",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "updateApi",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "sumFormat",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "returnObject",
+              "type": null,
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "itemKey",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "disabledUpdate",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "template",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "excel",
+              "type": null,
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "hover",
+              "type": null,
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "showSearch",
+              "type": null,
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "fixedHeader",
+              "type": null,
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "height",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "disableSort",
+              "type": null,
+              "default": false,
+              "required": null
+            },
+            {
+              "name": "density",
+              "type": null,
+              "default": "compact",
+              "required": null
+            },
+            {
+              "name": "hideDefaultFooter",
+              "type": null,
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "itemsPerPage",
+              "type": null,
+              "default": 50,
+              "required": null
+            },
+            {
+              "name": "footerProps",
+              "type": null,
+              "default": "{'items-per-page-options':[50, 100, 150, 200, -1]}",
+              "required": null
+            },
+            {
+              "name": "updateFormAttr",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "slots",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "groupTemplate",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "click:row",
+            "input"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "addnew",
+            "buildHeader",
+            "buildHeaderData",
+            "customSearch",
+            "deleteItem",
+            "editItem",
+            "headerSetDefaultProps",
+            "isDateValid",
+            "itemSelect",
+            "itemSelectRebuild",
+            "newBtnClick",
+            "onSearchBlur",
+            "removeResize",
+            "save",
+            "sumByColumn",
+            "toExcel",
+            "toggleSearch",
+            "updateFillHeight",
+            "updateSearch"
+          ],
+          "computed": [
+            "bindAttr",
+            "dataOut",
+            "edit",
+            "formTitle",
+            "headersArray",
+            "heightNum",
+            "hideDefaultFooter_cacl",
+            "sumText",
+            "tableFixedHeader",
+            "tableHeight"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "THtml": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "TLabel": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "TNum": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": "Number",
+              "default": 0,
+              "required": null
+            },
+            {
+              "name": "hidezero",
+              "type": "Boolean",
+              "default": true,
+              "required": null
+            },
+            {
+              "name": "format",
+              "type": "String",
+              "default": "",
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [
+            "showData"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "TTime": {
+          "props": [
+            {
+              "name": "format",
+              "type": "String",
+              "default": "DD/MM/YYYY",
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "TCheck": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "falseValue",
+              "type": null,
+              "default": false,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onchange"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "TSelect": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onchange"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "TCombobox": {
+          "props": [
+            {
+              "name": "modelValue",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "text",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": "Array",
+              "default": [],
+              "required": null
+            },
+            {
+              "name": "api",
+              "type": "String",
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "apiData",
+              "type": "Object",
+              "default": {},
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onchange",
+            "querySelections"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "TMenu": {
+          "props": [
+            {
+              "name": "iconText",
+              "type": null,
+              "default": "mdi-menu",
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": null,
+              "default": [],
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onSelect"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "TLink": {
+          "props": [
+            {
+              "name": "id",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "target",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "url",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "onclose",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "onclick"
+          ],
+          "computed": [
+            "iURL"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "TButton": {
+          "props": [
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "variant",
+              "type": null,
+              "default": "text",
+              "required": null
+            },
+            {
+              "name": "color",
+              "type": null,
+              "default": "primary",
+              "required": null
+            },
+            {
+              "name": "wid",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "url",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "title",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "density",
+              "type": null,
+              "default": "compact",
+              "required": null
+            },
+            {
+              "name": "onclose",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "clickButton"
+          ],
+          "computed": [],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        },
+        "FSheet": {
+          "props": [
+            {
+              "name": "label",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "columns",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "items",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "rowKey",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "height",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "allowAdd",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "allowDelete",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "readonly",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "updateApi",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "saveExtra",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "defaultItem",
+              "type": null,
+              "default": null,
+              "required": null
+            },
+            {
+              "name": "deleteApi",
+              "type": null,
+              "default": null,
+              "required": null
+            }
+          ],
+          "emits": [
+            "change",
+            "save",
+            "saved"
+          ],
+          "slots": [],
+          "hasTemplate": true,
+          "methods": [
+            "addRow",
+            "autoColDefs",
+            "buildColDefs",
+            "buildOriginalData",
+            "changeCellStyle",
+            "deleteRow",
+            "deleteSelected",
+            "destroyGrid",
+            "discardAll",
+            "exportExcel",
+            "getChangedList",
+            "getChangedRows",
+            "initGrid",
+            "parseByType",
+            "refresh",
+            "saveAll",
+            "updateFillHeight"
+          ],
+          "computed": [
+            "changedCount",
+            "gridStyle",
+            "heightNum"
+          ],
+          "defaultAttr": null,
+          "defaultCol": null,
+          "requiredImports": null
+        }
+      },
+      "importOnly": {
+        "v-text-field": {
+          "attr": {
+            ":required": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]"
+          },
+          "col": null,
+          "import": null
+        },
+        "v-combobox": {
+          "attr": {
+            ":required": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]"
+          },
+          "col": null,
+          "import": null
+        },
+        "v-select": {
+          "attr": {
+            ":required": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]"
+          },
+          "col": null,
+          "import": null
+        },
+        "v-autocomplete": {
+          "attr": {
+            ":required": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]"
+          },
+          "col": null,
+          "import": null
+        },
+        "v-jsoneditor": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/jsonEditor/v-jsoneditor.min.js"
+          ]
+        },
+        "f-button": {
+          "attr": null,
+          "col": {
+            "align": null
+          },
+          "import": null
+        },
+        "f-radiobox": {
+          "attr": {
+            ":required": true,
+            ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]"
+          },
+          "col": null,
+          "import": null
+        },
+        "f-menu": {
+          "attr": null,
+          "col": {
+            "align": null
+          },
+          "import": null
+        },
+        "f-sheet": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/ag-grid/ag-grid.min.css",
+            "/include/ag-grid/ag-theme-alpine.min.css",
+            "/include/ag-grid/ag-grid-community.min.js"
+          ]
+        },
+        "f-pdfmake": {
+          "attr": {
+            "width": "100%",
+            "height": "500px"
+          },
+          "col": null,
+          "import": [
+            "/include/pdfmake/pdfmake.min.js",
+            "/include/pdfmake/print.min.js",
+            "/include/pdfmake/vfs_fonts.js"
+          ]
+        },
+        "f-echart": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/chart/echarts.min.js",
+            "/include/chart/fechart.js"
+          ]
+        },
+        "f-code-editor": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/monaco-editor/min/vs/loader.js"
+          ]
+        },
+        "f-qrcode": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/qrcode/qrcode.min.js"
+          ]
+        },
+        "f-qrcode-reader": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/qrcode/qrcode-reader.min.js"
+          ]
+        },
+        "f-file-upload": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/plupload-2.3.7/plupload.full.min.js"
+          ]
+        },
+        "f-image-update": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "https://unpkg.com/vue-advanced-cropper@^1.0.0/dist/index.umd.js",
+            "https://unpkg.com/vue-advanced-cropper@^2.0.0/dist/style.css"
+          ]
+        },
+        "f-q-and-a": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML",
+            "/include/QandA/q-and-a-ckedit.css",
+            "/include/vue-context-menu.js",
+            "/include/layoutEditor/Sortable.min.js",
+            "/include/layoutEditor/vuedraggable.umd.min.js",
+            "/include/ckeditor5/build/ckeditor.js",
+            "/include/plupload-2.3.7/plupload.full.min.js",
+            "/include/audio/vueaudio.js",
+            "/include/QandA/QandA.js"
+          ]
+        },
+        "f-etest-review": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML",
+            "/include/QandA/q-and-a-ckedit.css",
+            "/include/vue-context-menu.js",
+            "/include/audio/vueaudio.js",
+            "/include/QandA/QandA.js"
+          ]
+        },
+        "f-audio": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/audio/vueaudio.js"
+          ]
+        },
+        "f-audio-recorder": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/audio/vueaudio.js"
+          ]
+        },
+        "f-editor": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/ckeditor5/build/ckeditor.js"
+          ]
+        },
+        "f-editor-dialog": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "/include/ckeditor5/build/ckeditor.js"
+          ]
+        },
+        "f-excel-reader": {
+          "attr": null,
+          "col": {
+            "align": null
+          },
+          "import": null
+        },
+        "f-google-login": {
+          "attr": null,
+          "col": null,
+          "import": [
+            "https://apis.google.com/js/platform.js"
+          ]
+        }
+      }
+    }
+  }
+}

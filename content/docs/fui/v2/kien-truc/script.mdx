@@ -1,0 +1,159 @@
+---
+title: Script của module
+description: Phần JavaScript helper — tách biệt với JSON, phục vụ action FUN và EXE
+icon: Braces
+---
+
+`script` là **một phần riêng** của module, ngang hàng với JSON chứ không nằm trong JSON. Trên
+server nó được lưu thành một trường riêng; công cụ lấy code về sẽ đặt nó vào `script.js` (FUI MCP)
+hoặc khối `<script>` của `index.vue` (extension FUIX).
+
+Nó tồn tại để chứa những gì JSON diễn đạt kém: biến đổi dữ liệu phức tạp, dựng option biểu đồ,
+parse, debounce.
+
+## Đây là script global thuần
+
+Không phải Vue SFC. **Không có** `export default`, không `this`, không `data()`, không
+`mounted()`.
+
+```js
+function getTongTien() {
+  return vueData.items.reduce(function (sum, i) { return sum + (i.amount || 0); }, 0);
+}
+```
+
+Mọi hàm khai báo ở đây trở thành global trên `window`, và truy cập trực tiếp `vueData` để đọc
+state.
+
+<Callout type="warn">
+**Không có lifecycle hook cho module.** Muốn chạy gì đó lúc trang load thì đặt một action tự chạy
+trong `data[]` — đó là cơ chế duy nhất.
+</Callout>
+
+## Ba cách gọi từ JSON
+
+<Tabs items={['FUN — có IN/OUT', 'EXE — chạy trực tiếp', 'Gọi thẳng trong controls']}>
+
+<Tab value="FUN — có IN/OUT">
+```js
+function tinhThanhTien(input) {
+  return input.soLuong * input.donGia;
+}
+```
+
+```json
+{
+  "FUN": "tinhThanhTien",
+  "IN":  { "soLuong": "form.sl", "donGia": "form.gia" },
+  "OUT": "form.thanhTien"
+}
+```
+
+Runtime tra `window["tinhThanhTien"]` rồi gọi với **đúng một tham số** là object `IN` đã phân
+giải. Giá trị trả về được ghi vào `OUT`.
+
+Đây là cách sạch nhất — hàm không cần biết gì về `vueData`, dễ test và dùng lại.
+</Tab>
+
+<Tab value="EXE — chạy trực tiếp">
+```json
+{ "EXE": "vueData.tong = _.sumBy(dsNhanVien, 'Luong')" }
+```
+
+`EXE` chạy qua lodash template với `with(obj)`, nên bên trong viết được tên biến trần
+(`dsNhanVien`) mà không cần prefix. Nhưng khi **ghi** thì vẫn phải viết rõ `vueData.x = ...`.
+
+Dùng cho một dòng lệnh ngắn. Dài hơn thì đưa vào hàm rồi gọi bằng `FUN`.
+</Tab>
+
+<Tab value="Gọi thẳng trong controls">
+FUI không có computed property. Gọi thẳng hàm trong `innerHTML` là cách thay thế:
+
+```json
+{ "el": "div", "w": 12, "innerHTML": "Tổng: {{getTongTien().toLocaleString()}} VNĐ" }
+```
+
+Hàm được gọi lại mỗi lần Vue vẽ lại — nên phải nhẹ và không có side effect.
+</Tab>
+
+</Tabs>
+
+## Khi nào nên đưa vào script
+
+| Đưa vào script | Giữ trong JSON |
+|---|---|
+| Biến đổi dữ liệu nhiều bước | Gán state đơn giản |
+| Dựng ECharts option từ dữ liệu API | Gọi API, `IN`/`OUT` |
+| Debounce, chống race condition | Điều phối bằng `watch` |
+| Parse, format phức tạp | Điều kiện `IF`/`THEN` ngắn |
+
+<Callout>
+Ranh giới thực dụng: một biểu thức `EXE` dài quá một dòng là dấu hiệu nên chuyển sang hàm.
+</Callout>
+
+## Ví dụ: dựng biểu đồ từ dữ liệu API
+
+Đây là trường hợp dùng script phổ biến nhất.
+
+```js
+function buildChartOption(input) {
+  return {
+    grid: { left: 20, right: 20, containLabel: true },
+    xAxis: { type: 'category', data: _.map(input.rows, 'Thang') },
+    yAxis: { type: 'value' },
+    series: [{
+      type: 'bar',
+      data: _.map(input.rows, 'DoanhThu'),
+      label: { show: true, position: 'top' }
+    }]
+  };
+}
+```
+
+```json
+{
+  "apiDoanhThu": {
+    "API": "/api/baocao/doanhthu",
+    "IN":  { "Nam": "filter.nam" },
+    "OUT": "dsDoanhThu",
+    "CALLBACK": {
+      "FUN": "buildChartOption",
+      "IN":  { "rows": "dsDoanhThu" },
+      "OUT": "chartOption"
+    }
+  }
+}
+```
+
+## Ví dụ: debounce ô tìm kiếm
+
+`watch` gọi API mỗi lần gõ một ký tự sẽ tạo ra race condition. Đưa việc chống dội sang script:
+
+```js
+var _timkiemDebounced = _.debounce(function () {
+  CALL(vueData.apiDanhSach);
+}, 400);
+
+function timKiem() {
+  _timkiemDebounced();
+}
+```
+
+```json
+"watch": {
+  "filter.tuKhoa": { "FUN": "timKiem" }
+}
+```
+
+## Thư viện dùng được
+
+Đã bundled sẵn trên mọi trang, không cần import: `$` (jQuery), `_` (Lodash), `moment`,
+`numeral`, `Vuetify`.
+
+Cùng với đó là toàn bộ [hàm dựng sẵn của FUI](/docs/fui/v2/kien-truc/default-function) —
+`ajaxCALL`, `openWindow`, `confirm`, `showMessage`, `jsonToExcel`, `groupBy`…
+
+<Callout type="warn">
+Gọi API trong script thì dùng `ajaxCALL(url, data, cb, errCb)`, **không dùng `fetch()`** — `fetch`
+không mang theo bearer token và cấu hình CORS của FUI.
+</Callout>

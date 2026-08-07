@@ -1,0 +1,269 @@
+---
+title: CRUD một bảng
+description: Danh sách, tìm kiếm, thêm/sửa/xoá qua dialog — khung xương màn hình quản lý
+icon: Database
+---
+
+Màn hình quản lý phổ biến nhất: một bảng dữ liệu, một ô lọc, và thêm/sửa/xoá ngay trong bảng.
+
+Toàn bộ phần CRUD do `f-table` lo — bạn chỉ khai `:update-form` (các field trong dialog) và
+`:update-api` (gọi API nào).
+
+## JSON hoàn chỉnh
+
+```json
+{
+  "data": [
+    {
+      "filter": { "tuKhoa": "", "phongBanID": null },
+      "dsNhanVien": [],
+      "dsPhongBan": []
+    },
+    {
+      "apiPhongBan": {
+        "API": "/api/phongban/list",
+        "OUT": "dsPhongBan"
+      },
+
+      "apiDanhSach": {
+        "API": "/api/nhanvien/list",
+        "IN":  { "TuKhoa": "filter.tuKhoa", "PhongBanID": "filter.phongBanID" },
+        "OUT": "dsNhanVien"
+      }
+    },
+    { "CALL": "apiPhongBan" },
+    { "CALL": "apiDanhSach" }
+  ],
+
+  "watch": {
+    "filter.tuKhoa":     { "CALL": "apiDanhSach" },
+    "filter.phongBanID": { "CALL": "apiDanhSach" }
+  },
+
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "v-text-field",
+              "w": 3,
+              "attr": {
+                "v-model": "filter.tuKhoa",
+                "label": "Tìm theo tên hoặc email",
+                ":required": false
+              }
+            },
+            {
+              "el": "v-select",
+              "w": 3,
+              "attr": {
+                "v-model": "filter.phongBanID",
+                "label": "Phòng ban",
+                ":items": "dsPhongBan",
+                "item-text": "`TenPhongBan",
+                "item-value": "`ID",
+                ":clearable": true,
+                ":required": false
+              }
+            }
+          ]
+        },
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-table",
+              "w": 12,
+              "attr": {
+                "label": "Danh sách nhân viên",
+                ":items": "dsNhanVien",
+                "item-key": "ID",
+                ":excel": true,
+                ":height": "$( window ).height()-285",
+
+                ":headers": [
+                  { "text": "Họ tên",    "value": "HoTen",    "width": "200px" },
+                  { "text": "Email",     "value": "Email" },
+                  { "text": "Phòng ban", "value": "TenPhongBan", "width": "160px" },
+                  { "text": "Lương",     "value": "Luong",    "align": "right", "width": "130px",
+                    "el": "t-num", "attr": { "format": "0,0" } },
+                  { "text": "Ngày vào",  "value": "NgayVao",  "align": "center", "width": "120px",
+                    "el": "t-time" },
+                  { "text": "Đang làm",  "value": "Active",   "align": "center", "width": "100px",
+                    "el": "t-boolean" },
+                  { "text": "Tác vụ",    "value": "ctrl-update", "align": "center", "width": "120px" }
+                ],
+
+                ":sum-format": { "Luong": "0,0" },
+
+                ":update-form": [
+                  { "el": "v-text-field", "attr": {
+                      "v-model": "HoTen", "label": "Họ tên", ":required": true } },
+                  { "el": "v-text-field", "attr": {
+                      "v-model": "Email", "label": "Email", ":required": true } },
+                  { "el": "v-select", "attr": {
+                      "v-model": "PhongBanID", "label": "Phòng ban",
+                      ":items": "vueData.dsPhongBan",
+                      "item-text": "`TenPhongBan", "item-value": "`ID",
+                      ":required": true } },
+                  { "el": "v-text-field", "attr": {
+                      "v-model.number": "Luong", "label": "Lương", "type": "number",
+                      ":required": false } },
+                  { "el": "f-date", "attr": {
+                      "v-model": "NgayVao", "label": "Ngày vào làm", ":required": false } },
+                  { "el": "v-switch", "attr": {
+                      "v-model": "Active", "label": "Đang làm việc" } }
+                ],
+                ":update-form-attr": { "width": 700 },
+
+                ":update-api": {
+                  "default-item": { "HoTen": "", "Email": "", "Luong": 0, "Active": true },
+
+                  "new": {
+                    "API": "/api/nhanvien/create",
+                    "IN":  { "jsonObj": "$row" },
+                    "CALLBACK": [ { "MESS": "Đã thêm" }, { "CALL": "apiDanhSach" } ]
+                  },
+
+                  "edit": {
+                    "API": "/api/nhanvien/update",
+                    "IN":  { "ID": "item.ID", "jsonObj": "$row" },
+                    "CALLBACK": [ { "MESS": "Đã lưu" }, { "CALL": "apiDanhSach" } ]
+                  },
+
+                  "delete": {
+                    "CONFIRM": "Xác nhận xoá {{item.HoTen}}?",
+                    "API": "/api/nhanvien/delete",
+                    "IN":  { "ID": "item.ID" },
+                    "CALLBACK": [ { "MESS": "Đã xoá" }, { "CALL": "apiDanhSach" } ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "set": { "title": "Quản lý nhân viên" }
+}
+```
+
+## Những chỗ dễ sai trong mẫu này
+
+<Callout type="warn">
+**Cột `"value": "ctrl-update"` là bắt buộc.** Không có nó thì nút sửa/xoá không hiện, dù đã khai
+đủ `:update-api`.
+</Callout>
+
+<Callout type="warn">
+**`item-text` và `item-value` phải bọc backtick.** `"TenPhongBan"` không có dấu cách nên sẽ bị
+eval như biến. Viết `` "`TenPhongBan" ``.
+</Callout>
+
+<Callout type="warn">
+**Ô lọc phải có `":required": false`.** Mặc định `v-text-field` và `v-select` trong FUI là
+`:required: true` — để nguyên thì người dùng không lưu được form nào cho tới khi điền ô lọc.
+</Callout>
+
+<Callout>
+Bên trong `:update-form`, `v-model` trỏ **thẳng vào field của dòng** (`HoTen`), không có prefix.
+Nhưng `:items` tham chiếu state của trang thì **phải** có prefix `vueData.` — vì nó chạy trong
+scope của dialog.
+</Callout>
+
+## Biến thể
+
+<Tabs items={['Chỉ đọc', 'Ẩn nút theo quyền', 'Truyền từng field thay vì $row']}>
+
+<Tab value="Chỉ đọc">
+Bỏ hẳn `:update-form` và `:update-api`, bỏ luôn cột `ctrl-update`:
+
+```json
+{
+  "el": "f-table",
+  "w": 12,
+  "attr": {
+    "label": "Danh sách nhân viên",
+    ":items": "dsNhanVien",
+    "item-key": "ID",
+    ":excel": true
+  }
+}
+```
+
+Bỏ luôn `:headers` thì bảng tự dựng cột từ dữ liệu.
+</Tab>
+
+<Tab value="Ẩn nút theo quyền">
+```json
+":disabled-update": "vueData.user.SystemRight < 9"
+```
+
+Ẩn toàn bộ nút thêm/sửa/xoá với người không đủ quyền. Bảng vẫn xem được.
+
+<br />
+
+Phân quyền ở mức nút riêng lẻ thì đặt `v-if` trên `col`:
+
+```json
+{ "el": "f-button", "col": { "v-if": "vueData.user.SystemRight >= 9" },
+  "attr": { "label": "Duyệt", ":action": { "CALL": "apiDuyet" } } }
+```
+</Tab>
+
+<Tab value="Truyền từng field thay vì $row">
+`"jsonObj": "$row"` gửi cả object dòng. Muốn kiểm soát chính xác field nào được gửi:
+
+```json
+"new": {
+  "API": "/api/nhanvien/create",
+  "IN": {
+    "HoTen":      "item.HoTen",
+    "Email":      "item.Email",
+    "PhongBanID": "item.PhongBanID",
+    "Luong":      "item.Luong",
+    "Active":     "item.Active"
+  },
+  "CALLBACK": { "CALL": "apiDanhSach" }
+}
+```
+
+Dài hơn nhưng rõ ràng hơn, và tránh gửi thừa field kỹ thuật lên server.
+</Tab>
+
+</Tabs>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy dựng cho tôi màn hình quản lý [ĐỔI TÊN ĐỐI TƯỢNG] theo mẫu CRUD một bảng: thanh lọc, bảng
+danh sách có tìm kiếm và xuất Excel, thêm/sửa/xoá qua dialog form.
+
+Các field: [LIỆT KÊ FIELD VÀ KIỂU]
+API: [LIỆT KÊ ENDPOINT]
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-table` với `:update-form` + `:update-api`, và **phải** có cột `"value": "ctrl-update"`
+  thì nút sửa/xoá mới hiện. Không dùng `f-button` + `f-dialog` cho form thêm mới — cặp này không
+  ổn định trong V2
+- `item-key` là bắt buộc
+- Chuỗi hằng **không có dấu cách** phải bọc backtick ở đầu — `item-text`, `item-value`, mọi mã cố
+  định. Ví dụ `` "`TenPhongBan" ``
+- Ô lọc phải khai `":required": false`, nếu không sẽ chặn submit form
+- Cột số dùng `"el": "t-num"`, cột ngày `"el": "t-time"`, cột boolean `"el": "t-boolean"`
+- Mỗi field lọc có một `watch` gọi lại action tải dữ liệu — đừng làm nút "Tìm kiếm"
+- `data[]` xếp thứ tự: state → action có tên → `{ "CALL": ... }` tự chạy ở cuối
+- Event viết đầy đủ `v-on:click`, không dùng `@click`
+- Chia cột bằng khoá `w` (1–12), không dùng `style="width:..."`
+- Không tự thêm `class` hay `style` để làm đẹp
+
+Trả về JSON hoàn chỉnh gồm cả 4 khối.
+</AiPrompt>

@@ -1,0 +1,73 @@
+---
+title: Công cụ phát triển
+description: Cách lấy code FUI về máy, sửa, xem thử và đẩy lên server
+icon: Wrench
+---
+
+Code FUI sống trên server fui.vn. Để sửa nó bằng editor ở máy mình, bạn cần một công cụ lấy code
+về, rồi đẩy ngược lên.
+
+Có hai công cụ, dùng cho hai mục đích khác nhau:
+
+<Cards>
+  <Card
+    title="FUIX — Extension VS Code"
+    href="/docs/fui/cong-cu/fuix"
+    description="Cho người viết code. Clone, sửa, live preview, push — làm ngay trong VS Code / Cursor / Antigravity."
+  />
+  <Card
+    title="FUI MCP"
+    href="/docs/fui/cong-cu/mcp"
+    description="Cho AI agent. Bộ tool để Claude/Codex đọc, kiểm tra, mô phỏng và publish module."
+  />
+</Cards>
+
+## Điều cần nắm trước
+
+<Callout type="warn">
+**Cấu trúc thư mục trên đĩa là quy ước của công cụ, không phải của FUI.**
+
+Trên server, một module chỉ gồm: **moduleUI** (JSON), **script**, **header**, **body**, **style**,
+cùng các file `uc-*.vue`. Không có khái niệm "file `index.vue`" hay "file `module.json`" ở đó.
+
+Mỗi công cụ tự chọn cách bày các phần đó ra đĩa:
+
+| Phần trên server | FUIX bày thành | FUI MCP bày thành |
+|---|---|---|
+| moduleUI (JSON) | khối `<fui-app lang="json">` trong `index.vue` | `module.json` |
+| script | khối `<script>` trong `index.vue` | `script.js` |
+| header | `header.html` | `header.html` |
+| body | `body.html` | `body.html` |
+| style | `style.css` | `style.css` |
+| metadata | `.fuix/modules/{id}/info.json` | `_moduleInfo.json` |
+
+Nội dung thì giống hệt. Đọc tài liệu của người khác mà thấy tên file lạ, nhiều khả năng chỉ là họ
+đang dùng công cụ khác bạn.
+</Callout>
+
+Phần [Kiến trúc](/docs/fui/v2/kien-truc/module-json) mô tả **nội dung** — JSON, script, component.
+Phần này mô tả **công cụ**. Hai thứ đó độc lập nhau.
+
+## Chọn công cụ nào
+
+| Bạn đang làm gì | Dùng |
+|---|---|
+| Tự viết code trong VS Code | FUIX |
+| Cần xem thử trước khi push | FUIX — `Live preview module` |
+| Nhờ AI agent dựng/sửa module | FUI MCP |
+| Cần validate, mô phỏng runtime, chụp ảnh giao diện tự động | FUI MCP |
+
+Hai công cụ dùng chung được trên cùng một project, nhưng **không dùng chung cấu trúc thư mục** —
+đừng trỏ cả hai vào một thư mục.
+
+## Quy tắc an toàn chung
+
+<Callout type="error">
+Bản local chỉ là **bản sao tại thời điểm lấy về**. Người khác có thể đã sửa trên server sau đó.
+
+Trước khi sửa một module lâu không đụng tới, **đồng bộ lại trước**. Push đè lên thay đổi mới hơn
+của người khác là kiểu mất dữ liệu khó phát hiện nhất.
+</Callout>
+
+Cả hai công cụ đều có cơ chế đối chiếu bản local với bản server và cảnh báo trước khi ghi đè —
+đừng bỏ qua cảnh báo đó.

@@ -1,0 +1,37 @@
+---
+title: FUI V3
+description: Vue 3 + Vuetify 3 — đang biên soạn tài liệu
+icon: Construction
+---
+
+<Callout type="warn">
+Tài liệu FUI V3 đang được biên soạn. Hiện tại hãy dùng
+[tài liệu FUI V2](/docs/fui/v2) — mô hình `data` / `watch` / `controls` / `set` là như nhau,
+khác biệt nằm ở lớp Vuetify bên dưới.
+</Callout>
+
+## Khác biệt đã biết so với V2
+
+Ghi lại từ source code V3 (`component-3.0.js`, `componentTable-3.0.js`, `fastproject-3.0.js`)
+để bạn ước lượng được công sức chuyển đổi.
+
+| | V2 | V3 |
+|---|---|---|
+| Vue / Vuetify | Vue 2 + Vuetify 2 | Vue 3 + Vuetify 3 |
+| Tên component khi đăng ký | kebab-case — `f-button`, `f-table` | PascalCase — `FButton`, `FTable` |
+| Số component đăng ký | 40 | 35 |
+| Component động | không có | có `FDynamicComponent` (bọc `<component :is>`) |
+
+Trong `controls` bạn vẫn viết `"el": "f-button"` như cũ — Vue tự khớp kebab-case với tên
+PascalCase đã đăng ký.
+
+## Xác định project đang chạy bản nào
+
+Xem trường `Framework` trong `.fuix/project.json`:
+
+```json
+{ "ProjectID": "ex", "ProjectName": "FUI - Example", "Framework": "V2" }
+```
+
+Giá trị hợp lệ: `V2`, `V3`. Từng module có thể khai đè trong
+`.fuix/modules/{moduleId}/info.json`.

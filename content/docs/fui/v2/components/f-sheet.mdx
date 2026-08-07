@@ -1,0 +1,288 @@
+---
+title: f-sheet
+description: Bảng nhập liệu kiểu Excel — sửa thẳng trên ô, dán nhiều dòng, dựa trên AG Grid
+icon: Sheet
+---
+
+`f-sheet` là lưới nhập liệu kiểu Excel, xây trên **AG Grid Community**. Mọi cấu hình cột và lưới
+đều là cấu hình AG Grid, nên khi cần tuỳ biến cứ dùng thẳng kiến thức AG Grid. FUI bọc thêm:
+thanh công cụ (thêm/xoá/lưu/xuất Excel), theo dõi dòng thay đổi, dán từ Excel, và wiring API.
+
+<Callout>
+**`f-sheet` hay [`f-table`](/docs/fui/v2/components/f-table)?**
+
+`f-table` hiển thị dữ liệu và sửa từng dòng qua **dialog form riêng**. `f-sheet` sửa **ngay trên
+ô**, không qua dialog — hợp với nhập liệu hàng loạt, dán nhiều dòng từ Excel, sửa nhanh nhiều ô.
+
+Cả hai đều dựng sẵn. **Đừng tự viết bảng nhập liệu bằng `uc-*.vue`.**
+</Callout>
+
+## Demo
+
+Thử sửa thẳng trên ô, hoặc copy một vùng từ Excel rồi dán vào lưới.
+
+<FuiPreview template="f-sheet" height={480} />
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì lưới không render. Ba file, đúng thứ tự:
+
+```text
+/include/ag-grid/ag-grid.min.css
+/include/ag-grid/ag-theme-alpine.min.css
+/include/ag-grid/ag-grid-community.min.js
+```
+</Callout>
+
+## Props
+
+<TypeTable
+  type={{
+    items: { description: "Dữ liệu dòng (rowData của AG Grid).", type: "Array" },
+    columns: {
+      description: "Mảng colDef của AG Grid. Bỏ trống thì tự suy cột từ items[0].",
+      type: "Array",
+    },
+    label: { description: "Tiêu đề hiện trên thanh công cụ.", type: "String" },
+    rowKey: {
+      description: "Tên field khoá chính — dùng để nhận diện dòng đổi/mới/xoá.",
+      type: "String",
+      default: "'id'",
+    },
+    height: {
+      description: "Bỏ trống = tự giãn theo số dòng; số dương = px cố định; số âm = fill tới đáy màn hình, chừa |height| px.",
+      type: "Number",
+    },
+    allowAdd: { description: "Hiện nút Thêm dòng.", type: "Boolean" },
+    allowDelete: { description: "Hiện cột checkbox chọn và nút Xoá.", type: "Boolean" },
+    readonly: { description: "Khoá toàn bộ chỉnh sửa.", type: "Boolean" },
+    updateApi: { description: "Endpoint tAPI lưu từng dòng đã đổi.", type: "String" },
+    deleteApi: { description: "Endpoint tAPI xoá một dòng.", type: "String" },
+    saveExtra: {
+      description: "Tham số phụ trộn vào payload mỗi lần lưu/xoá. VD { LopID: vueData.lopID }.",
+      type: "Object",
+    },
+    defaultItem: { description: "Giá trị mẫu cho dòng mới khi bấm Thêm.", type: "Object" },
+  }}
+/>
+
+**Event**: `change(data, field, value)` · `save(rows)` · `saved`
+
+**Method qua `$refs`**: `getChangedRows()` · `addRow()` · `deleteRow(row)` · `refresh()` ·
+`exportExcel()`
+
+## Định nghĩa cột
+
+Mỗi phần tử của `columns` là một **colDef của AG Grid**:
+
+| Khoá | Tác dụng |
+|---|---|
+| `field` | Tên field trong dữ liệu |
+| `headerName` | Nhãn cột |
+| `editable` | Cho sửa ô — **mặc định bật**. Cột chỉ đọc khai `false` |
+| `width` · `minWidth` · `flex` | Bề rộng (mặc định `flex: 1`, `minWidth: 80`) |
+| `pinned` | `'left'` · `'right'` — ghim cột |
+| `type` | `"number"` = cột số, xem bên dưới |
+| `cellEditor` | `"fsheetDate"` = editor ngày dựng sẵn |
+| `valueFormatter` · `valueGetter` · `cellRenderer` | Hàm AG Grid |
+
+Tính năng cột nâng cao khác tra tài liệu AG Grid Community — `f-sheet` truyền colDef thẳng vào
+lưới.
+
+### Cột số — chỉ cần `"type": "number"`
+
+Khai một dòng đó là đủ, `f-sheet` tự gắn bốn thứ (chỉ gắn khi colDef **chưa** tự khai, nên muốn
+khác mặc định thì cứ khai đè):
+
+| Tự gắn | Hành vi |
+|---|---|
+| `cellStyle` | Căn phải |
+| `valueFormatter` | Phân cách nghìn → `1,234,567.89`. Chỉ khi hiển thị — bấm vào sửa vẫn thấy số thô |
+| `valueParser` | Rỗng → `null` thật (không phải `""`); chuỗi số → `Number`; chuỗi hỏng → `null`. Áp cho cả dữ liệu dán từ Excel |
+| `filter` | `agNumberColumnFilter` — lọc lớn hơn/nhỏ hơn/bằng thay vì lọc text |
+
+<Callout type="warn">
+`type` không phải khoá gốc của AG Grid mà là **columnType** do `f-sheet` đăng ký. Đặt `type` một
+giá trị khác `"number"` sẽ khiến AG Grid cảnh báo
+`colDef.type 'x' does not correspond to defined gridOptions.columnTypes`.
+</Callout>
+
+### Chiều cao
+
+| `:height` | Hành vi |
+|---|---|
+| *(bỏ trống)* | Tự giãn theo số dòng, không có thanh cuộn riêng |
+| `> 0` | px cố định |
+| `<= 0` | Fill tới đáy màn hình, chừa `|height|` px |
+
+Chế độ số âm **đo vị trí thật** của lưới sau khi layout xong rồi tính, và tự cập nhật khi resize
+cửa sổ — nên bạn không cần biết header/breadcrumb phía trên cao bao nhiêu, chỉ khai khoảng hở
+muốn chừa ở đáy.
+
+- **Bảng chính của trang**: `":height": -16`
+- **Trong dialog**: dùng số **dương** (px cố định), vì lưới không sát đáy viewport
+- **Bảng ngắn**: bỏ trống để tự giãn
+
+<Callout type="warn">
+Số âm **không** có nghĩa "viewport trừ đi N". Module cũ khai `":height": -220` phải sửa thành
+`-16`, nếu không lưới hụt mất ~200px.
+
+Chế độ tự giãn **render toàn bộ dòng** (AG Grid không ảo hoá được khi thiếu chiều cao cố định).
+Từ vài trăm dòng trở lên phải khai `:height` để lấy lại virtual scrolling.
+</Callout>
+
+## Cách dùng
+
+<Tabs items={['Tối giản', 'Đầy đủ (demo)', 'Nối API']}>
+
+<Tab value="Tối giản">
+```json
+{
+  "el": "f-sheet",
+  "w": 12,
+  "attr": { "label": "Bảng điểm", ":items": "dsDiem", "row-key": "DiemID" }
+}
+```
+</Tab>
+
+<Tab value="Đầy đủ (demo)">
+JSON đang chạy trong demo ở trên — không khai `update-api` nên nút Lưu bị khoá:
+
+```json
+{
+  "el": "f-sheet",
+  "w": 12,
+  "attr": {
+    "label": "Bảng điểm",
+    ":items": "dsBangDiem",
+    "row-key": "DiemID",
+    ":allow-add": true,
+    ":allow-delete": true,
+    ":height": 320,
+    ":columns": [
+      { "field": "MaSV",    "headerName": "Mã SV",    "editable": false, "width": 110, "pinned": "left" },
+      { "field": "HoTen",   "headerName": "Họ tên",   "editable": false, "minWidth": 180 },
+      { "field": "Diem",    "headerName": "Điểm",     "type": "number",  "width": 120 },
+      { "field": "NgayThi", "headerName": "Ngày thi", "cellEditor": "fsheetDate", "width": 140 }
+    ],
+    ":default-item": { "Diem": 0 }
+  }
+}
+```
+</Tab>
+
+<Tab value="Nối API">
+```json
+{
+  "el": "f-sheet",
+  "w": 12,
+  "attr": {
+    "label": "Bảng điểm",
+    ":items": "dsDiem",
+    "row-key": "DiemID",
+    ":allow-add": true,
+    ":allow-delete": true,
+    ":height": -16,
+    ":columns": [
+      { "field": "MaSV",    "headerName": "Mã SV",    "editable": false, "width": 120, "pinned": "left" },
+      { "field": "HoTen",   "headerName": "Họ tên",   "editable": false },
+      { "field": "Diem",    "headerName": "Điểm",     "type": "number" },
+      { "field": "NgayThi", "headerName": "Ngày thi", "cellEditor": "fsheetDate" }
+    ],
+    "update-api": "Diem_Save",
+    "delete-api": "Diem_Delete",
+    ":save-extra": { "LopID": "vueData.lopID" },
+    ":default-item": { "Diem": 0 }
+  }
+}
+```
+</Tab>
+
+</Tabs>
+
+## Hợp đồng với API
+
+`update-api` và `delete-api` được gọi bằng `ajaxCALL(api, { ...saveExtra, ...row })`. Stored
+procedure nên trả về **một dòng**:
+
+```sql
+SELECT Success = 1, Message = N'Đã lưu'   -- hoặc Success = 0 khi lỗi nghiệp vụ
+```
+
+`f-sheet` đọc `res.data[0]`, hiện snackbar `Message`, và dùng `Success` để quyết định đánh dấu
+thành công.
+
+- **Dòng mới** nhận khoá **âm** tạm (−1, −2…) và nền **xanh nhạt**. Khi lưu, khoá âm được đặt về
+  `0` trong payload → SP hiểu là INSERT
+- **Ô đã sửa** nền **vàng nhạt**; thanh công cụ hiện "N dòng thay đổi"
+- Lưu chạy **từng dòng song song**; xong hết và không lỗi thì làm mới baseline, xoá đánh dấu, phát
+  event `saved`
+- Xoá nhiều dòng đã tồn tại thì hỏi xác nhận trước; dòng mới (khoá âm) xoá cục bộ, không gọi API
+
+## Tính năng có sẵn
+
+Không cần tự code:
+
+- Sửa inline kèm theo dõi thay đổi (vàng = đã đổi, xanh = dòng mới)
+- **Dán từ Excel**: copy một vùng ô trong Excel/Sheets rồi dán thẳng vào lưới (TSV nhiều dòng nhiều cột)
+- Thanh công cụ: Thêm · Xoá đã chọn · Lưu · Huỷ thay đổi · Xuất Excel
+
+## Checklist
+
+<Steps>
+
+<Step>
+### Đã đăng ký đủ 3 file import AG Grid
+Hai CSS và một JS.
+</Step>
+
+<Step>
+### `row-key` trỏ đúng khoá chính
+Sai khoá thì `f-sheet` không phân biệt được dòng mới với dòng đã sửa.
+</Step>
+
+<Step>
+### SP trả về `{ Success, Message }`
+Mỗi dòng một kết quả.
+</Step>
+
+<Step>
+### `:height` khai đúng chế độ
+Bảng chính `-16`; trong dialog dùng số dương; bảng ngắn bỏ trống.
+</Step>
+
+<Step>
+### Cột số dùng `"type": "number"`
+Đừng tự khai `cellStyle` / `valueFormatter` / `valueParser` bằng tay nữa.
+</Step>
+
+</Steps>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON trong khối
+`<fui-app lang="json">` của `index.vue`).
+
+Hãy dựng cho tôi màn hình nhập điểm: chọn lớp từ dropdown, rồi nhập điểm trực tiếp trên bảng kiểu
+Excel, có lưu và xoá dòng.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-sheet` (không phải `f-table`) vì cần sửa thẳng trên ô, không qua dialog. Tuyệt đối
+  không tự viết bảng nhập liệu bằng `uc-*.vue`
+- Nhắc tôi đăng ký 3 file import AG Grid: `ag-grid.min.css`, `ag-theme-alpine.min.css`,
+  `ag-grid-community.min.js`
+- `:columns` là mảng **colDef của AG Grid**. Cột số chỉ cần `"type": "number"` — đừng tự khai
+  `cellStyle`/`valueFormatter`/`valueParser`. Cột ngày dùng `"cellEditor": "fsheetDate"`
+- `row-key` trỏ đúng khoá chính
+- `:height` khai `-16` cho bảng chính (nghĩa là chừa 16px ở đáy màn hình, **không phải**
+  "viewport trừ 16")
+- Dùng `:save-extra` để truyền LopID kèm mỗi lần lưu
+- Stored procedure phải trả về `SELECT Success = 1, Message = N'...'`
+- Chuỗi cố định **không có dấu cách** phải bọc backtick ở đầu, ví dụ `` "`active" ``
+- Event viết đầy đủ `v-on:click`, không dùng `@click`
+- Không tự thêm `class` hay `style` để làm đẹp
+
+Trả về `data[]`, `watch` và `controls` hoàn chỉnh, kèm chữ ký SP cần viết.
+</AiPrompt>

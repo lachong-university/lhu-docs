@@ -1,0 +1,210 @@
+---
+title: Cấu trúc JSON của module
+description: Bốn khối data · watch · controls · set và cách chúng tương tác
+icon: FileBraces
+---
+
+Phần cốt lõi của một module FUI là **một object JSON có đúng bốn khối**:
+
+```json
+{
+  "data":     [ /* state + action */ ],
+  "watch":    { /* observer → action */ },
+  "controls": [ /* bố cục giao diện */ ],
+  "set":      { /* cấu hình trang */ }
+}
+```
+
+Trên server, khối JSON này được lưu riêng dưới tên **moduleUI**. Script helper, header, body và
+CSS là những phần **tách biệt** — không nằm trong JSON này.
+
+<Callout type="warn">
+Tuỳ công cụ bạn dùng để lấy code về, JSON này xuất hiện dưới tên file khác nhau: `module.json`
+(FUI MCP) hoặc khối `<fui-app lang="json">` trong `index.vue` (extension FUIX). Nội dung thì
+giống hệt nhau.
+
+Tài liệu này mô tả **JSON**, không mô tả cách công cụ bày nó ra đĩa.
+[Xem phần công cụ →](/docs/fui/cong-cu)
+</Callout>
+
+Đây là JSON thật — **không comment, không trailing comma, không `undefined`**. Muốn ghi chú thì
+đặt key bắt đầu bằng `_` (ví dụ `"_note"`).
+
+## 1. `data` — mảng
+
+Xử lý **tuần tự từ trên xuống** khi trang load. Ba loại phần tử:
+
+| Loại | Nhận biết | Tác dụng |
+|---|---|---|
+| Khởi tạo state | Không có key action | Tạo biến reactive trong `vueData` |
+| Action có tên | Key là tên, value là object action | Định nghĩa action tái sử dụng, gọi bằng `CALL` |
+| Action tự chạy | Bản thân object là một action | **Chạy ngay khi load** |
+
+```json
+"data": [
+  { "dsUser": [], "sGroup": null, "dlUserInfo": false },
+  {
+    "getUser": {
+      "API": "SM_Users_SelectByDepGroup",
+      "IN":  { "GroupID": "sGroup" },
+      "OUT": "dsUser"
+    }
+  },
+  { "CALL": "getUser" }
+]
+```
+
+Thứ tự quy ước: **state trước → action có tên → action tự chạy ở cuối**.
+
+[Chi tiết action →](/docs/fui/v2/kien-truc/data-va-action)
+
+## 2. `watch` — object
+
+```json
+"watch": {
+  "sGroup":      { "CALL": "getUser" },
+  "sDepartment": { "CALL": "getUser" },
+  "sModuleID":   [ { "CALL": "getSysRight" }, { "CALL": "getFunctionRight" } ]
+}
+```
+
+Một biến cần nhiều action thì truyền mảng.
+
+[Chi tiết watch →](/docs/fui/v2/kien-truc/watch)
+
+## 3. `controls` — mảng
+
+Đây là nơi khai báo giao diện. Ba tầng bắt buộc: **container → rows → cols**.
+
+```json
+"controls": [
+  {
+    "prop": "fluid grid-list-md",
+    "rows": [
+      {
+        "prop": "row",
+        "cols": [
+          { "el": "v-text-field", "w": 6, "attr": { "v-model": "hoTen", "label": "Họ tên" } },
+          { "el": "uc-thong-ke", "w": 6, "attr": { ":items": "dsThongKe" } }
+        ]
+      }
+    ]
+  }
+]
+```
+
+Khoá `el` nhận **cả ba loại component**: `v-*` của Vuetify, `f-*`/`t-*` của FUI, và `uc-*` do
+bạn tự viết. JSON không phân biệt — nó chỉ khai báo tag và truyền props qua `attr`.
+
+[Chi tiết layout →](/docs/fui/v2/kien-truc/layout-grid) ·
+[Cách viết `uc-*.vue` →](/docs/fui/v2/kien-truc/custom-component)
+
+## 4. `set` — object
+
+Chỉ khai báo phần khác với cấu hình project. Trang bình thường bỏ trống.
+
+```json
+"set": {
+  "title": "Quản lý sinh viên",
+  "menu": false
+}
+```
+
+| Key hay dùng | Tác dụng |
+|---|---|
+| `title` | Tiêu đề trang |
+| `menu` | `false` = ẩn header menu |
+| `menuLeft` | `[]` = ẩn luôn sidebar |
+| `apiDomain` | Đổi backend riêng cho trang này |
+| `login` | `""` = **tắt yêu cầu đăng nhập** cho trang này |
+| `userInfo` | `""` = không gọi API lấy thông tin user |
+
+<Callout>
+`set` của module **thắng** cấu hình project. Đó là cách một trang nhúng iframe công khai tự tắt
+đăng nhập trong khi cả project vẫn bắt buộc login:
+
+```json
+"set": { "menu": false, "login": "", "userInfo": "" }
+```
+
+Chính module gallery của tài liệu này dùng đúng thủ thuật đó.
+</Callout>
+
+## Bốn khối nối với nhau thế nào
+
+```text
+URL ?param  ──►  vueData[param]        (nạp TRƯỚC khi data[] chạy)
+data[]      ──►  tạo state + action, chạy action khởi động
+controls    ──►  bind hai chiều vào state (v-model), gọi action (:action / v-on:)
+watch       ──►  state đổi → chạy action → cập nhật state khác → UI vẽ lại
+set         ──►  quyết định khung trang bao quanh controls
+```
+
+Vòng lặp điển hình: người dùng thao tác trên `controls` → state đổi → `watch` bắt được → gọi
+action `API` trong `data` → `OUT` ghi vào state → `controls` vẽ lại.
+
+## Ví dụ hoàn chỉnh tối thiểu
+
+Một trang danh sách có lọc, đủ cả bốn khối:
+
+```json
+{
+  "data": [
+    { "filter": { "tuKhoa": "" }, "dsNhanVien": [] },
+    {
+      "apiDanhSach": {
+        "API": "/api/nhanvien/list",
+        "IN":  { "TuKhoa": "filter.tuKhoa" },
+        "OUT": "dsNhanVien"
+      }
+    },
+    { "CALL": "apiDanhSach" }
+  ],
+
+  "watch": {
+    "filter.tuKhoa": { "CALL": "apiDanhSach" }
+  },
+
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            { "el": "v-text-field", "w": 4,
+              "attr": { "v-model": "filter.tuKhoa", "label": "Tìm kiếm", ":required": false } }
+          ]
+        },
+        {
+          "prop": "row",
+          "cols": [
+            { "el": "f-table", "w": 12,
+              "attr": {
+                "label": "Danh sách nhân viên",
+                ":items": "dsNhanVien",
+                "item-key": "ID",
+                ":headers": [
+                  { "text": "Họ tên", "value": "HoTen" },
+                  { "text": "Email",  "value": "Email" }
+                ]
+              } }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "set": { "title": "Nhân viên" }
+}
+```
+
+## Checklist
+
+1. `data[]`: state trước, action có tên giữa, `{ "CALL": ... }` khởi động cuối
+2. Mọi dropdown lọc đều có `watch` tương ứng để reload
+3. `controls` bắt đầu bằng grid wrapper; mọi item trong `cols` đều có `w`
+4. Dialog đặt trong container `"prop": "hidden-container"`
+5. Event viết `v-on:click`, không `@click`
+6. Chuỗi cố định không có dấu cách phải bọc backtick
+7. JSON hợp lệ — không comment, không trailing comma

@@ -1,0 +1,169 @@
+---
+title: FUI MCP
+description: Bộ tool cho AI agent đọc, kiểm tra, mô phỏng và publish module FUI
+icon: Bot
+---
+
+**FUI MCP** là một MCP server cho AI agent (Claude Code, Codex…) làm việc với project FUI. Nó
+cung cấp tool để đọc module, kiểm tra tĩnh, mô phỏng runtime, và publish — thay vì để agent tự
+đoán.
+
+```bash
+npm i @fui-org/fui-mcp
+```
+
+Package này cũng chứa **agent skill** của FUI: source code component, tài liệu tham chiếu, và ví
+dụ mẫu. Chính tài liệu bạn đang đọc được viết dựa trên đó.
+
+## Cấu trúc thư mục FUI MCP tạo ra
+
+Khác FUIX — MCP tách moduleUI và script thành hai file:
+
+```text
+{projectId}/
+├── _projectInfo.json
+├── project.json
+├── components/
+│   ├── _components.json
+│   └── uc-*.vue
+├── imports/_imports.json
+├── modules/
+│   ├── _modules.json
+│   └── {moduleId}/
+│       ├── _moduleInfo.json      metadata + HTMLOnly
+│       ├── module.json           ← moduleUI: data/watch/controls/set
+│       ├── script.js             ← script
+│       ├── header.html
+│       ├── body.html
+│       ├── style.css
+│       └── components/uc-*.vue
+├── _db/                          schema + stored procedure
+└── _history/                     bản lưu trước mỗi lần ghi đè
+```
+
+## Hai chế độ chạy
+
+Chế độ quyết định agent sửa file bằng cách nào:
+
+| | STDIO / CLI | SSE / remote |
+|---|---|---|
+| Chung ổ đĩa với server | Có | Không |
+| Sửa file | Agent dùng tool đọc/ghi file của chính nó | Gọi tool `*_stage` để server tự ghi |
+| Tìm kiếm nhiều file | Grep/Glob của agent | `workspace_glob` · `workspace_grep` |
+
+Cách nhận biết: nếu thấy `workspace_glob` / `workspace_grep` / các tool `*_stage` trong danh sách
+tool, nghĩa là đang chạy SSE.
+
+## Nhóm tool chính
+
+<Accordions>
+
+<Accordion title="Session — chọn project/module đang làm">
+`session_read` · `session_set` · `session_clear` · `session_resolve`
+
+Đặt target trước, các tool sau đó không cần truyền lại `projectId`/`moduleId`.
+</Accordion>
+
+<Accordion title="Đọc và đồng bộ">
+`project_list` · `project_sync` · `module_list` · `module_get` · `module_get_ui` ·
+`module_get_html` · `component_get` · `component_list` · `file_import_list` · `file_import_get`
+
+`module_get` làm mới **toàn bộ** file của module, không phải một file.
+</Accordion>
+
+<Accordion title="Kiểm tra trước khi publish">
+`module_validate` — validator tĩnh cho `module.json`: bắt lỗi `CALL` trỏ sai đích, sai cấu trúc
+lưới, dùng nhầm `@`/`#` shorthand, tên component không tồn tại, thiếu import, API lệch schema.
+Kèm nhóm cảnh báo `[design]` về chuẩn thẩm mỹ.
+
+`module_outline` — render `module.json` thành cây layout dạng text để review: lưới với `w` (cảnh
+báo khi tổng `w` > 12), binding, tóm tắt action, state và action không dùng tới.
+
+`module_preview` — diff bản local với bản server, đồng thời tạo token cần cho `module_update_ui`.
+
+`db_sp_verify` — kiểm chứng tĩnh contract của stored procedure, không gọi HTTP hay SQL.
+</Accordion>
+
+<Accordion title="Mô phỏng runtime — không cần trình duyệt">
+`module_simulate` chạy `module.json` bằng engine bám sát `fastproject.js`: khởi tạo `data[]`, chạy
+kịch bản `{set}`/`{click}`/`{call}`/`{exe}`/`{assert}`, API trả về từ mock, `watch` tự bắn sau mỗi
+bước (phát hiện được vòng lặp watcher). Trả về trace đầy đủ và state cuối.
+
+Toàn bộ network bị chặn — hoàn toàn an toàn, không đụng dữ liệu thật.
+
+Thêm `renderUI: true` thì dựng module trong Chromium thật (cần cài Playwright): reactivity Vue
+thật, thu JS error và `[Vue warn]`, kiểm tra DOM (app rỗng, tràn ngang, text `undefined`/`NaN`,
+ảnh vỡ, canvas biểu đồ cao 0), chụp màn hình. Có `device: "mobile"` / `"tablet"` để test
+responsive.
+</Accordion>
+
+<Accordion title="Publish — sửa file nào gọi tool đó">
+| Sửa | Gọi |
+|---|---|
+| `module.json` | `module_update_ui_json` |
+| `header.html` / `body.html` / title | `module_update_ui` (đẩy kèm cả `module.json`) |
+| `script.js` | `module_script_update` |
+| `style.css` | `module_css_update` |
+| `uc-*.vue` | `component_update` cho từng file |
+| Import | `file_import_new` · `file_import_update` · `file_import_upload` |
+
+`module_update_ui` cần token approval từ `module_preview` trước.
+</Accordion>
+
+<Accordion title="Database và stored procedure">
+`db_connect` · `db_schema_get` · `db_schema_read` · `db_sp_list` · `db_sp_get` · `db_sp_save` ·
+`db_sp_update` · `db_sp_verify` · `db_sp_help` · `db_sql_execute`
+
+Có chặn cứng ở code: `DROP TABLE` / `ALTER TABLE` bị block; `DELETE`/`UPDATE` không `WHERE` bị
+block; lệnh ghi cần `confirmWrite: true`.
+</Accordion>
+
+</Accordions>
+
+## Phân loại rủi ro
+
+Mỗi tool được gắn hai chiều: **ReadOnly (R) / Mutating (M)**, và **Safe ✅ / RequiresConfirm ⚠️ /
+Destructive 🔴**.
+
+Mặc định một tool là Mutating và cần xác nhận, **trừ khi** được đánh dấu rõ là ReadOnly/Safe.
+
+<Callout type="error">
+Nhóm **Destructive 🔴** — xoá vĩnh viễn, không khôi phục được:
+
+`module_delete` · `component_delete` · `file_import_delete` · `db_sp_delete` · `db_sp_update` ·
+`db_sql_execute_nonquery`
+
+Luôn yêu cầu xác nhận rõ ràng từ người dùng trước khi gọi.
+</Callout>
+
+## Strict mode
+
+Đặt biến môi trường `FUI_MCP_STRICT=1` để bật:
+
+- Các tool publish bị **chặn cứng** cho tới khi `skill_get` được gọi trong phiên — buộc agent
+  phải đọc quy tắc FUI trước khi được ghi lên server
+- Lỗi từ `module_validate` **chặn** việc publish `module.json`
+
+Chế độ thường chỉ cảnh báo mềm. Nên bật strict khi để agent làm việc ít giám sát.
+
+## Cơ chế bảo vệ
+
+Tool đồng bộ **luôn ghi đè, không hỏi**. Thứ bảo vệ thay đổi local của bạn là thư mục
+`_history/`: mọi file sắp bị ghi đè hoặc xoá đều được chép vào đó trước, giữ nguyên hình dạng
+đường dẫn gốc kèm mốc thời gian.
+
+<Callout type="warn">
+**Quy tắc 48 giờ**: file local cũ hơn 48 giờ phải đồng bộ lại từ server trước khi đọc để review
+hoặc sửa. Các tool đọc tự cảnh báo bằng dòng `⏳ … đồng bộ lần cuối cách đây N ngày` — thấy dòng
+đó thì chạy lệnh nó nêu trước.
+</Callout>
+
+## Component cấp project
+
+<Callout type="warn">
+`module_update_ui` **không** đẩy component cấp project.
+
+Có sửa `uc-*.vue` trong `{projectId}/components/` thì phải gọi `component_update` riêng. Và phải
+publish **trước** khi render module dùng nó — `module_simulate({ renderUI: true })` chặn cứng nếu
+bản local lệch bản server, vì phần cấp project được tải từ server chứ không dựng cục bộ.
+</Callout>

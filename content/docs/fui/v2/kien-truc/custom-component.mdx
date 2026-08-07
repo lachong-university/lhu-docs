@@ -1,0 +1,397 @@
+---
+title: Component riêng (uc-*.vue)
+description: Viết component Vue của bạn, khai báo props/slot/emit, và gọi lại từ JSON
+icon: Puzzle
+---
+
+JSON lo phần *dữ liệu, API, phân quyền, điều hướng*. Khi cần một khối giao diện mà `f-*` và
+`v-*` không có sẵn, bạn viết một component Vue thật rồi gọi lại từ JSON bằng một dòng.
+
+```json
+{ "el": "uc-invoice-list", "w": 12,
+  "attr": { ":items": "dsHoaDon", "title": "Hoá đơn tháng 5",
+            "v-on:select": "CALL(vueData.xemChiTiet)" } }
+```
+
+## Khi nào nên tách ra component
+
+- `controls` của một module vượt khoảng **200 dòng**
+- Cùng một khối giao diện lặp lại ở nhiều module
+- Cần logic trình bày mà JSON diễn đạt kém: kéo thả, canvas, layout động, animation
+
+Ngược lại, đừng tách khi `f-*` đã làm được. Không tự viết bảng bằng `uc-*.vue` —
+[`f-table`](/docs/fui/v2/components/f-table) và [`f-sheet`](/docs/fui/v2/components/f-sheet)
+đã có sẵn.
+
+## Hai phạm vi
+
+| | Module-scope | Project-scope |
+|---|---|---|
+| Vị trí | `modules/{moduleId}/components/uc-*.vue` | `{projectId}/components/uc-*.vue` |
+| Dùng được ở | Chỉ module đó | **Mọi module trong project** |
+
+Trùng tên thì bản module-scope thắng trong phạm vi module đó.
+
+FUI **tự quét và đăng ký toàn bộ `uc-*.vue` ở cấp global** — không cần khai báo gì thêm để dùng.
+
+## Ba quy tắc đăng ký
+
+<Callout type="error">
+**1. Không khai `name:`** — FUI tự lấy tên component từ tên file.
+
+**2. Không khai `components: { ... }`** — FUI đã đăng ký global, khai lại không có tác dụng.
+
+**3. Tiền tố `uc-` là bắt buộc**, kebab-case, đặt thẳng trong `components/` (không tạo thư mục con).
+</Callout>
+
+```js
+// ❌ SAI
+export default {
+  name: 'uc-user-card',
+  components: { 'uc-badge': UcBadge },
+  props: { ... }
+}
+
+// ✅ ĐÚNG — dùng thẳng <uc-badge> trong template, không cần import
+export default {
+  props: { ... }
+}
+```
+
+## Props
+
+Khai bằng camelCase trong `script`, dùng bằng kebab-case ở nơi gọi.
+
+```js
+export default {
+  props: {
+    title:    { type: String,  default: '' },
+    value:    { type: [String, Number, Object, Array], default: null },
+    items:    { type: Array,   default: function () { return []; } },
+    itemText: { type: String,  default: 'label' },
+    loading:  { type: Boolean, default: false },
+    disabled: { type: Boolean, default: false },
+    options:  { type: Object,  default: function () { return {}; } }
+  }
+}
+```
+
+<Callout type="warn">
+Default của `Array` và `Object` phải là **hàm thường**, không dùng arrow function:
+
+```js
+items: { default: () => [] }                       // ❌ SAI
+items: { default: function () { return []; } }     // ✅ ĐÚNG
+```
+</Callout>
+
+Ưu tiên tên props trung lập, dùng lại được: `items`, `value`, `label`, `loading`, `readonly`,
+`disabled`, `options`, `config`. Đừng đặt tên gắn chặt vào một màn hình cụ thể.
+
+### Truyền props từ JSON
+
+```json
+{
+  "el": "uc-invoice-list",
+  "w": 12,
+  "attr": {
+    "title": "Hoá đơn tháng 5",
+    ":items": "dsHoaDon",
+    ":loading": "dangTai",
+    "item-text": "TenKhachHang"
+  }
+}
+```
+
+| Trong JSON | Ý nghĩa |
+|---|---|
+| `"title": "Hoá đơn tháng 5"` | Chuỗi tĩnh (có dấu cách nên an toàn) |
+| `":items": "dsHoaDon"` | Bind động — lấy giá trị biến `dsHoaDon` |
+| `"item-text": "TenKhachHang"` | Prop `itemText`, kebab-case |
+
+Prop tĩnh không dấu cách vẫn phải bọc backtick:
+`` "item-text": "`label" `` — nếu không sẽ bị eval như biến.
+[Quy tắc phân giải giá trị →](/docs/fui/v2/kien-truc/value-resolution)
+
+## Emit
+
+Luôn emit lên cha thay vì sửa thẳng state của cha.
+
+```js
+methods: {
+  handleSelect: function (item) {
+    this.$emit('input', item.id);   // cho v-model
+    this.$emit('select', item);
+  }
+}
+```
+
+Event chuẩn: `input` · `change` · `select` · `submit` · `remove` · `action`.
+
+Bắt event từ JSON — nhớ viết đầy đủ `v-on:`, **không** dùng `@`:
+
+```json
+{
+  "el": "uc-invoice-list",
+  "attr": {
+    ":items": "dsHoaDon",
+    "v-model": "hoaDonDangChon",
+    "v-on:select": "CALL(vueData.xemChiTiet, { item: $event })"
+  }
+}
+```
+
+`$event` là tham số component vừa emit.
+
+## Slot
+
+Slot giúp component dùng lại được ở nhiều nơi mà không phải nhồi thêm props.
+
+```html
+<template>
+  <div class="uc-invoice-list">
+    <v-card outlined>
+      <v-card-title v-if="title" class="subtitle-1 font-weight-bold">
+        <slot name="title">{{ title }}</slot>
+      </v-card-title>
+
+      <v-card-text>
+        <div v-if="loading"><slot name="loading">Đang tải…</slot></div>
+        <div v-else-if="!hasItems"><slot name="empty">Không có dữ liệu</slot></div>
+        <div v-else>
+          <slot :items="localItems" :selected-item="localValue">
+            <!-- nội dung mặc định khi cha không truyền slot -->
+          </slot>
+        </div>
+      </v-card-text>
+    </v-card>
+  </div>
+</template>
+```
+
+Ba loại slot ở trên: **named slot** (`title`, `loading`, `empty`), **default slot**, và
+**scoped slot** (truyền `items` cùng `selected-item` ngược ra cho cha).
+
+Dùng slot từ JSON thì viết `v-slot:` đầy đủ, không dùng `#`:
+
+```json
+{
+  "el": "uc-invoice-list",
+  "attr": { ":items": "dsHoaDon", "v-slot:empty": "" },
+  "innerHTML": "Chưa phát sinh hoá đơn nào"
+}
+```
+
+<Callout>
+Expose `loading` / `empty` / `disabled` / `readonly` qua props hoặc slot, đừng hardcode một luồng
+duy nhất — đó là khác biệt giữa component dùng lại được và component chỉ chạy ở một màn hình.
+</Callout>
+
+## Ràng buộc cú pháp
+
+FUI parse file `.vue` bằng parser riêng, nên có vài giới hạn cứng:
+
+| Cấm | Thay bằng |
+|---|---|
+| Backtick trong `<template>` và `<script>` | Nối chuỗi: `'Tổng (' + items.length + ')'` |
+| `async` / `await` / `finally` | Callback |
+| `fetch()` | `ajaxCALL(url, data, cb, errCb)` |
+| `components: { ... }` · `name:` | Bỏ hẳn |
+| `f-dialog` trong template | Dùng thẳng `v-dialog` |
+| Nhiều root element | Vue 2 — phải có đúng một root |
+
+<Callout>
+`@click` và `#default` **dùng bình thường được trong file `.vue`**. Quy tắc "viết đầy đủ
+`v-on:` / `v-slot:`" chỉ áp dụng cho JSON.
+</Callout>
+
+## CSS trong component
+
+`<style scoped>` **được phép**, nhưng có một cái bẫy lớn:
+
+<Callout type="error">
+**`scoped` không thật sự scope.** FUI không compile SFC — nó chỉ nối phần CSS của mọi component
+trong module thành **một stylesheet chung**, không gắn `data-v-xxxx`.
+
+Nghĩa là selector trần sẽ **rò sang mọi component khác** cùng module.
+</Callout>
+
+Phải tự đặt namespace thủ công theo hai bước:
+
+1. Thẻ gốc mang một class trùng tên component
+2. Mọi selector đều bắt đầu từ class đó
+
+```vue
+<template>
+  <div class="uc-invoice-list">
+    <div class="uc-invoice-list__toolbar">
+      <span class="uc-invoice-list__title">{{ title }}</span>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.uc-invoice-list__toolbar { display: flex; align-items: center; justify-content: space-between; }
+.uc-invoice-list__title   { font-weight: 600; font-size: 14px; }
+</style>
+```
+
+```vue
+<!-- ❌ SAI — selector trần, đụng mọi component khác cùng module -->
+<style scoped>
+.title   { font-weight: 600; }
+.toolbar { display: flex; }
+</style>
+```
+
+<Callout type="error">
+**Tuyệt đối không inject CSS bằng JavaScript.** Tạo thẻ `<style>` rồi `document.head.appendChild`
+(kiểu `_injectStyle`) là anti-pattern nặng — vừa lách luật, vừa đẻ ra hàng loạt class tự chế.
+</Callout>
+
+Trước khi đặt class mới, tra
+[bộ từ vựng Vuetify đã duyệt](/docs/fui/v2/kien-truc/layout-grid#bộ-từ-vựng-được-duyệt) —
+nó áp dụng y nguyên trong `.vue`. Khác biệt duy nhất: trong `.vue` không có `w`/`col` của lưới
+FUI, nên chia cột bằng `v-layout`/`v-flex` trực tiếp.
+
+CSS dùng chung cho cả module thì đặt ở `style.css`, không nhét vào component.
+
+## Dialog trong component
+
+`f-dialog` chỉ chạy khi khai trong `controls` JSON. Cần dialog trong `uc-*.vue` thì dựng
+`v-dialog` theo quy ước spacing chuẩn:
+
+```html
+<v-dialog v-model="editDialog" max-width="600">
+  <v-card>
+    <v-card-title class="d-flex align-center px-3 pt-2 pb-3 subtitle-1 font-weight-bold">
+      {{ editItem.ID ? 'Chỉnh sửa' : 'Thêm mới' }}
+      <v-spacer></v-spacer>
+      <v-btn icon @click="editDialog = false"><v-icon>mdi-close</v-icon></v-btn>
+    </v-card-title>
+
+    <v-card-text class="px-3 py-1">
+      <v-row>
+        <v-col cols="8">
+          <v-text-field v-model="editItem.Ten" label="Tên"
+                        hide-details outlined dense></v-text-field>
+        </v-col>
+        <v-col cols="4">
+          <v-text-field v-model.number="editItem.ThuTu" label="Thứ tự" type="number"
+                        hide-details outlined dense></v-text-field>
+        </v-col>
+      </v-row>
+    </v-card-text>
+
+    <v-card-actions class="pa-3">
+      <v-spacer></v-spacer>
+      <v-btn color="primary" elevation="0" :loading="saving" @click="save">Lưu</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+```
+
+| Phần | Class chuẩn |
+|---|---|
+| `v-dialog` | `max-width="600"` — 400 nhỏ, 800–900 form rộng |
+| `v-card-title` | `d-flex align-center px-3 pt-2 pb-3 subtitle-1 font-weight-bold` + nút X |
+| `v-card-text` | `px-3 py-1` |
+| Field nhập | `outlined dense hide-details` |
+| `v-card-actions` | `pa-3` + `v-spacer` trước nút |
+| Nút chính | `color="primary" elevation="0"` + `:loading` |
+
+Component dialog luôn emit `('input', false)` để đóng — khớp `v-model` của Vue 2.
+
+## Mẫu khởi đầu
+
+```vue
+<template>
+  <div class="uc-danh-sach">
+    <v-card outlined>
+      <v-card-title v-if="title" class="subtitle-1 font-weight-bold">
+        <slot name="title">{{ title }}</slot>
+      </v-card-title>
+
+      <v-card-text>
+        <div v-if="loading"><slot name="loading">Đang tải…</slot></div>
+        <div v-else-if="!hasItems"><slot name="empty">Không có dữ liệu</slot></div>
+        <div v-else>
+          <slot :items="localItems">
+            <v-list dense>
+              <v-list-item v-for="(item, i) in localItems" :key="item.id || i"
+                           @click="handleSelect(item)">
+                <v-list-item-content>
+                  <v-list-item-title>{{ item[itemText] }}</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </slot>
+        </div>
+      </v-card-text>
+    </v-card>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    title:    { type: String,  default: '' },
+    value:    { type: [String, Number, Object], default: null },
+    items:    { type: Array,   default: function () { return []; } },
+    itemText: { type: String,  default: 'label' },
+    loading:  { type: Boolean, default: false }
+  },
+  data: function () {
+    return { localValue: null, localItems: [] };
+  },
+  computed: {
+    hasItems: function () { return this.localItems.length > 0; }
+  },
+  watch: {
+    value: { handler: function (v) { this.localValue = v; }, immediate: true },
+    items: { handler: function (v) { this.localItems = Array.isArray(v) ? v : []; }, immediate: true }
+  },
+  methods: {
+    handleSelect: function (item) {
+      this.localValue = item;
+      this.$emit('input', item);
+      this.$emit('select', item);
+    }
+  }
+}
+</script>
+```
+
+Lưu ý mẫu này **mirror prop sang state cục bộ** bằng watcher `immediate` — Vue 2 cấm sửa thẳng
+prop, nên đây là cách chuẩn để component vừa nhận giá trị từ cha vừa tự quản lý được.
+
+## Checklist
+
+<Steps>
+
+<Step>
+### Tên file `uc-*.vue`, kebab-case, đặt thẳng trong `components/`
+</Step>
+
+<Step>
+### Không có `name:`, không có `components: {}`
+</Step>
+
+<Step>
+### Default của Array/Object là `function () { return ... }`
+</Step>
+
+<Step>
+### Một root element duy nhất, không backtick, không `async/await`
+</Step>
+
+<Step>
+### `<style scoped>` tự đặt namespace theo tên component
+Không selector trần. Không inject CSS bằng JS.
+</Step>
+
+<Step>
+### API và phân quyền để ở JSON, component chỉ lo trình bày
+</Step>
+
+</Steps>

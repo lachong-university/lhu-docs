@@ -1,0 +1,273 @@
+---
+title: f-echart
+description: Biểu đồ dựa trên Apache ECharts V5 — bar, line, pie, gauge, radar, sankey, map
+icon: ChartColumn
+---
+
+`f-echart` là lớp bọc mỏng quanh **Apache ECharts V5**. Prop `option` chính là ECharts option
+nguyên bản, nên khi cần cấu hình gì cứ dùng thẳng kiến thức ECharts. FUI chỉ thêm: nạp theme,
+vài shortcut trong `config`, bảng xem dữ liệu, và các event.
+
+Dùng `f-echart` cho mọi loại biểu đồ. Component `f-chart` (Chart.js) là bản cũ.
+
+## Demo
+
+<FuiPreview template="f-echart" height={480} />
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì `<f-echart>` **không tồn tại** và vùng biểu đồ trắng trơn.
+
+```text
+1. /include/chart/echarts.min.js   ← ECharts core, phải chạy TRƯỚC
+2. /include/chart/fechart.js       ← lớp bọc FUI, phải chạy SAU
+```
+
+Thứ tự do **`FileSort` quyết định**, không phải thứ tự bạn thêm hay phạm vi project/module.
+`fechart.js` phụ thuộc biến global `echarts`, nên `FileSort` của nó phải **lớn hơn** — ví dụ
+100 và 110.
+</Callout>
+
+## Props
+
+<TypeTable
+  type={{
+    option: {
+      description: "Option ECharts đầy đủ, truyền thẳng vào echarts.setOption(). Đây là prop chính.",
+      type: "Object",
+      default: "{}",
+    },
+    config: {
+      description: "Shortcut riêng của FUI: height, theme, title, toolbox, dataView… Đóng vai trò giá trị nền, bị option ghi đè.",
+      type: "Object",
+      default: "{}",
+    },
+  }}
+/>
+
+<Callout>
+Component chỉ có **hai** prop. **Không có prop `data`** — dữ liệu nằm trong `option.series`.
+</Callout>
+
+### Thứ tự merge
+
+`config` dựng phần nền → `option` ghi đè lên trên.
+
+| Kiểu | Cách merge |
+|---|---|
+| Mảng (`series`, `color`, `xAxis`…) | **Thay thế** |
+| Object thường | Deep merge |
+| Giá trị đơn | Thay thế |
+
+### Các khoá của `config`
+
+| Khoá | Kiểu | Mặc định | Tác dụng |
+|---|---|---|---|
+| `height` | number \| string | `400` | Số = px; chuỗi = `'50vh'`… |
+| `theme` | string \| null | `'fui'` | `'fui'` · `'shine'` · `'v5'`; `null` = không theme |
+| `title` | string | | → `option.title.text` |
+| `subtitle` | string | | → `option.title.subtext` |
+| `titleLeft` | string | `'left'` | `left` · `center` · `right` |
+| `color` | string[] | | Đổi bảng màu |
+| `legend` | false \| Object | | `false` = ẩn |
+| `tooltipFormat` | string | `'auto'` | `number` · `percent` · `currency` · `short` · `auto` |
+| `dataView` | boolean | `false` | Hiện nút bảng xem dữ liệu |
+| `toolbox` | boolean | `false` | Hiện toolbox (lưu ảnh + khôi phục) |
+| `zoom` | boolean | | Bật dataZoom |
+| `animation` | boolean | | `false` = tắt hiệu ứng |
+| `refreshInterval` | number | | ms — tự làm mới |
+| `backgroundColor` | string | `'transparent'` | Nền biểu đồ |
+
+**Event**: `chart-click` · `drilldown` · `legend-change` · `rendered` · `finished`
+
+## Cách dùng
+
+<Tabs items={['Tối giản', 'Đầy đủ']}>
+
+<Tab value="Tối giản">
+```json
+{
+  "el": "f-echart",
+  "w": 12,
+  "attr": {
+    ":config": { "title": "Doanh thu", "height": 350 },
+    ":option": "chartOption"
+  }
+}
+```
+</Tab>
+
+<Tab value="Đầy đủ">
+JSON đang chạy trong demo ở trên. Biểu đồ khai trong `data[]` rồi tham chiếu từ `controls`:
+
+```json
+"data": [
+  {
+    "chartConfig": {
+      "title": "Doanh thu theo quý",
+      "subtitle": "Đơn vị: triệu đồng",
+      "height": 360,
+      "dataView": true
+    },
+    "chartOption": {
+      "grid": { "left": 20, "right": 20, "containLabel": true },
+      "xAxis": { "type": "category", "data": ["Quý 1", "Quý 2", "Quý 3", "Quý 4"] },
+      "yAxis": { "type": "value" },
+      "series": [
+        { "name": "Năm 2025", "type": "bar", "data": [1250, 1480, 1310, 1720],
+          "label": { "show": true, "position": "top" } },
+        { "name": "Năm 2026", "type": "bar", "data": [1390, 1655, 1580, 1910],
+          "label": { "show": true, "position": "top" } }
+      ]
+    }
+  }
+]
+```
+
+```json
+{ "el": "f-echart", "w": 12, "attr": { ":config": "chartConfig", ":option": "chartOption" } }
+```
+</Tab>
+
+</Tabs>
+
+## Quy ước hiển thị mặc định
+
+Đúc kết từ các yêu cầu chỉnh sửa lặp đi lặp lại của người dùng thật. Áp dụng ngay từ đầu cho mọi
+biểu đồ mới, trừ khi có yêu cầu khác:
+
+<Steps>
+
+<Step>
+### Luôn hiện giá trị trên biểu đồ
+
+Bar và line: `"label": { "show": true, "position": "top" }`.
+Bar ngang thì dùng `"position": "right"`.
+</Step>
+
+<Step>
+### Padding lưới
+
+`"grid": { "left": 20, "right": 20, "containLabel": true }` — đừng để dư khoảng trắng hai bên.
+</Step>
+
+<Step>
+### Số hiển thị đầy đủ
+
+`1,500,000` chứ không rút gọn `1.5M`. Mặc định đã đúng — **đừng override** `tooltipFormat` trừ
+khi được yêu cầu.
+</Step>
+
+<Step>
+### Pie đừng để labelLine dài
+
+Nhãn ngắn gọn, hoặc dồn thông tin về legend và tooltip.
+</Step>
+
+<Step>
+### Đừng tự dựng nút "Xem dữ liệu"
+
+Dùng `"dataView": true` có sẵn.
+</Step>
+
+</Steps>
+
+## Bảng xem dữ liệu
+
+`config.dataView: true` thêm icon bảng ở góc trên phải. Bấm vào hiện overlay bảng dữ liệu.
+
+Dữ liệu được **tự trích từ `option`**, không cần truyền riêng:
+
+1. Ưu tiên `option.dataset.source`
+2. Không có thì lấy `option.series[].data` cùng `xAxis.data` / `yAxis.data`
+3. Không tìm được dữ liệu phù hợp thì nút tự ẩn
+
+Bỏ `dataView` khi option không có mảng series rõ ràng — gauge một giá trị, sankey node/link, tree
+phân cấp.
+
+<Callout>
+Đây là **overlay Vue riêng của FUI**, không phải DataView của ECharts toolbox. `config.toolbox:
+true` chỉ thêm lưu ảnh và khôi phục.
+</Callout>
+
+## Nối với dữ liệu từ API
+
+Biểu đồ hay phải dựng lại sau khi API trả về. Dựng `option` trong khối `<script>` rồi gọi bằng
+`FUN`:
+
+```vue
+<script>
+function buildChartOption(input) {
+  return {
+    grid: { left: 20, right: 20, containLabel: true },
+    xAxis: { type: 'category', data: _.map(input.rows, 'Thang') },
+    yAxis: { type: 'value' },
+    series: [{
+      type: 'bar',
+      data: _.map(input.rows, 'DoanhThu'),
+      label: { show: true, position: 'top' }
+    }]
+  };
+}
+</script>
+```
+
+```json
+{
+  "apiDoanhThu": {
+    "API": "/api/baocao/doanhthu",
+    "IN":  { "Nam": "filter.nam" },
+    "OUT": "dsDoanhThu",
+    "CALLBACK": {
+      "FUN": "buildChartOption",
+      "IN":  { "rows": "dsDoanhThu" },
+      "OUT": "chartOption"
+    }
+  }
+}
+```
+
+## Cạm bẫy
+
+<Callout type="warn">
+**Trang trắng, console báo unknown element `f-echart`** → thiếu import, hoặc `fechart.js` có
+`FileSort` nhỏ hơn `echarts.min.js` nên chạy trước lúc biến `echarts` chưa tồn tại.
+</Callout>
+
+<Callout type="warn">
+**Mảng bị thay thế chứ không merge.** Khai `series` trong `config` rồi lại khai trong `option`
+thì bản trong `option` thắng hoàn toàn. Để dữ liệu ở `option`, để phần trình bày ở `config`.
+</Callout>
+
+<Callout>
+Biểu đồ không hiện mà không có lỗi thì kiểm tra `config.height` — chiều cao `0` cho ra canvas
+rỗng. Mặc định là `400`.
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON trong khối
+`<fui-app lang="json">` của `index.vue`).
+
+Hãy dựng cho tôi trang báo cáo doanh thu: bộ lọc theo năm, một biểu đồ cột doanh thu 12 tháng, và
+một biểu đồ tròn tỷ trọng theo ngành. Dữ liệu lấy từ API.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-echart`, không dùng `f-chart` hay thư viện khác
+- `f-echart` chỉ có **2 prop**: `:option` (ECharts option nguyên bản) và `:config` (shortcut FUI).
+  **Không có prop `data`**
+- Nhắc tôi đăng ký import theo đúng thứ tự `FileSort`: `/include/chart/echarts.min.js` (sort nhỏ)
+  rồi `/include/chart/fechart.js` (sort lớn hơn)
+- Quy ước hiển thị mặc định: luôn `"label": { "show": true, "position": "top" }` cho cột/đường;
+  `"grid": { "left": 20, "right": 20, "containLabel": true }`; số hiển thị đầy đủ có phân cách
+  nghìn (đừng override `tooltipFormat`); dùng `"dataView": true` thay vì tự dựng nút xem dữ liệu
+- Dựng `option` từ dữ liệu API bằng một hàm trong khối `<script>` rồi gọi qua `FUN` trong
+  `CALLBACK`, đừng nhồi vào `EXE`
+- Chuỗi cố định **không có dấu cách** phải bọc backtick ở đầu, ví dụ `` "`active" ``
+- Event viết đầy đủ `v-on:click`, không dùng `@click`
+- Không tự thêm `class` hay `style` để làm đẹp
+
+Trả về `data[]`, `watch`, `controls` và khối `<script>` hoàn chỉnh.
+</AiPrompt>

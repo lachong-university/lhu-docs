@@ -1,0 +1,283 @@
+---
+title: Master–detail
+description: Chọn dòng ở bảng trái, xem và sửa chi tiết ở panel phải
+icon: Columns2
+---
+
+Bảng danh sách chiếm cột trái, chi tiết của dòng đang chọn hiện ở cột phải. Đây là mẫu hay dùng
+cho dữ liệu có nhiều field mà mở dialog thì bất tiện.
+
+Cơ chế: `f-table` phát event `click:row`, action lưu dòng vào state, panel phải hiện ra nhờ
+`v-if`.
+
+## JSON hoàn chỉnh
+
+```json
+{
+  "data": [
+    {
+      "filter": { "tuKhoa": "" },
+      "dsDonHang": [],
+      "donHangChon": null,
+      "dsChiTiet": []
+    },
+    {
+      "apiDanhSach": {
+        "API": "/api/donhang/list",
+        "IN":  { "TuKhoa": "filter.tuKhoa" },
+        "OUT": "dsDonHang"
+      },
+
+      "apiChiTiet": {
+        "API": "/api/donhang/detail",
+        "IN":  { "DonHangID": "donHangChon.ID" },
+        "OUT": "dsChiTiet"
+      },
+
+      "chonDonHang": [
+        { "donHangChon": "$row" },
+        { "CALL": "apiChiTiet" }
+      ],
+
+      "luuDonHang": {
+        "API": "/api/donhang/update",
+        "IN":  { "ID": "donHangChon.ID", "jsonObj": "donHangChon" },
+        "CALLBACK": [
+          { "MESS": "Đã lưu" },
+          { "CALL": "apiDanhSach" }
+        ]
+      }
+    },
+    { "CALL": "apiDanhSach" }
+  ],
+
+  "watch": {
+    "filter.tuKhoa": { "CALL": "apiDanhSach" }
+  },
+
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "v-text-field",
+              "w": 4,
+              "attr": {
+                "v-model": "filter.tuKhoa",
+                "label": "Tìm đơn hàng",
+                ":required": false
+              }
+            }
+          ]
+        },
+
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-table",
+              "w": 7,
+              "attr": {
+                "label": "Đơn hàng",
+                ":items": "dsDonHang",
+                "item-key": "ID",
+                ":height": "$( window ).height()-285",
+                "v-on:click:row": "CALL(vueData.chonDonHang, { $row: $event })",
+                ":item-class": "item => item.ID == (vueData.donHangChon && vueData.donHangChon.ID) ? 'primary lighten-5' : ''",
+                ":headers": [
+                  { "text": "Mã đơn",    "value": "MaDon",     "width": "120px" },
+                  { "text": "Khách hàng", "value": "TenKhachHang" },
+                  { "text": "Ngày",      "value": "NgayDat",   "align": "center", "width": "110px",
+                    "el": "t-time" },
+                  { "text": "Tổng tiền", "value": "TongTien",  "align": "right",  "width": "140px",
+                    "el": "t-num", "attr": { "format": "0,0" } }
+                ]
+              }
+            },
+
+            {
+              "el": "v-card",
+              "w": 5,
+              "col": { "v-if": "vueData.donHangChon" },
+              "attr": { "class": "pa-2" },
+              "innerHTML": [
+                { "el": "f-title", "attr": {
+                    "label": "Chi tiết đơn {{donHangChon.MaDon}}" } },
+
+                { "el": "v-text-field", "attr": {
+                    "v-model": "donHangChon.TenKhachHang",
+                    "label": "Khách hàng", "class": "mt-3", ":required": true } },
+
+                { "el": "v-text-field", "attr": {
+                    "v-model": "donHangChon.DienThoai",
+                    "label": "Điện thoại", "class": "mt-2", ":required": false } },
+
+                { "el": "v-textarea", "attr": {
+                    "v-model": "donHangChon.DiaChi",
+                    "label": "Địa chỉ giao", "rows": "2", "class": "mt-2",
+                    ":required": false } },
+
+                { "el": "f-table", "attr": {
+                    "label": "Mặt hàng",
+                    ":items": "dsChiTiet",
+                    "item-key": "ID",
+                    "class": "mt-3",
+                    ":show-search": false,
+                    ":headers": [
+                      { "text": "Tên hàng", "value": "TenHang" },
+                      { "text": "SL",       "value": "SoLuong",  "align": "right", "width": "70px",
+                        "el": "t-num" },
+                      { "text": "Thành tiền", "value": "ThanhTien", "align": "right", "width": "120px",
+                        "el": "t-num", "attr": { "format": "0,0" } }
+                    ],
+                    ":sum-format": { "ThanhTien": "0,0" } } },
+
+                { "el": "div", "attr": { "class": "d-flex justify-end mt-3" }, "innerHTML": [
+                    { "el": "f-button", "attr": {
+                        "label": "Lưu", "icon-text": "mdi-content-save",
+                        ":ctrlhotkey": 83,
+                        ":action": { "CALL": "luuDonHang" } } }
+                  ] }
+              ]
+            },
+
+            {
+              "el": "v-card",
+              "w": 5,
+              "col": { "v-if": "!vueData.donHangChon" },
+              "attr": { "class": "pa-4 text-center grey--text" },
+              "innerHTML": "Chọn một đơn hàng để xem chi tiết"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "set": { "title": "Đơn hàng" }
+}
+```
+
+## Cơ chế chọn dòng
+
+`f-table` phát `click:row` kèm object dòng. Bắt bằng `v-on:` và truyền `$event` vào action:
+
+```json
+"v-on:click:row": "CALL(vueData.chonDonHang, { $row: $event })"
+```
+
+Action nhận `$row` rồi gán vào state và tải chi tiết:
+
+```json
+"chonDonHang": [
+  { "donHangChon": "$row" },
+  { "CALL": "apiChiTiet" }
+]
+```
+
+<Callout>
+Hai bước tách rời nhau là cố ý: bước một gán state (Vue vẽ lại panel ngay), bước hai mới gọi API.
+Người dùng thấy phản hồi tức thì thay vì chờ mạng.
+</Callout>
+
+## Đánh dấu dòng đang chọn
+
+```json
+":item-class": "item => item.ID == (vueData.donHangChon && vueData.donHangChon.ID) ? 'primary lighten-5' : ''"
+```
+
+`:item-class` nhận một hàm dạng chuỗi. Nhớ kiểm tra `donHangChon` khác `null` trước khi đọc `.ID`
+— lúc trang vừa load nó còn rỗng.
+
+## Panel rỗng
+
+Hai `v-card` loại trừ nhau bằng `v-if` trên `col`:
+
+```json
+{ "el": "v-card", "w": 5, "col": { "v-if": "vueData.donHangChon" },  ... }
+{ "el": "v-card", "w": 5, "col": { "v-if": "!vueData.donHangChon" }, ... }
+```
+
+Đặt điều kiện ở `col` chứ không ở `attr` — như vậy ẩn cả ô lưới, cột trái không bị lệch.
+
+## Những chỗ dễ sai
+
+<Callout type="warn">
+**`v-model` trong panel phải trỏ vào `donHangChon.Field`**, tức là sửa thẳng object trong mảng
+`dsDonHang`. Bảng bên trái sẽ cập nhật theo ngay khi gõ — tiện, nhưng nghĩa là **người dùng thấy
+thay đổi trước khi bấm Lưu**.
+
+Không muốn vậy thì clone object lúc chọn:
+`{ "donHangChon": "_.cloneDeep($row)" }`
+</Callout>
+
+<Callout type="warn">
+Trong `controls`, biểu thức `v-if` chạy ở scope Vue nên **cần prefix `vueData.`**. Còn trong
+`data[]`, `IF`/`EXE` chạy qua lodash template nên **không cần**. Cùng một biến, hai cách viết.
+</Callout>
+
+## Biến thể
+
+<Tabs items={['Chi tiết mở cửa sổ riêng', 'Master–detail dọc']}>
+
+<Tab value="Chi tiết mở cửa sổ riêng">
+Chi tiết quá phức tạp thì tách thành module riêng và mở bằng `openWindow`:
+
+```json
+"chonDonHang": [
+  { "donHangChon": "$row" },
+  { "EXE": "openWindow({ id: 'winChiTiet', title: 'Chi tiết đơn hàng', url: '/ex/donhang-chitiet?id=' + $row.ID, onclose: { CALL: 'apiDanhSach' } })" }
+]
+```
+
+Cửa sổ con ghi ngược về cha bằng key `#PARENT`:
+
+```json
+{ "#PARENT.dsDonHang": "dsDonHang" }
+```
+</Tab>
+
+<Tab value="Master–detail dọc">
+Màn hình hẹp thì xếp dọc — bảng trên, chi tiết dưới:
+
+```json
+{ "prop": "row", "cols": [ { "el": "f-table", "w": 12, "attr": { } } ] },
+{ "prop": { "v-if": "vueData.donHangChon" },
+  "cols": [ { "el": "v-card", "w": 12, "attr": { } } ] }
+```
+
+Ở đây `v-if` đặt trên `prop` của cả hàng — ẩn nguyên hàng chi tiết khi chưa chọn gì.
+</Tab>
+
+</Tabs>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy dựng cho tôi màn hình master–detail: bảng [ĐỐI TƯỢNG CHA] bên trái, chọn một dòng thì panel
+bên phải hiện form chi tiết và bảng [ĐỐI TƯỢNG CON].
+
+Field và API: [LIỆT KÊ]
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Chọn dòng bằng `"v-on:click:row": "CALL(vueData.chonX, { $row: $event })"` — viết đầy đủ
+  `v-on:`, không dùng `@`
+- Action chọn dòng tách hai bước: gán state trước, gọi API chi tiết sau
+- Panel phải và panel rỗng là hai control loại trừ nhau bằng `v-if` đặt ở **`col`**, không đặt ở
+  `attr`
+- Trong `controls`, biểu thức `v-if` cần prefix `vueData.`; trong `data[]` thì **không** cần
+- Đánh dấu dòng đang chọn bằng `:item-class`, nhớ kiểm tra null trước khi đọc field
+- Chuỗi hằng **không có dấu cách** phải bọc backtick ở đầu, ví dụ `` "`active" ``
+- Chia cột bằng khoá `w` (1–12), không dùng `style="width:..."`
+- Không tự thêm `class`/`style` để làm đẹp, chỉ dùng class tiện ích Vuetify
+
+Cho tôi biết nên clone object lúc chọn dòng hay sửa trực tiếp, và giải thích khác biệt.
+
+Trả về JSON hoàn chỉnh 4 khối.
+</AiPrompt>

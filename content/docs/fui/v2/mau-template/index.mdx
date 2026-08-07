@@ -1,0 +1,98 @@
+---
+title: Mẫu template
+description: JSON hoàn chỉnh cho các màn hình hay gặp — copy về sửa lại là chạy
+icon: LayoutTemplate
+---
+
+Mỗi mẫu ở đây là một module **hoàn chỉnh và chạy được**: đủ `data`, `watch`, `controls`, `set`.
+Copy về, đổi tên API và tên field là dùng được.
+
+<Cards>
+  <Card
+    title="CRUD một bảng"
+    href="/docs/fui/v2/mau-template/crud-co-ban"
+    description="Danh sách + tìm kiếm + thêm/sửa/xoá qua dialog. Khung xương của phần lớn màn hình quản lý."
+  />
+  <Card
+    title="Lọc và báo cáo"
+    href="/docs/fui/v2/mau-template/loc-va-bao-cao"
+    description="Thanh lọc theo khoảng ngày và danh mục, biểu đồ cùng bảng tự tải lại khi đổi điều kiện."
+  />
+  <Card
+    title="Master–detail"
+    href="/docs/fui/v2/mau-template/master-detail"
+    description="Chọn một dòng ở bảng trái, xem và sửa chi tiết ở panel phải."
+  />
+</Cards>
+
+## Bộ khung tối thiểu
+
+Mọi module đều bắt đầu từ đây:
+
+```json
+{
+  "data": [
+    { "dsItem": [] },
+    { "apiDanhSach": { "API": "/api/item/list", "OUT": "dsItem" } },
+    { "CALL": "apiDanhSach" }
+  ],
+  "watch": {},
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            { "el": "f-table", "w": 12,
+              "attr": { "label": "Danh sách", ":items": "dsItem", "item-key": "ID" } }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}
+```
+
+Bỏ `:headers` thì `f-table` tự dựng cột từ dữ liệu — đủ dùng để nhìn thấy dữ liệu ngay từ bước
+đầu, sau đó mới khai cột tường minh.
+
+## Nguyên tắc chung của mọi mẫu
+
+<Steps>
+
+<Step>
+### `data[]` xếp theo thứ tự: state → action có tên → action tự chạy
+Đặt sai thứ tự thì action chạy trước khi state tồn tại.
+</Step>
+
+<Step>
+### Mỗi field lọc có một `watch` gọi lại action tải dữ liệu
+Đừng làm nút "Tìm kiếm" — để `watch` lo.
+</Step>
+
+<Step>
+### Hằng chuỗi không có dấu cách phải bọc backtick
+`` "`active" `` — nếu không sẽ bị eval như biến JS.
+[Chi tiết →](/docs/fui/v2/kien-truc/value-resolution)
+</Step>
+
+<Step>
+### Ô lọc phải khai `":required": false`
+Mặc định của nhiều component là `true`, để nguyên sẽ chặn việc submit form ở nơi khác trên trang.
+</Step>
+
+<Step>
+### Không tự thêm `class`/`style` để làm đẹp
+Chia cột bằng `w`. Cần khoảng cách thì dùng class tiện ích Vuetify.
+</Step>
+
+</Steps>
+
+## Khi nào tách sang component riêng
+
+`controls` vượt khoảng **200 dòng** là dấu hiệu nên tách một phần giao diện sang `uc-*.vue`, giữ
+JSON chỉ còn dữ liệu và API.
+
+[Cách viết `uc-*.vue` →](/docs/fui/v2/kien-truc/custom-component)

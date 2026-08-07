@@ -19,6 +19,12 @@ export default async function Layout({
           text: "Documentation",
           items: [
             {
+              text: "FUI",
+              description:
+                "Framework UI — dựng module web bằng JSON. Kiến trúc, component và ví dụ copy được",
+              url: "/docs/fui",
+            },
+            {
               text: "LMS Moodle System",
               description: "Learn how to use the Moodle LMS System",
               url: "/docs/lms-learn-system",

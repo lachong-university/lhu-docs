@@ -1,0 +1,193 @@
+---
+title: Hàm dựng sẵn
+description: Thư viện bundled và các hàm global dùng được ngay trong EXE, script và controls
+icon: SquareFunction
+---
+
+Mọi hàm dưới đây là **global**, gọi được từ `EXE`, từ khối `<script>`, từ `attr` của control và
+từ `uc-*.vue`. Không cần import.
+
+## Thư viện đã bundled — đừng thêm CDN
+
+Có sẵn trên mọi trang FUI. Thêm lại từ CDN chỉ làm trang nặng thêm.
+
+| Thư viện | Biến global |
+|---|---|
+| jQuery | `$` · `jQuery` |
+| Lodash | `_` |
+| Moment | `moment` |
+| Numeral | `numeral` |
+| Vuetify | `Vuetify` |
+| vue-toast | qua `Vue.$toast` |
+| jquery-confirm | qua `confirm()` |
+
+## Biến global
+
+| Biến | Nội dung |
+|---|---|
+| `vueData` | Toàn bộ state của trang. Cũng chính là data root của instance Vue |
+| `vm` | Instance Vue — dùng `vm.formvalidate()` để validate form |
+| `$isMobile` · `$isPhone` · `$isApple` | Nhận diện thiết bị qua user-agent |
+| `$awt` | Bearer token hiện tại |
+
+## Gọi API và điều hướng
+
+<TypeTable
+  type={{
+    "ajaxCALL": {
+      description: "POST AJAX. DÙNG HÀM NÀY thay cho fetch() — nó xử lý đúng CORS, credentials và bearer token của FUI.",
+      type: "(URL, DATA, callBack, errorCallBack, header) => void",
+    },
+    "fixURL": {
+      description: "Ghép apiDomain của project vào URL tương đối.",
+      type: "(url) => string",
+    },
+    "CALL": {
+      description: "Chạy một object action. Chính là hàm dùng trong :action của controls.",
+      type: "(obj, includeData) => void",
+    },
+    "openWindow": {
+      description: "Mở cửa sổ/dialog FUI chứa một URL.",
+      type: "({ id, url, title, onclose }) => void",
+    },
+    "pushRouter": {
+      description: "Đổi URL trên thanh địa chỉ, KHÔNG tải lại trang.",
+      type: "(router) => void",
+    },
+    "redirect": {
+      description: "Điều hướng có tải lại trang. query=true thì giữ query string hiện tại.",
+      type: "(obj, query) => void",
+    },
+    "reload": { description: "Tải lại trang.", type: "() => void" },
+  }}
+/>
+
+## Giao tiếp với người dùng
+
+<TypeTable
+  type={{
+    "showMessage": {
+      description: "Hộp thoại thông báo. Nhận { title, message, icon, type, onclose }.",
+      type: "(obj) => void",
+    },
+    "confirm": {
+      description: "Hộp xác nhận. Nhận { title, message, action, cancel, icon, type }.",
+      type: "(obj) => void",
+    },
+    "Vue.$toast.success": {
+      description: "Toast góc trên — chính là thứ khoá MESS gọi bên dưới.",
+      type: "(message, options) => void",
+    },
+  }}
+/>
+
+## Xử lý dữ liệu
+
+<TypeTable
+  type={{
+    "groupBy": {
+      description: "Nhóm mảng theo field, cộng dồn các cột chỉ định. VD: groupBy(dsSinhVien, 'Khoa', ['SL Nghỉ Học'])",
+      type: "(arrayObj, groupField, sumArr) => Array",
+    },
+    "buildHeader": {
+      description: "Tự dựng headers cho f-table từ chính dữ liệu.",
+      type: "(obj, mapCol) => Array",
+    },
+    "fillData": {
+      description: "Map dữ liệu nguồn sang đích theo { src, des, key, map }.",
+      type: "(obj) => void",
+    },
+    "findInArray": {
+      description: "Tìm phần tử trong mảng theo { array, value }.",
+      type: "(obj) => any",
+    },
+    "jsonToExcel": {
+      description: "Xuất Excel bằng ExcelJS. Nhận { data, filename, worksheet, sheets }.",
+      type: "(Obj) => void",
+    },
+    "printPDF": {
+      description: "Render/in/tải PDF bằng pdfMake. Nhận { data, download, viewer, callBack }.",
+      type: "(obj) => void",
+    },
+  }}
+/>
+
+## Tiện ích
+
+<TypeTable
+  type={{
+    "generateID": { description: "Sinh ID ngẫu nhiên duy nhất.", type: "() => string" },
+    "copyToClipboard": { description: "Copy chuỗi vào clipboard.", type: "(text) => void" },
+    "capacityText": { description: "Đổi số byte sang Kb/Mb dễ đọc.", type: "(numb) => string" },
+    "fileNameClear": { description: "Làm sạch tên file cho an toàn.", type: "(fname) => string" },
+    "hashCode": { description: "Băm chuỗi thành số.", type: "(s) => number" },
+    "colorLib": {
+      description: "Bộ công cụ màu → { hexString, rgbString, hslString, lighten, darken, alpha }.",
+      type: "(color) => object",
+    },
+    "transparentize": { description: "Tạo màu RGBA từ màu + độ mờ.", type: "(value, opacity) => string" },
+    "getCookie": { description: "Đọc cookie.", type: "(cname) => string" },
+    "setCookie": { description: "Ghi cookie.", type: "(name, value, days, domain) => void" },
+    "logout": { description: "Xoá cookie phiên và chuyển hướng.", type: "(cookiesName, domain, url) => void" },
+    "rightTest": { description: "Kiểm tra quyền người dùng, trả về boolean.", type: "(rightObject) => boolean" },
+    "loadScripts": { description: "Nạp nhiều script rồi gọi callback.", type: "(scriptsArray, callbackFunc) => void" },
+  }}
+/>
+
+## Real-time (SignalR)
+
+<TypeTable
+  type={{
+    "webSocketJoinGroup": { description: "Tham gia nhóm real-time.", type: "(groupObj, timeout, callBackFunc) => void" },
+    "webSocketConnection": { description: "Mở kết nối WebSocket.", type: "(wsURL, WS, wsState) => void" },
+    "webSocket_Send": { description: "Gửi message qua WebSocket.", type: "(obj) => void" },
+  }}
+/>
+
+Khai báo `vueData.webSocket` trong `data[]` thì runtime tự kết nối tới `https://ws.fui.vn/signalr`
+khi trang load.
+
+## Ví dụ dùng thật
+
+<Tabs items={['Gọi API trong uc-*.vue', 'Xuất Excel', 'Xác nhận rồi mới làm']}>
+
+<Tab value="Gọi API trong uc-*.vue">
+```js
+methods: {
+  taiDanhSach: function () {
+    var self = this;
+    ajaxCALL('/api/nhanvien/list', { PhongBanID: this.phongBanID },
+      function (res) { self.items = res.data; },
+      function (err) { showMessage({ type: 'red', title: 'Lỗi tải dữ liệu' }); }
+    );
+  }
+}
+```
+Không dùng `fetch()` — nó không mang theo bearer token và cấu hình CORS của FUI.
+</Tab>
+
+<Tab value="Xuất Excel">
+```json
+{
+  "EXE": "jsonToExcel({ data: dsNhanVien, filename: 'nhan-vien.xlsx', worksheet: 'Danh sách' })"
+}
+```
+Riêng `f-table` đã có sẵn nút Excel — chỉ cần `":excel": true`.
+</Tab>
+
+<Tab value="Xác nhận rồi mới làm">
+```json
+{
+  "EXE": "confirm({ title: 'Xoá toàn bộ?', action: function(){ CALL(vueData.xoaTatCa) } })"
+}
+```
+Thường thì dùng khoá `CONFIRM` của action gọn hơn — chỉ xuống mức hàm khi cần logic đặc biệt.
+</Tab>
+
+</Tabs>
+
+<Callout>
+Danh sách trên trích trực tiếp từ `defaultfunction.js` của bản FUI đang chạy. Nếu một hàm bạn
+thấy trong source mà không có ở đây, nhiều khả năng nó vừa được thêm — chạy
+`npm run skill:update` ở thư mục gốc để cập nhật.
+</Callout>

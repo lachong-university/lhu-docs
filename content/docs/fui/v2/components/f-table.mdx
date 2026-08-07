@@ -1,0 +1,316 @@
+---
+title: f-table
+description: Bảng dữ liệu — CRUD qua dialog hoặc chỉ đọc, kèm 12 renderer ô bảng
+icon: Table
+---
+
+Dùng `f-table` cho **mọi bảng dữ liệu**, cả CRUD lẫn chỉ xem. Không dùng `v-data-table` trực tiếp
+— `f-table` đã có sẵn sắp xếp, tìm kiếm, xuất Excel, CRUD qua dialog và điều khiển trong ô.
+
+Bảng chỉ đọc = `f-table` **không khai** `:update-api`.
+
+## Demo
+
+<FuiPreview template="f-table" height={480} />
+
+## Props
+
+<TypeTable
+  type={{
+    items: { description: "Nguồn dữ liệu.", type: "Array" },
+    headers: {
+      description: "Định nghĩa cột. Bỏ hẳn prop này thì bảng tự dựng header từ dữ liệu.",
+      type: "Array",
+    },
+    label: { description: "Tiêu đề hiện trên đầu bảng.", type: "String" },
+    itemKey: {
+      description: "Field khoá chính. Bắt buộc khi dùng chọn dòng hoặc CRUD.",
+      type: "String",
+    },
+    value: { description: "Các dòng đang được chọn. Dùng qua v-model.", type: "Array" },
+    returnObject: {
+      description: "true = v-model trả về object dòng; false = trả về mảng itemKey.",
+      type: "Boolean",
+      default: "true",
+    },
+    excel: { description: "Hiện nút xuất Excel.", type: "Boolean", default: "false" },
+    showSearch: { description: "Hiện nút tìm kiếm.", type: "Boolean", default: "true" },
+    itemsPerPage: {
+      description: "Số dòng mỗi trang. -1 = hiện tất cả, không phân trang.",
+      type: "Number",
+      default: "50",
+    },
+    height: {
+      description: "Chiều cao vùng cuộn. Hay dùng: '$( window ).height()-285'",
+      type: "String | Number",
+    },
+    fixedHeader: { description: "Ghim dòng tiêu đề khi cuộn.", type: "Boolean", default: "true" },
+    hideDefaultFooter: { description: "Ẩn thanh phân trang.", type: "Boolean", default: "true" },
+    disabledHover: { description: "Tắt hiệu ứng hover dòng.", type: "Boolean" },
+    sumFormat: {
+      description: "Tổng cột. Object = hàng tổng trong bảng; String = một dòng text dưới bảng.",
+      type: "Object | String",
+    },
+    updateForm: {
+      description: "Mảng Control Object — các field trong dialog thêm/sửa.",
+      type: "Array",
+    },
+    updateFormAttr: { description: "Cấu hình dialog form, VD { width: 700 }.", type: "Object" },
+    updateApi: {
+      description: "Wiring CRUD: { default-item, new, edit, delete, new-action, edit-action, data-out }.",
+      type: "Object",
+    },
+    disabledUpdate: {
+      description: "Ẩn nút thêm/sửa/xoá. Nhận cả biểu thức, VD 'vueData.user.SystemRight != 9'.",
+      type: "Boolean | String",
+    },
+    template: { description: "Chuỗi template slot thêm vào bảng.", type: "String" },
+    headercomponent: { description: "Component chèn vào thanh tiêu đề bảng.", type: "String" },
+  }}
+/>
+
+### Default FUI tự thêm
+
+```json
+{
+  ":dense": true,           ":show-search": true,
+  ":fixed-header": true,    ":items-per-page": 50,
+  ":hide-default-footer": true,  ":return-object": true,
+  ":excel": false,          ":allow-hover": false,
+  ":disable-sort": false,   "mobile-breakpoint": "0"
+}
+```
+
+**Event**: `input` (dòng được chọn) · `click:row` · `mouseover:row` · `mouseleave:row`
+
+## Định nghĩa cột
+
+Mỗi phần tử của `headers`:
+
+| Khoá | Tác dụng |
+|---|---|
+| `text` | Nhãn cột |
+| `value` | Tên field trong dữ liệu |
+| `align` | `left` (mặc định) · `center` · `right` |
+| `width` | `"200px"` · `"10%"` |
+| `divider` | `true` = kẻ dọc sau cột này |
+| `el` | Renderer trong ô: một trong các `t-*` |
+| `attr` | Props cho `el` |
+| `innerHTML` | Nội dung — dùng với `v-icon`, `v-chip-group` |
+
+Cột có `el` thì `f-table` **tự sinh slot** và tự truyền vào `item`, `index`, cùng
+`v-model="item['<value>']"`.
+
+### Renderer trong ô
+
+| `el` | Hiển thị |
+|---|---|
+| `t-label` | Chữ, không xuống dòng |
+| `t-html` | HTML thô |
+| `t-num` | Số căn phải, phân cách nghìn. `attr.format` nhận chuỗi numeral |
+| `t-time` | Ngày giờ. `attr.format` mặc định `DD/MM/YYYY` |
+| `t-boolean` | Icon check/close theo giá trị true-false |
+| `t-check` | Checkbox bật tắt, có `:action` |
+| `t-text` | Ô nhập text ngay trong bảng |
+| `t-select` · `t-combobox` | Dropdown ngay trong bảng |
+| `t-menu` | Menu ngữ cảnh |
+| `t-link` | Đường dẫn |
+| `t-button` | Nút bấm có `:action` |
+
+### Header tự dựng
+
+Bỏ hẳn `:headers` thì bảng tự dựng cột từ dòng đầu tiên của `items`: mỗi key thành một cột,
+key có giá trị số tự gắn `t-num`, và headers được dựng lại mỗi khi `items` đổi.
+
+```json
+{ "el": "f-table", "w": 12, "attr": { "label": "Kết quả", ":items": "dsKetQua" } }
+```
+
+Hợp khi API đã alias tên cột đẹp sẵn. **Phải khai `:headers` tường minh** khi cần: nhãn khác tên
+field, ẩn bớt cột, dùng renderer `t-*`, đặt width/align, hoặc dữ liệu có field kỹ thuật không nên
+hiện.
+
+## Cách dùng
+
+<Tabs items={['Chỉ đọc', 'CRUD đầy đủ']}>
+
+<Tab value="Chỉ đọc">
+JSON đang chạy trong demo ở trên:
+
+```json
+{
+  "el": "f-table",
+  "w": 12,
+  "attr": {
+    "label": "Danh sách nhân viên",
+    ":items": "dsNhanVien",
+    "item-key": "ID",
+    ":excel": true,
+    ":items-per-page": -1,
+    ":headers": [
+      { "text": "Họ tên",    "value": "HoTen", "width": "200px" },
+      { "text": "Email",     "value": "Email" },
+      { "text": "Phòng ban", "value": "PhongBan", "width": "140px" },
+      { "text": "Lương",     "value": "Luong",   "align": "right",  "width": "130px",
+        "el": "t-num",  "attr": { "format": "0,0" } },
+      { "text": "Ngày vào",  "value": "NgayVao", "align": "center", "width": "120px",
+        "el": "t-time" },
+      { "text": "Đang làm",  "value": "Active",  "align": "center", "width": "100px",
+        "el": "t-boolean" },
+      { "text": "Tác vụ",    "value": "ctrl",    "align": "center", "width": "110px",
+        "el": "t-button",
+        "attr": {
+          "label": "Chi tiết",
+          "icon-text": "mdi-eye",
+          ":action": { "MESSBOX": "Nhân viên: {{item.HoTen}} — phòng {{item.PhongBan}}" }
+        } }
+    ]
+  }
+}
+```
+</Tab>
+
+<Tab value="CRUD đầy đủ">
+```json
+{
+  "el": "f-table",
+  "w": 12,
+  "attr": {
+    "label": "Danh sách nhân viên",
+    ":items": "dsNhanVien",
+    "item-key": "ID",
+    ":excel": true,
+    ":headers": [
+      { "text": "Họ tên",   "value": "HoTen" },
+      { "text": "Email",    "value": "Email" },
+      { "text": "Đang làm", "value": "Active", "el": "t-boolean", "align": "center", "width": "90px" },
+      { "text": "Tác vụ",   "value": "ctrl-update", "align": "center", "width": "120px" }
+    ],
+    ":update-form": [
+      { "el": "v-text-field", "attr": { "v-model": "HoTen", "label": "Họ tên", ":required": true } },
+      { "el": "v-text-field", "attr": { "v-model": "Email", "label": "Email",  ":required": true } },
+      { "el": "v-switch",     "attr": { "v-model": "Active", "label": "Đang làm việc" } }
+    ],
+    ":update-form-attr": { "width": 700 },
+    ":update-api": {
+      "default-item": { "HoTen": "", "Email": "", "Active": true },
+      "new": {
+        "API": "/api/nhanvien/create",
+        "IN":  { "jsonObj": "$row" },
+        "CALLBACK": { "CALL": "apiDanhSach" }
+      },
+      "edit": {
+        "API": "/api/nhanvien/update",
+        "IN":  { "ID": "item.ID", "jsonObj": "$row" },
+        "CALLBACK": { "CALL": "apiDanhSach" }
+      },
+      "delete": {
+        "CONFIRM": "Xác nhận xoá {{item.HoTen}}?",
+        "API": "/api/nhanvien/delete",
+        "IN":  { "ID": "item.ID" },
+        "CALLBACK": { "CALL": "apiDanhSach" }
+      }
+    }
+  }
+}
+```
+
+Ba điểm đáng chú ý:
+
+- Cột **`"value": "ctrl-update"`** kích hoạt slot sửa/xoá dựng sẵn. Không có cột này thì không
+  có nút thao tác nào.
+- `:update-form` là mảng **Control Object** — cùng schema `el`/`attr` như `controls`. Bên trong,
+  `v-model` trỏ thẳng vào field của dòng.
+- `"jsonObj": "$row"` truyền cả object dòng thay vì liệt kê từng field.
+
+Bỏ bớt khoá nào trong `:update-api` thì mất chức năng tương ứng — chỉ có `edit` thì không hiện
+nút thêm mới.
+</Tab>
+
+</Tabs>
+
+## Tổng cột
+
+Có **hai dạng**, render khác hẳn nhau.
+
+<Tabs items={['Object → hàng tổng trong bảng', 'String → dòng text dưới bảng']}>
+
+<Tab value="Object → hàng tổng trong bảng">
+```json
+":sum-format": { "DangKy": "0,0", "NhapHoc": "0,0", "HocPhi": "0,0.0" }
+```
+
+Key là `value` của cột, value là chuỗi format numeral riêng cho cột đó. Render thành một `<tr>`
+cuối thân bảng, **thẳng hàng với cột**, cuộn cùng bảng.
+
+Là object → khai với prefix `:`.
+</Tab>
+
+<Tab value="String → dòng text dưới bảng">
+```json
+"sum-format": "Tổng đăng ký: [[DangKy]] | Nhập học: [[NhapHoc]]"
+```
+
+`[[Field]]` được thay bằng tổng của cột đó, format cố định `0,0`. Ra **một dòng chữ** căn phải
+dưới bảng, không thẳng cột.
+
+Là chuỗi tĩnh → khai **không** có prefix `:`.
+</Tab>
+
+</Tabs>
+
+<Callout type="warn">
+**Đừng tự dựng hàng tổng.** Không push dòng "Tổng" vào `items`, không tự viết template
+`body.append` — dùng `sum-format`.
+</Callout>
+
+## Cạm bẫy
+
+<Callout type="warn">
+**`item-key` bắt buộc khi dùng chọn dòng hoặc CRUD.** Thiếu nó thì việc chọn dòng hoạt động
+thất thường và CRUD không xác định được dòng nào đang sửa.
+</Callout>
+
+<Callout type="warn">
+**`:hide-default-footer` mặc định là `true`.** Bảng nhiều dữ liệu sẽ không có thanh phân trang.
+Hoặc đặt `":items-per-page": -1` để hiện hết, hoặc `":hide-default-footer": false` để bật lại
+phân trang.
+</Callout>
+
+<Callout type="warn">
+**Đừng dùng `f-button` + `f-dialog` để làm form thêm mới** — không ổn định trong FUI V2. Dùng
+`ctrl-update` như trên. Cần dialog có logic riêng thì dựng `v-dialog` thủ công trong container
+`"prop": "hidden-container"`.
+</Callout>
+
+<Callout>
+Bảng chiếm cả màn hình nên đặt `:height` để chỉ vùng dữ liệu cuộn, còn trang thì không:
+`":height": "$( window ).height()-285"`. Bảng nằm trong dialog thì dùng `max-height` với số px cố định.
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON trong khối
+`<fui-app lang="json">` của `index.vue`).
+
+Hãy dựng cho tôi màn hình quản lý nhân viên: bảng danh sách có tìm kiếm, xuất Excel, thêm/sửa/xoá
+qua dialog form, và một hàng tổng cho cột Lương.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-table`, không dùng `v-data-table`
+- CRUD làm bằng `:update-form` + `:update-api`, và **phải** có cột `"value": "ctrl-update"` thì
+  nút sửa/xoá mới hiện. Không dùng `f-button` + `f-dialog` cho form thêm mới — cặp này không ổn
+  định trong V2
+- `item-key` là bắt buộc
+- Cột số dùng `"el": "t-num"`, cột ngày dùng `"el": "t-time"`, cột boolean dùng `"el": "t-boolean"`
+- Hàng tổng dùng `:sum-format` dạng object (`{ "Luong": "0,0" }`), tuyệt đối không push dòng
+  "Tổng" vào items
+- Không khai lại các default FUI đã tự thêm: `:dense`, `:show-search`, `:fixed-header`,
+  `:items-per-page 50`, `:hide-default-footer`
+- Chuỗi cố định **không có dấu cách** phải bọc backtick ở đầu, ví dụ `` "`active" ``
+- Event viết đầy đủ `v-on:click`, không dùng `@click`
+- Không tự thêm `class` hay `style` để làm đẹp
+
+Trả về `data[]` (kèm action `apiDanhSach`) và `controls` hoàn chỉnh.
+</AiPrompt>

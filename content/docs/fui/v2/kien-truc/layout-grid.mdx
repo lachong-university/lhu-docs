@@ -1,0 +1,229 @@
+---
+title: Layout & lưới
+description: container → rows → cols, khoá w, và bộ từ vựng class được duyệt
+icon: LayoutGrid
+---
+
+`controls` luôn có **ba tầng**. Runtime dịch chúng thành tag Vuetify:
+
+| Tầng | Khoá JSON | Tag sinh ra |
+|---|---|---|
+| Container | `prop`, `rows` | `<v-container>` |
+| Row | `prop`, `cols` | `<v-layout>` |
+| Cột | Control Object | `<v-flex>` bọc quanh `el` |
+
+<Callout type="warn">
+Đây là **lưới kiểu Vuetify 1.5** (`v-container` / `v-layout` / `v-flex`), không phải
+`v-row` / `v-col` của Vuetify 2. Chia cột bằng khoá `w`, không dùng class `col-6`.
+</Callout>
+
+```json
+"controls": [
+  {
+    "prop": "fluid grid-list-md",
+    "rows": [
+      {
+        "prop": "row",
+        "cols": [
+          { "el": "v-text-field", "w": 6, "attr": { "v-model": "hoTen",  "label": "Họ tên" } },
+          { "el": "v-text-field", "w": 6, "attr": { "v-model": "email", "label": "Email" } }
+        ]
+      }
+    ]
+  }
+]
+```
+
+## Control Object — đầy đủ các khoá
+
+| Khoá | Kiểu | Tác dụng |
+|---|---|---|
+| `el` | string | **Bắt buộc.** Tag/component. Thiếu hoặc rỗng → control bị bỏ qua im lặng |
+| `attr` | object | Thuộc tính và directive. Được **trộn lên trên** default của FUI |
+| `w` | number | Bề rộng cột — xem bảng dưới |
+| `col` | string \| object | Thuộc tính cho `<v-flex>` bao ngoài |
+| `innerHTML` | string \| mảng | Nội dung: chuỗi (hỗ trợ `{{ }}`) hoặc mảng Control Object lồng nhau |
+| `inner` | string \| mảng | Bí danh của `innerHTML`, **được kiểm tra trước**. Có trong runtime nhưng không thấy trong tài liệu gốc — nên dùng `innerHTML` |
+
+`"el": "layout"` là bí danh của `"el": "v-layout"`.
+
+### Khoá `w`
+
+| Giá trị | Kết quả |
+|---|---|
+| `1`–`12` | Số cột lưới (12 = tràn hàng) → class `sm{w}` |
+| `> 12` (ví dụ `250`) | Bề rộng cố định `flex-basis: 250px` |
+| `""` | Tự co theo nội dung |
+
+Trên mobile, mọi cột có `w` từ 1–12 tự động thêm `xs12` — tức là xếp dọc một cột.
+
+### `col` — cấu hình cột bao ngoài
+
+Viết dạng chuỗi ngắn hoặc object:
+
+```json
+{ "el": "f-button", "col": "text-end" }
+{ "el": "f-button", "col": { "class": "shrink", "v-if": "vueData.user.SystemRight > 1" } }
+```
+
+<Callout>
+Điều kiện hiển thị theo quyền nên đặt ở **`col`**, không đặt ở `attr` — như vậy ẩn cả ô lưới
+chứ không để lại khoảng trống.
+</Callout>
+
+## Lồng control
+
+Dùng `innerHTML` dạng mảng:
+
+```json
+{
+  "el": "v-card",
+  "w": 12,
+  "attr": { "class": "pa-2" },
+  "innerHTML": [
+    { "el": "div", "attr": { "class": "text-h6" }, "innerHTML": "Thông tin liên hệ" },
+    { "el": "v-text-field", "attr": { "v-model": "sdt", "label": "Điện thoại" } }
+  ]
+}
+```
+
+Nếu phần tử cha là `v-layout` thì các phần tử con được bọc `<v-flex>`; ngược lại thì không.
+
+## Ẩn / hiện
+
+Không có khoá riêng — dùng thẳng directive Vue. Đặt được ở **bốn** vị trí:
+
+<Tabs items={['Trên cột', 'Trên control', 'Trên cả hàng', 'Trên cả container']}>
+
+<Tab value="Trên cột">
+Ẩn control **và** ô lưới của nó. Đây là chỗ khuyến nghị cho việc phân quyền.
+```json
+{ "el": "f-button", "col": { "v-if": "vueData.user.SystemRight == 9" } }
+```
+</Tab>
+
+<Tab value="Trên control">
+```json
+{ "el": "v-layout", "attr": { "v-if": "vueData.showAdvanced" }, "innerHTML": [ ] }
+```
+</Tab>
+
+<Tab value="Trên cả hàng">
+`prop` viết dạng object thay vì chuỗi:
+```json
+{ "prop": { "v-if": "vueData.showAdvanced", "class": "justify-end" }, "cols": [ ] }
+```
+</Tab>
+
+<Tab value="Trên cả container">
+```json
+{ "prop": { "v-if": "vueData.template == 'f-button'", "fluid": "", "grid-list-md": "" }, "rows": [ ] }
+```
+Chính là cách gallery của tài liệu này chuyển giữa các demo.
+</Tab>
+
+</Tabs>
+
+`v-for` cũng dùng được, tuy hiếm — với danh sách thì `f-table` gần như luôn là lựa chọn đúng.
+
+## Bộ từ vựng được duyệt
+
+FUI có quy ước cứng về trình bày. Thống kê trên 1.284 control object thực tế của 5 dự án:
+chỉ ~12% dùng `attr.style` (gần như chỉ để đặt `width`), và **không có class tự chế nào**.
+
+<Callout type="warn">
+**Mặc định: không style, không class.** Chỉ đặt `el`, `attr`, `w`, và `col` khi cần chia cột.
+Nếu người mô tả không yêu cầu một hiệu ứng cụ thể → không thêm gì cả.
+</Callout>
+
+### `prop` của container / row
+
+| Token | Dùng để |
+|---|---|
+| `fluid` | Container rộng hết chiều ngang |
+| `grid-list-md` | Khoảng cách chuẩn giữa các cột |
+| `row` | Đánh dấu hàng |
+| `justify-center` · `justify-end` · `justify-start` | Căn ngang |
+| `mw-800` `mw-1000` `mw-1200` `mw-1400` | Giới hạn bề rộng — dùng cho trang form |
+| `hidden-container` | Bọc dialog — không chiếm chỗ trong layout |
+| `pa-0` · `py-0` | Bỏ padding container |
+
+**Công thức mặc định**: container `"fluid grid-list-md"`, mỗi hàng `"row"`. Trang nhập liệu thì
+thêm `mw-1000` để giới hạn bề rộng.
+
+### `col`
+
+`shrink` (ô lọc bề rộng cố định — hay dùng nhất) · `text-end` · `text-start` · `text-center` ·
+`pa-0` · `align-self-center`
+
+### `attr.class` — chỉ class tiện ích Vuetify
+
+| Nhóm | Token |
+|---|---|
+| Margin | `mt-1 mt-2 mt-3` · `mb-1 mb-2 mb-4` · `my-2` · `ml-2` · `mr-2` |
+| Padding | `pa-0 pa-2` · `pt-3` · `py-1` — **tránh `pa-4/6/8`** |
+| Flex | `d-flex` · `flex-column` · `align-center` · `justify-center` · `justify-end` |
+| Chữ | `text-h6` · `subtitle-1` · `body-2` · `caption` · `font-weight-bold` |
+| Màu chữ | `primary--text` · `error--text` · `grey--text` |
+| Bo góc | `rounded` · `rounded-lg` · `rounded-0` |
+
+### Thứ tự ưu tiên khi *có* yêu cầu trình bày cụ thể
+
+Chỉ xuống nấc sau khi nấc trước không đáp ứng được:
+
+```text
+prop của component (color, outlined, dense, elevation)
+  → class tiện ích Vuetify (pa-*, ma-*, text-*, primary--text)
+    → mw-* cho bề rộng
+      → custom class
+        → inline style   ← cuối cùng
+```
+
+### Đối chiếu đúng / sai
+
+```json
+// ✅ ĐÚNG — gọn, dùng w và prop chuẩn
+{ "el": "v-text-field", "w": 6, "attr": { "v-model": "hoTen", "label": "Họ tên" } }
+
+// ❌ SAI — style và class tự chế không cần thiết
+{ "el": "v-text-field", "w": 6, "attr": {
+    "v-model": "hoTen", "label": "Họ tên",
+    "style": "padding:8px; border:1px solid #ddd; border-radius:8px",
+    "class": "my-custom-input shadow" } }
+```
+
+Chỗ hợp lệ **duy nhất** để dùng `style` là đặt bề rộng cố định cho ô lọc trên thanh công cụ:
+
+```json
+{ "el": "v-select", "col": { "class": "shrink" },
+  "attr": { "class": "flex-md-grow-0", "style": "width:200px" } }
+```
+
+## Vài hành vi bất ngờ của runtime
+
+<Accordions>
+
+<Accordion title="Không khai :required thì :rules bị xoá">
+Runtime chạy `if (!c.attr[":required"]) delete c.attr[":rules"]`. Nhiều component có sẵn
+`:rules` mặc định trong `defaultControlAttr` — bỏ `:required` là mất luôn validate.
+</Accordion>
+
+<Accordion title="attr được trộn lên trên default, không thay thế">
+`$.extend(true, defaultControlAttr[el].attr, c.attr)` — deep merge. Bạn chỉ cần khai những
+prop muốn **ghi đè**, không cần lặp lại default. Ví dụ `f-button` đã có sẵn
+`color: "primary"` và `elevation: 0`.
+</Accordion>
+
+<Accordion title="el không thể là biểu thức">
+`controls` được dịch thành DOM **một lần** trước khi Vue khởi tạo, nên `el` phải là chuỗi cố
+định. Chỉ giá trị bên trong `attr` mới reactive. Muốn đổi component theo trạng thái thì dựng
+sẵn từng nhánh rồi gate bằng `v-if`.
+</Accordion>
+
+<Accordion title="Object/mảng trong attr bị JSON.stringify">
+Giá trị object hoặc mảng trong `attr` được stringify thành chuỗi rồi gắn làm thuộc tính. Với
+key bắt đầu bằng `:` thì Vue lại eval chuỗi đó thành object — nên `:headers` và `:columns`
+viết trực tiếp bằng mảng JSON đều hoạt động bình thường.
+</Accordion>
+
+</Accordions>

@@ -1,0 +1,7 @@
+{
+  "title": "FUI",
+  "description": "Framework UI — dựng module web bằng JSON",
+  "icon": "Blocks",
+  "root": true,
+  "pages": ["index", "v2", "v3", "cong-cu"]
+}

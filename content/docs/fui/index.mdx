@@ -1,0 +1,115 @@
+---
+title: FUI là gì
+description: Framework UI — mô tả giao diện bằng JSON, mở rộng bằng component Vue của bạn
+icon: Blocks
+---
+
+**FUI (Framework UI)** là nền tảng low-code của LHU để dựng module web quản lý. Một trang được
+mô tả bằng **JSON**; runtime FUI đọc JSON đó rồi dựng ra ứng dụng Vue + Vuetify.
+
+```json
+{
+  "data":     [ /* state + action */ ],
+  "watch":    { /* observer → action */ },
+  "controls": [ /* bố cục giao diện */ ],
+  "set":      { /* cấu hình trang */ }
+}
+```
+
+## JSON không thay thế component — nó lắp ráp component
+
+Đây là điểm hay bị hiểu nhầm. JSON **không phải** là thứ dùng thay cho việc viết component. Nó là
+nơi **khai báo và lắp ráp** component, gồm ba nguồn:
+
+| Loại | Ví dụ | Đến từ đâu |
+|---|---|---|
+| `v-*` | `v-text-field`, `v-card`, `v-select` | Vuetify |
+| `f-*` · `t-*` | `f-table`, `f-button`, `f-echart`, `t-num` | FUI dựng sẵn — 40 component |
+| `uc-*` | `uc-main`, `uc-app`, `uc-invoice-list` | **Bạn tự viết**, bằng Vue |
+
+Một control trong JSON chỉ là một dòng khai báo:
+
+```json
+{ "el": "uc-invoice-list", "w": 12,
+  "attr": { ":items": "dsHoaDon", "title": "Hoá đơn tháng 5",
+            "v-on:select": "CALL(vueData.xemChiTiet)" } }
+```
+
+Còn `uc-invoice-list` là một file `.vue` thật, có props, slot, emit, computed, method — bạn viết
+Vue bình thường trong đó.
+
+<Callout>
+**Cách làm điển hình**: bắt đầu bằng `f-*` và `v-*` cho những gì có sẵn. Khi `controls` phình quá
+~200 dòng, hoặc khi cần một khối giao diện đặc thù dùng lại nhiều nơi, thì tách ra thành
+`uc-*.vue` và gọi lại từ JSON bằng đúng một dòng.
+
+JSON giữ phần *dữ liệu, API, phân quyền, điều hướng*. Component giữ phần *trình bày*.
+
+[Cách viết `uc-*.vue` →](/docs/fui/v2/kien-truc/custom-component)
+</Callout>
+
+## Một module gồm những gì
+
+Trên server, một module FUI là bốn phần tách biệt:
+
+| Phần | Nội dung |
+|---|---|
+| **moduleUI** | JSON — `data` · `watch` · `controls` · `set`. Phần cốt lõi |
+| **script** | JavaScript helper cho action `FUN` / `EXE` |
+| **header** | Nội dung trong `<head>` |
+| **body** | Nội dung trong `<body>` |
+
+Cộng thêm `style.css` của module, và các file `uc-*.vue` ở phạm vi module hoặc project.
+
+<Callout type="warn">
+Công cụ lấy code về sẽ **sắp xếp lại** bốn phần này thành file trên đĩa theo cách riêng của
+chúng — extension FUIX gộp moduleUI và script vào một `index.vue`, còn MCP tách thành
+`module.json` và `script.js`. Đó là quy ước của **công cụ**, không phải của FUI.
+
+[Xem phần công cụ →](/docs/fui/cong-cu)
+</Callout>
+
+## Hai phiên bản
+
+<Cards>
+  <Card
+    title="FUI V2"
+    href="/docs/fui/v2"
+    description="Vue 2 + Vuetify 2. Phiên bản đang chạy hầu hết module thực tế. Tài liệu đầy đủ ở đây."
+  />
+  <Card
+    title="FUI V3"
+    href="/docs/fui/v3"
+    description="Vue 3 + Vuetify 3. Đang biên soạn tài liệu."
+  />
+</Cards>
+
+Phiên bản của project nằm ở trường `Framework` (`"V2"` hoặc `"V3"`). **Cú pháp JSON của hai bản
+gần như giống nhau**, khác biệt nằm ở lớp Vuetify bên dưới.
+
+## FUI không phải Vue thuần
+
+Ba điểm khiến người quen Vue hay bị hụt chân — và cả ba **chỉ áp dụng cho JSON**, không áp dụng
+cho file `.vue` bạn tự viết:
+
+<Callout type="warn">
+**1. Trong JSON, chuỗi không có dấu cách bị hiểu là biểu thức JS.**
+`"f-button"` cho ra *giá trị của biến* `f-button`, không phải chuỗi. Muốn chuỗi thật thì thêm
+backtick ở đầu: `` "`f-button" ``.
+[Chi tiết →](/docs/fui/v2/kien-truc/value-resolution)
+
+**2. Trong JSON, event phải viết đầy đủ** — `v-on:click`, không phải `@click`; slot dùng
+`v-slot:`, không phải `#`. *(Trong file `.vue` thì `@click` và `#default` vẫn dùng bình thường.)*
+
+**3. Lưới là kiểu Vuetify 1.5** — `v-container > v-layout > v-flex`, chia cột bằng khoá `w`
+(1–12), không phải `v-row`/`v-col`.
+[Chi tiết →](/docs/fui/v2/kien-truc/layout-grid)
+</Callout>
+
+## Nguồn của tài liệu này
+
+Bảng props, giá trị mặc định và danh sách import được **trích tự động từ source code FUI**
+(`component.js`, `componentTable.js`, `fechart.js`) chứ không chép tay, nên luôn khớp runtime.
+
+Mỗi trang component nhúng **demo trực tiếp** từ module [`ex/fui-v2`](https://fui.vn/ex/fui-v2).
+JSON in trong tài liệu chính là JSON đang chạy trong demo, copy về dùng được ngay.

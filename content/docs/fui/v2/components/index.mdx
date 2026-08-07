@@ -1,0 +1,120 @@
+---
+title: Danh mục component
+description: 40 component dựng sẵn của FUI V2 — chọn cái nào, và cái nào cần import thêm
+icon: Component
+---
+
+FUI V2 đăng ký sẵn **40 component** ở phạm vi global. Nguyên tắc chọn:
+
+<Callout>
+**Ưu tiên `f-*` trước, chỉ dùng `v-*` của Vuetify khi FUI không có sẵn.**
+
+Component `f-*` đã tích hợp action, validate form, phím tắt, CRUD, tìm kiếm, xuất Excel — dùng
+chúng thì viết ít JSON hơn nhiều.
+</Callout>
+
+| Ưu tiên dùng | Thay vì | Lý do |
+|---|---|---|
+| `f-table` | `v-data-table` | Sẵn sort, tìm kiếm, CRUD, xuất Excel. Bỏ `:update-api` là thành bảng chỉ đọc |
+| `f-button` | `v-btn` | Hỗ trợ `CALL`, phím tắt, validate form |
+| `f-date` / `f-time` | `v-text-field` + tự parse | Sẵn picker và mask khi gõ |
+| `f-search` | `v-autocomplete` | Tìm qua API, có debounce và trạng thái loading |
+| `f-menu` | `v-menu` + `v-btn` | Cấu hình gọn hơn, tích hợp icon và action |
+| `f-echart` | `<canvas>`, thư viện khác | ECharts V5 — mọi loại biểu đồ |
+
+## Nhập liệu
+
+| Component | Dùng khi nào |
+|---|---|
+| [`f-button`](/docs/fui/v2/components/f-button) | Nút bấm có action, phím tắt, validate form |
+| [`f-date`](/docs/fui/v2/components/f-date) | Nhập ngày, có picker và mask |
+| `f-time` | Nhập giờ, có picker và mask |
+| `f-time-counter` | Đếm ngược hoặc đồng hồ thời gian thực |
+| `f-search` | Autocomplete tìm qua API |
+| `f-menu` | Nút dropdown có icon, action, link |
+| `f-radiobox` | Nhóm radio dựng từ mảng |
+| `f-file-upload` | Tải file lên (Plupload, có dialog tiến trình) |
+| `f-image-update` | Tải ảnh lên kèm cắt ảnh |
+| `f-excel-reader` | Đọc file Excel/CSV thành JSON |
+| `f-qrcode` | Vẽ mã QR |
+| `f-qrcode-reader` | Đọc QR bằng camera |
+
+## Hiển thị
+
+| Component | Dùng khi nào |
+|---|---|
+| `f-label` | Chip/badge hiển thị nhãn, trạng thái |
+| `f-box` | Hiển thị và sửa dữ liệu dạng key–value |
+| `f-header` | Tiêu đề lớn |
+| `f-title` | Tiêu đề nhỏ |
+| `f-slider` | Carousel ảnh |
+| `f-pdfmake` | Render PDF trong iframe |
+| `fp-profile` | Khối thông tin người dùng |
+
+## Bảng dữ liệu
+
+| Component | Dùng khi nào |
+|---|---|
+| [`f-table`](/docs/fui/v2/components/f-table) | **Mọi bảng dữ liệu** — CRUD qua dialog hoặc chỉ đọc |
+| [`f-sheet`](/docs/fui/v2/components/f-sheet) | Nhập liệu kiểu Excel — sửa thẳng trên ô, dán nhiều dòng |
+
+Renderer dùng trong `headers` của `f-table`:
+`t-html` · `t-label` · `t-num` · `t-time` · `t-boolean` · `t-check` · `t-text` · `t-select` ·
+`t-combobox` · `t-menu` · `t-link` · `t-button`
+
+<Callout>
+**`f-table` hay `f-sheet`?** `f-table` sửa từng dòng qua dialog form riêng. `f-sheet` sửa ngay
+trên ô như Excel, dán được nhiều dòng từ bảng tính. Cả hai đều dựng sẵn — đừng tự viết bảng
+nhập liệu bằng `uc-*.vue`.
+</Callout>
+
+## Dialog và soạn thảo
+
+| Component | Dùng khi nào |
+|---|---|
+| `f-dialog` | Modal có form, watch, nút bấm — chỉ hợp form rất nhỏ |
+| `f-window` | Dialog mở URL trong iframe |
+| `f-editor` | Soạn thảo rich text (CKEditor 5) |
+| `f-editor-dialog` | Soạn thảo rich text trong modal |
+
+<Callout type="warn">
+**Không dùng `f-button` + `f-dialog` để mở form thêm mới** — không ổn định trong FUI V2. Dùng
+`ctrl-update` của `f-table` cho CRUD inline. Cần dialog riêng thì dựng `v-dialog` thủ công.
+</Callout>
+
+## Biểu đồ
+
+| Component | Dùng khi nào |
+|---|---|
+| [`f-echart`](/docs/fui/v2/components/f-echart) | Mọi loại biểu đồ — bar, line, pie, gauge, scatter, radar, sankey, tree, map |
+
+## Component cần import thêm
+
+Thiếu import thì component **không tồn tại** và vùng đó trắng trơn. Import không tự động —
+phải đăng ký cho module bằng FUIX hoặc `file_import_new`.
+
+| Component | Import bắt buộc |
+|---|---|
+| `f-echart` | `/include/chart/echarts.min.js` → `/include/chart/fechart.js` (**đúng thứ tự này**) |
+| `f-sheet` | `/include/ag-grid/ag-grid.min.css` · `/include/ag-grid/ag-theme-alpine.min.css` · `/include/ag-grid/ag-grid-community.min.js` |
+| `f-pdfmake` | `/include/pdfmake/pdfmake.min.js` · `print.min.js` · `vfs_fonts.js` |
+| `f-file-upload` | `/include/plupload-2.3.7/plupload.full.min.js` |
+| `f-image-update` | `/include/vue-advanced-cropper/index.umd.js` · `style.css` |
+| `f-qrcode` | `/include/qrcode/qrcode.min.js` |
+| `f-qrcode-reader` | `/include/qrcode/qrcode-reader.min.js` |
+| `f-editor` · `f-editor-dialog` | `/include/ckeditor5/build/ckeditor.js` |
+
+<Callout type="warn">
+**Thứ tự nạp do `FileSort` quyết định, không phải phạm vi.** Server gộp import của cả framework,
+project và module rồi sort chung một lần. `fechart.js` phụ thuộc biến global `echarts` nên bắt
+buộc phải có `FileSort` **lớn hơn** `echarts.min.js` (ví dụ 100 và 110).
+</Callout>
+
+**Bundled sẵn, không cần import**: mọi `v-*` của Vuetify, `f-table`, `f-dialog`, `f-button`,
+`f-date`, `f-time`, `f-search`, `f-menu`, `f-radiobox`, `f-box`, `f-label`, `f-header`,
+`f-title`, `f-slider`, `f-excel-reader` — và mọi component không có tên trong bảng trên.
+
+## Component nội bộ
+
+`header-bar` và `f-window` do runtime tự dựng (menu header, cửa sổ `openWindow`). **Đừng đặt
+trực tiếp vào `controls`.**

@@ -1,0 +1,153 @@
+---
+title: Tổng quan FUI V2
+description: Vue 2 + Vuetify 2 — mô hình lập trình, thứ tự nạp trang, và những chỗ dễ sai
+icon: Layers
+---
+
+FUI V2 chạy trên **Vue 2 + Vuetify 2**. Bạn mô tả trang bằng JSON; runtime `fastproject.js` đọc
+JSON đó, dựng DOM, rồi khởi tạo một instance Vue.
+
+## Bạn viết những gì
+
+| Phần | Là gì | Tài liệu |
+|---|---|---|
+| **JSON** | `data` · `watch` · `controls` · `set` — khai báo state, logic và bố cục | [Cấu trúc JSON →](/docs/fui/v2/kien-truc/module-json) |
+| **script** | JavaScript helper cho action `FUN` / `EXE` | [Script →](/docs/fui/v2/kien-truc/script) |
+| **`uc-*.vue`** | Component Vue của bạn, gọi lại từ JSON bằng một dòng | [Component riêng →](/docs/fui/v2/kien-truc/custom-component) |
+| **style.css** | CSS của cả module | |
+
+JSON **không thay thế** việc viết component — nó lắp ráp component. Khoá `el` nhận cả `v-*` của
+Vuetify, `f-*` của FUI, lẫn `uc-*` do bạn viết:
+
+```json
+{ "el": "uc-thong-ke", "w": 6, "attr": { ":items": "dsThongKe", "title": "Tháng 5" } }
+```
+
+Ranh giới thực dụng: JSON giữ *dữ liệu, API, phân quyền, điều hướng*; component giữ *trình bày*.
+
+## Trang FUI nạp theo thứ tự nào
+
+Biết thứ tự này giải thích được gần hết các lỗi "sao biến của tôi mất giá trị".
+
+<Steps>
+
+<Step>
+### Thư viện nền (server tự chèn, đừng import lại)
+
+jQuery, **Lodash (`_`)**, **Moment**, **Numeral**, Vuetify, vue-toast, jquery-confirm.
+</Step>
+
+<Step>
+### Script FUI
+
+`defaultfunction.js` (hàm tiện ích) → `component.js` + `componentTable.js` (đăng ký toàn bộ
+`f-*` và `t-*`) → `fastproject.js` (engine).
+</Step>
+
+<Step>
+### Trộn cấu hình → `v_Set`
+
+Cấu hình nhóm → cấu hình project → `set` của module. **`set` của module thắng.**
+[Chi tiết →](/docs/fui/v2/kien-truc/project-module)
+</Step>
+
+<Step>
+### Query string được nạp vào `vueData`
+
+`?id=123` trở thành `vueData.id === "123"`. **Bước này chạy trước `data[]`** — hệ quả quan trọng,
+xem [Tham số URL](/docs/fui/v2/kien-truc/url-params).
+</Step>
+
+<Step>
+### Chạy `data[]`
+
+Tuần tự từ trên xuống: tạo state, định nghĩa action có tên, chạy action tự khởi động.
+</Step>
+
+<Step>
+### Dựng DOM từ `controls`, rồi `new Vue()`, rồi gắn `watch`
+
+`controls` được dịch thành DOM **một lần** trước khi Vue khởi tạo. Nghĩa là `el` không thể là
+biểu thức — chỉ giá trị bên trong `attr` mới reactive.
+</Step>
+
+</Steps>
+
+## Ba lỗi chiếm phần lớn thời gian debug
+
+Cả ba **chỉ áp dụng cho JSON**. Trong file `.vue` bạn viết Vue bình thường.
+
+<Callout type="error">
+### 1. Chuỗi không có dấu cách bị hiểu là biểu thức JS
+
+```json
+{ "trangThai": "active" }
+```
+
+Không gán chuỗi `"active"` — nó **eval biến `active`**, và vì biến đó không tồn tại nên bạn nhận
+`undefined`. Viết `` "`active" `` mới ra chuỗi.
+
+Chuỗi *có* dấu cách thì an toàn: `"Đang hoạt động"` cho ra đúng chuỗi đó.
+[Đọc kỹ quy tắc →](/docs/fui/v2/kien-truc/value-resolution)
+</Callout>
+
+<Callout type="error">
+### 2. Trong JSON, event và slot phải viết đầy đủ
+
+| Sai trong JSON | Đúng |
+|---|---|
+| `"@click"` | `"v-on:click"` |
+| `"#default"` | `"v-slot:default"` |
+
+*(Trong file `.vue` thì `@click` và `#default` vẫn dùng bình thường.)*
+</Callout>
+
+<Callout type="error">
+### 3. Khai lại biến từ URL sẽ xoá mất giá trị
+
+`data[]` chạy **sau** khi query string đã nạp vào `vueData`. Nên:
+
+```json
+"data": [ { "id": "" } ]
+```
+
+sẽ xoá sạch `?id=123`. Phải bọc trong guard:
+
+```json
+"data": [
+  { "IF": "typeof id == 'undefined'", "THEN": { "id": "`0" } }
+]
+```
+</Callout>
+
+## Component có sẵn
+
+FUI V2 đăng ký sẵn **40 component**: 25 trong `component.js`, 14 trong `componentTable.js`
+(gồm `f-table`, `f-sheet` và 12 renderer ô bảng `t-*`), 1 trong `fechart.js` (`f-echart`).
+
+Nguyên tắc chọn: **ưu tiên `f-*` trước, chỉ dùng `v-*` khi FUI không có sẵn.** Component `f-*` đã
+tích hợp action, validate form, phím tắt, CRUD, xuất Excel.
+
+[Xem danh mục component →](/docs/fui/v2/components) ·
+[Mẫu template hoàn chỉnh →](/docs/fui/v2/mau-template)
+
+## Quy tắc trình bày
+
+<Callout>
+**Không tự thêm `style` hay `class` để "làm đẹp".**
+
+Thống kê trên 1.284 control object thực tế của 5 dự án: chỉ ~12% dùng `attr.style`, và gần như
+chỉ để đặt `width` cố định cho ô lọc. **Không có class tự chế nào.**
+
+Chia cột thì dùng khoá `w`. Cần khoảng cách thì dùng class tiện ích Vuetify (`pa-2`, `mt-2`,
+`text-end`). Cần màu thì dùng prop `color` hoặc class `primary--text`.
+
+[Bộ từ vựng đã duyệt →](/docs/fui/v2/kien-truc/layout-grid#bộ-từ-vựng-được-duyệt)
+</Callout>
+
+## Lấy code về máy
+
+Tài liệu này mô tả **nội dung** module. Việc lấy code từ fui.vn về máy, sửa, xem thử và đẩy lên
+lại là chuyện của công cụ — cấu trúc thư mục trên đĩa là quy ước của công cụ, không phải của FUI.
+
+[Xem phần công cụ →](/docs/fui/cong-cu)

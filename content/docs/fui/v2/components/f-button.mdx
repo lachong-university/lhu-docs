@@ -1,0 +1,229 @@
+---
+title: f-button
+description: Nút bấm gắn action FUI — có phím tắt, validate form và chống double-click
+icon: MousePointerClick
+---
+
+Dùng `f-button` thay `v-btn` khi cần chạy một action FUI. Nó bọc `v-btn` và thêm: chạy action
+`CALL`, validate form trước khi chạy, phím tắt Ctrl, chống double-click.
+
+## Demo
+
+<FuiPreview template="f-button" height={260} />
+
+## Props
+
+<TypeTable
+  type={{
+    label: { description: "Chữ trên nút.", type: "String", default: "'OK'" },
+    action: {
+      description: "Object action chạy khi bấm. Nhận mọi khoá: CALL, API, CONFIRM, MESS, EXE… Cũng nhận mảng để chạy tuần tự.",
+      type: "Object | Array",
+    },
+    iconText: {
+      description: "Tên icon Material Design đặt bên trái chữ. VD: mdi-content-save",
+      type: "String",
+    },
+    checkvalid: {
+      description: "Validate toàn bộ form trước khi chạy action. Form chưa hợp lệ thì hiện cảnh báo và KHÔNG chạy.",
+      type: "Boolean",
+      default: "true",
+    },
+    ctrlhotkey: {
+      description: "Mã phím cho tổ hợp Ctrl (Cmd trên Mac). VD: 83 = Ctrl+S. 0 = tắt.",
+      type: "Number",
+      default: "0",
+    },
+    includeData: {
+      description: "Dữ liệu bổ sung truyền vào action, dùng được trong IN và {{ }}.",
+      type: "Object",
+    },
+  }}
+/>
+
+### Default FUI tự thêm
+
+Không cần khai lại hai prop này:
+
+```json
+{ "elevation": 0, "color": "primary" }
+```
+
+Trên điện thoại, cột bao ngoài tự nhận `align: "end"` — nút tự căn phải.
+
+Mọi prop khác đều rơi xuống `v-btn` bên dưới, nên `outlined`, `text`, `small`, `x-large`,
+`block`, `disabled`, `loading`, `color` đều dùng được.
+
+## Cách dùng
+
+<Tabs items={['Tối giản', 'Đầy đủ']}>
+
+<Tab value="Tối giản">
+```json
+{
+  "el": "f-button",
+  "w": "",
+  "attr": {
+    "label": "Lưu",
+    ":action": { "CALL": "apiLuu" }
+  }
+}
+```
+</Tab>
+
+<Tab value="Đầy đủ">
+Đây là JSON đang chạy trong demo ở trên:
+
+```json
+{
+  "prop": "row",
+  "cols": [
+    { "el": "f-button", "w": "", "attr": {
+        "label": "Lưu", "icon-text": "mdi-content-save",
+        ":checkvalid": false,
+        ":action": { "MESS": "Đã lưu thành công" } } },
+
+    { "el": "f-button", "w": "", "attr": {
+        "label": "Xoá", "color": "error", "icon-text": "mdi-delete",
+        ":checkvalid": false,
+        ":action": { "CONFIRM": "Bạn chắc chắn muốn xoá?", "MESS": "Đã xoá" } } },
+
+    { "el": "f-button", "w": "", "attr": {
+        "label": "Viền", ":outlined": true, ":checkvalid": false,
+        ":action": { "MESSBOX": "Nút dạng outlined" } } },
+
+    { "el": "f-button", "w": "", "attr": {
+        "label": "Phẳng", ":text": true, ":checkvalid": false,
+        ":action": { "MESSBOX": "Nút dạng text" } } },
+
+    { "el": "f-button", "w": "", "attr": {
+        "label": "Ctrl+S", "icon-text": "mdi-keyboard",
+        ":ctrlhotkey": 83, ":checkvalid": false,
+        ":action": { "MESS": "Kích hoạt bằng phím tắt Ctrl+S" } } }
+  ]
+}
+```
+</Tab>
+
+</Tabs>
+
+## Mẫu hay dùng
+
+<Tabs items={['Lưu form', 'Xoá có xác nhận', 'Ẩn theo quyền', 'Mở cửa sổ khác']}>
+
+<Tab value="Lưu form">
+```json
+{
+  "el": "f-button",
+  "w": "",
+  "col": "text-end",
+  "attr": {
+    "label": "Lưu",
+    "icon-text": "mdi-content-save",
+    ":ctrlhotkey": 83,
+    ":action": {
+      "API": "/api/nhanvien/save",
+      "IN": { "ID": "form.id", "HoTen": "form.hoTen" },
+      "CALLBACK": [ { "MESS": "Đã lưu" }, { "CALL": "apiDanhSach" } ]
+    }
+  }
+}
+```
+`checkvalid` mặc định `true` nên form chưa điền đủ field bắt buộc thì action không chạy.
+</Tab>
+
+<Tab value="Xoá có xác nhận">
+```json
+{
+  "el": "f-button",
+  "attr": {
+    "label": "Xoá",
+    "color": "error",
+    "icon-text": "mdi-delete",
+    ":checkvalid": false,
+    ":action": {
+      "CONFIRM": "Xác nhận xoá {{form.hoTen}}?",
+      "API": "/api/nhanvien/delete",
+      "IN": { "ID": "form.id" },
+      "CALLBACK": { "CALL": "apiDanhSach" }
+    }
+  }
+}
+```
+Nút xoá nên đặt `":checkvalid": false` — không có lý do bắt điền đủ form mới cho xoá.
+</Tab>
+
+<Tab value="Ẩn theo quyền">
+```json
+{
+  "el": "f-button",
+  "col": { "v-if": "vueData.user.SystemRight >= 9" },
+  "attr": { "label": "Duyệt", ":action": { "CALL": "apiDuyet" } }
+}
+```
+Đặt `v-if` ở `col` chứ không ở `attr` — như vậy ẩn cả ô lưới, không để lại khoảng trống.
+</Tab>
+
+<Tab value="Mở cửa sổ khác">
+```json
+{
+  "el": "f-button",
+  "attr": {
+    "label": "Chi tiết",
+    "target": "dialog",
+    "wid": "winChiTiet",
+    "title": "Chi tiết nhân viên",
+    "url": "/ex/nhanvien-chitiet?id=123",
+    ":onclose": { "CALL": "apiDanhSach" }
+  }
+}
+```
+Khi `target` là `"dialog"`, `f-button` gọi `openWindow` và **bỏ qua** `action` cùng
+`checkvalid`.
+</Tab>
+
+</Tabs>
+
+## Cạm bẫy
+
+<Callout type="warn">
+**`checkvalid` mặc định là `true`.** Nút không phản ứng mà chỉ hiện "Hãy điền đầy đủ dữ liệu bắt
+buộc!" nghĩa là đang có field `:required` bỏ trống ở đâu đó trên trang. Nút không liên quan tới
+form (làm mới, xuất Excel, đóng) nên đặt `":checkvalid": false`.
+</Callout>
+
+<Callout type="warn">
+**Click bị debounce 500ms**, chế độ leading — cú bấm đầu tiên chạy ngay, các cú trong 500ms tiếp
+theo bị bỏ. Đây là chống double-click cố ý, không phải lỗi.
+</Callout>
+
+<Callout type="warn">
+**Đừng dùng `f-button` để mở form thêm mới bằng `f-dialog`** — cặp này không ổn định trong FUI
+V2. Dùng `ctrl-update` của [`f-table`](/docs/fui/v2/components/f-table) cho CRUD, hoặc dựng
+`v-dialog` thủ công.
+</Callout>
+
+Mã phím hay dùng cho `ctrlhotkey`: `83` = S, `78` = N, `70` = F, `13` = Enter.
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON trong khối
+`<fui-app lang="json">` của `index.vue`).
+
+Hãy thêm cho tôi một thanh nút gồm: nút "Lưu" (icon `mdi-content-save`, phím tắt Ctrl+S, gọi
+API `/api/nhanvien/save`), nút "Xoá" (màu error, có hỏi xác nhận) và nút "Làm mới".
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-button`, không dùng `v-btn`
+- Event viết đầy đủ `v-on:click`, không dùng `@click`
+- Chuỗi cố định **không có dấu cách** phải bọc backtick ở đầu, ví dụ `` "`active" `` — nếu không
+  FUI sẽ eval nó như biểu thức JS
+- Không khai lại `color: "primary"` và `elevation: 0` — FUI đã tự thêm cho `f-button`
+- Nút không liên quan tới form (Làm mới, Xuất Excel) phải đặt `":checkvalid": false`
+- Điều kiện ẩn/hiện theo quyền đặt ở `col`, không đặt ở `attr`
+- Chia cột bằng khoá `w` (1–12), không dùng `style="width:..."`
+- Không tự thêm `class` hay `style` để làm đẹp
+
+Trả về đúng đoạn JSON của `controls` cùng các action tương ứng trong `data[]`.
+</AiPrompt>

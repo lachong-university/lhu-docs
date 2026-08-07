@@ -1,0 +1,275 @@
+---
+title: Lọc và báo cáo
+description: Thanh lọc theo khoảng ngày, biểu đồ và bảng tổng tự tải lại khi đổi điều kiện
+icon: ChartLine
+---
+
+Màn hình báo cáo: chọn khoảng ngày và danh mục, bên dưới là biểu đồ cùng bảng số liệu có hàng
+tổng. Đổi bất kỳ điều kiện nào thì cả hai tự tải lại.
+
+Điểm khác so với [mẫu CRUD](/docs/fui/v2/mau-template/crud-co-ban): dữ liệu chỉ đọc, và cần một
+hàm trong `script` để dựng option biểu đồ từ dữ liệu API.
+
+## Script
+
+```js
+function buildChartOption(input) {
+  var rows = input.rows || [];
+
+  return {
+    grid: { left: 20, right: 20, containLabel: true },
+    xAxis: { type: 'category', data: _.map(rows, 'Thang') },
+    yAxis: { type: 'value' },
+    series: [{
+      name: 'Doanh thu',
+      type: 'bar',
+      data: _.map(rows, 'DoanhThu'),
+      label: { show: true, position: 'top' }
+    }]
+  };
+}
+```
+
+## JSON hoàn chỉnh
+
+```json
+{
+  "data": [
+    {
+      "IF": "typeof nam == 'undefined'",
+      "THEN": { "nam": "{{moment().format('YYYY')}}" }
+    },
+    {
+      "filter": { "tuNgay": null, "denNgay": null, "phongBanID": null },
+      "dsPhongBan": [],
+      "dsBaoCao": [],
+      "chartConfig": {
+        "title": "Doanh thu theo tháng",
+        "height": 340,
+        "dataView": true
+      },
+      "chartOption": {}
+    },
+    {
+      "apiPhongBan": {
+        "API": "/api/phongban/list",
+        "OUT": "dsPhongBan"
+      },
+
+      "apiBaoCao": {
+        "API": "/api/baocao/doanhthu",
+        "IN": {
+          "TuNgay":     "filter.tuNgay",
+          "DenNgay":    "filter.denNgay",
+          "PhongBanID": "filter.phongBanID"
+        },
+        "OUT": "dsBaoCao",
+        "CALLBACK": {
+          "FUN": "buildChartOption",
+          "IN":  { "rows": "dsBaoCao" },
+          "OUT": "chartOption"
+        }
+      }
+    },
+    { "CALL": "apiPhongBan" },
+    { "CALL": "apiBaoCao" }
+  ],
+
+  "watch": {
+    "filter.tuNgay":     { "CALL": "apiBaoCao" },
+    "filter.denNgay":    { "CALL": "apiBaoCao" },
+    "filter.phongBanID": { "CALL": "apiBaoCao" }
+  },
+
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            { "el": "f-date", "w": 2, "attr": {
+                "v-model": "filter.tuNgay", "label": "Từ ngày",
+                ":required": false, ":date-add": -30 } },
+
+            { "el": "f-date", "w": 2, "attr": {
+                "v-model": "filter.denNgay", "label": "Đến ngày",
+                ":required": false, ":date-add": 0 } },
+
+            { "el": "v-select", "w": 3, "attr": {
+                "v-model": "filter.phongBanID", "label": "Phòng ban",
+                ":items": "dsPhongBan",
+                "item-text": "`TenPhongBan", "item-value": "`ID",
+                ":clearable": true, ":required": false } },
+
+            { "el": "f-button", "w": "", "col": "align-self-center", "attr": {
+                "label": "Làm mới", "icon-text": "mdi-refresh",
+                ":checkvalid": false,
+                ":action": { "CALL": "apiBaoCao" } } }
+          ]
+        },
+
+        {
+          "prop": "row",
+          "cols": [
+            { "el": "f-echart", "w": 12, "attr": {
+                ":config": "chartConfig", ":option": "chartOption" } }
+          ]
+        },
+
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-table",
+              "w": 12,
+              "attr": {
+                "label": "Chi tiết theo tháng",
+                ":items": "dsBaoCao",
+                "item-key": "Thang",
+                ":excel": true,
+                ":items-per-page": -1,
+
+                ":headers": [
+                  { "text": "Tháng",     "value": "Thang",     "width": "120px" },
+                  { "text": "Phòng ban", "value": "TenPhongBan" },
+                  { "text": "Số đơn",    "value": "SoDon",     "align": "right", "width": "120px",
+                    "el": "t-num", "attr": { "format": "0,0" } },
+                  { "text": "Doanh thu", "value": "DoanhThu",  "align": "right", "width": "160px",
+                    "el": "t-num", "attr": { "format": "0,0" } }
+                ],
+
+                ":sum-format": { "SoDon": "0,0", "DoanhThu": "0,0" }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "set": { "title": "Báo cáo doanh thu" }
+}
+```
+
+## Những chỗ đáng chú ý
+
+<Callout>
+**`:date-add` đặt khoảng ngày mặc định** — `-30` và `0` cho ra "30 ngày gần nhất" mà không phải
+tính ngày trong `data[]`. Nó chỉ đặt giá trị **ban đầu**; người dùng đổi sau đó thì không can
+thiệp nữa.
+</Callout>
+
+<Callout>
+**Biểu đồ dựng trong `CALLBACK`, không dựng trong `EXE`.** Hàm `buildChartOption` nhận dữ liệu
+qua `IN` và trả về option — không cần biết gì về `vueData`, nên dễ đọc và dùng lại được cho biểu
+đồ khác.
+</Callout>
+
+<Callout type="warn">
+**`f-echart` cần import**, và thứ tự do `FileSort` quyết định:
+`/include/chart/echarts.min.js` (sort nhỏ) rồi `/include/chart/fechart.js` (sort lớn hơn).
+Thiếu thì vùng biểu đồ trắng trơn.
+</Callout>
+
+<Callout type="warn">
+**`:sum-format` dạng object cho hàng tổng thẳng cột** trong bảng. Đừng tự push một dòng "Tổng"
+vào `dsBaoCao` — hàng đó sẽ bị tính vào tìm kiếm, sắp xếp và xuất Excel.
+</Callout>
+
+## Biến thể
+
+<Tabs items={['Nhiều biểu đồ', 'Lọc theo năm qua URL', 'Ô lọc bề rộng cố định']}>
+
+<Tab value="Nhiều biểu đồ">
+Mỗi biểu đồ một cặp `config` + `option` riêng, dựng trong cùng một `CALLBACK`:
+
+```json
+"CALLBACK": [
+  { "FUN": "buildChartCot",  "IN": { "rows": "dsBaoCao" }, "OUT": "chartCot" },
+  { "FUN": "buildChartTron", "IN": { "rows": "dsBaoCao" }, "OUT": "chartTron" }
+]
+```
+
+```json
+{ "el": "f-echart", "w": 8, "attr": { ":config": "cfgCot",  ":option": "chartCot"  } },
+{ "el": "f-echart", "w": 4, "attr": { ":config": "cfgTron", ":option": "chartTron" } }
+```
+</Tab>
+
+<Tab value="Lọc theo năm qua URL">
+Cho phép chia sẻ link đã lọc sẵn:
+
+```json
+"data": [
+  { "IF": "typeof nam == 'undefined'", "THEN": { "nam": "{{moment().format('YYYY')}}" } }
+]
+```
+
+```json
+"watch": {
+  "nam": [
+    { "CALL": "apiBaoCao" },
+    { "EXE": "pushRouter('/ex/baocao?nam=' + nam)" }
+  ]
+}
+```
+
+Guard `typeof` là bắt buộc — `data[]` chạy **sau** khi query string đã nạp vào `vueData`, khai
+thẳng `"nam": ""` sẽ xoá mất giá trị từ URL.
+[Chi tiết →](/docs/fui/v2/kien-truc/url-params)
+</Tab>
+
+<Tab value="Ô lọc bề rộng cố định">
+Thanh lọc nhiều ô mà không muốn chúng co giãn:
+
+```json
+{
+  "el": "v-select",
+  "col": { "class": "shrink" },
+  "attr": {
+    "v-model": "filter.phongBanID",
+    "label": "Phòng ban",
+    ":items": "dsPhongBan",
+    "class": "flex-md-grow-0",
+    "style": "width:200px",
+    ":required": false
+  }
+}
+```
+
+Đây là chỗ hợp lệ **duy nhất** để dùng `style` — và chỉ cho `width`.
+</Tab>
+
+</Tabs>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`; phần JavaScript helper nằm ở `script` riêng).
+
+Hãy dựng cho tôi màn hình báo cáo [ĐỔI TÊN]: thanh lọc theo khoảng ngày và [DANH MỤC], một biểu
+đồ [LOẠI], và bảng chi tiết có hàng tổng.
+
+API: [ENDPOINT VÀ FIELD TRẢ VỀ]
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-date` cho ô ngày với `:date-add` để đặt khoảng mặc định, và **phải** khai
+  `":required": false` cho mọi ô lọc
+- Dùng `f-echart` (không phải `f-chart`). Nó chỉ có 2 prop: `:option` (ECharts option nguyên bản)
+  và `:config` (shortcut FUI) — **không có prop `data`**
+- Dựng ECharts option bằng một hàm trong `script` rồi gọi qua `FUN` trong `CALLBACK` của action
+  API, đừng nhồi vào `EXE`
+- Quy ước biểu đồ mặc định: luôn `"label": { "show": true, "position": "top" }`;
+  `"grid": { "left": 20, "right": 20, "containLabel": true }`; số hiển thị đầy đủ có phân cách
+  nghìn; dùng `"dataView": true` thay vì tự dựng nút xem dữ liệu
+- Hàng tổng dùng `:sum-format` dạng object, tuyệt đối không push dòng "Tổng" vào mảng dữ liệu
+- Mỗi field lọc có một `watch` gọi lại action tải dữ liệu
+- Chuỗi hằng **không có dấu cách** phải bọc backtick ở đầu, ví dụ `` "`TenPhongBan" ``
+- Event viết đầy đủ `v-on:click`, không dùng `@click`
+- Chia cột bằng khoá `w` (1–12); không tự thêm `class`/`style` để làm đẹp
+- Nhắc tôi đăng ký import cho `f-echart` theo đúng thứ tự `FileSort`
+
+Trả về JSON hoàn chỉnh 4 khối, kèm phần `script`.
+</AiPrompt>

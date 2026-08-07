@@ -1,0 +1,168 @@
+---
+title: FUIX — Extension VS Code
+description: Clone, sửa, live preview và push code FUI ngay trong editor
+icon: Plug
+---
+
+**FUIX** là extension cho VS Code, Cursor, Windsurf và Antigravity. Nó lấy project FUI về máy,
+cho bạn sửa bằng editor quen thuộc, xem thử tại chỗ, rồi đẩy ngược lên fui.vn.
+
+## Cài đặt và đăng nhập
+
+<Steps>
+
+<Step>
+### Cài extension
+Tìm **FUIX** trong marketplace của editor và cài.
+</Step>
+
+<Step>
+### Kiểm tra môi trường
+Chạy lệnh **`FUIX: Kiểm tra & Thiết lập`** (`setupDoctor`) — nó rà soát những thứ còn thiếu và
+chỉ ra cách sửa.
+</Step>
+
+<Step>
+### Đăng nhập
+**`FUIX: Đăng nhập`**.
+
+Nếu đã đăng nhập fui.vn trên trình duyệt rồi, có đường tắt:
+**`FUIX: Lấy token (awt) từ trình duyệt vào users.json`**.
+</Step>
+
+<Step>
+### Clone project
+**`FUIX: Clone dự án`** để lấy cả project, hoặc **`FUIX: Clone module`** nếu chỉ cần một trang.
+
+Đã có project ở máy rồi mà cần thêm một module: **`FUIX: Kéo thêm module về dự án`**.
+</Step>
+
+</Steps>
+
+## Cấu trúc thư mục FUIX tạo ra
+
+```text
+{projectId}/
+├── .fuix/                        ← metadata, KHÔNG sửa tay
+│   ├── project.json              metadata project
+│   ├── runtime.json              cấu hình runtime: apiDomain, login, menu
+│   ├── modules.json              danh sách module
+│   ├── users.json                token đăng nhập (gitignore)
+│   ├── .cache/baseline/          mốc đồng bộ để phát hiện xung đột
+│   └── modules/{moduleId}/info.json
+├── components/uc-*.vue           component cấp project
+├── imports/                      file JS/CSS cấp project
+└── modules/{moduleId}/
+    ├── index.vue                 ← <fui-app lang="json"> + <script>
+    ├── header.html
+    ├── body.html
+    ├── style.css
+    └── components/uc-*.vue       component cấp module
+```
+
+<Callout type="warn">
+`.fuix/` do extension quản lý — **đừng sửa tay**. Nó giữ mốc đồng bộ; sửa lung tung sẽ làm cơ chế
+cảnh báo xung đột mất tác dụng.
+</Callout>
+
+### `index.vue` là gói của FUIX
+
+FUIX gộp hai phần vốn tách biệt trên server vào một file cho tiện sửa:
+
+```vue
+<fui-app lang="json">
+{ "data": [], "watch": {}, "controls": [], "set": {} }
+</fui-app>
+
+<script>
+// script của module
+</script>
+```
+
+Khối `<fui-app lang="json">` chính là **moduleUI**, khối `<script>` chính là **script**. Lúc push,
+FUIX tách chúng ra rồi gửi lên hai chỗ khác nhau.
+
+Đây là quy ước của FUIX, không phải định dạng của FUI.
+[Xem cấu trúc JSON →](/docs/fui/v2/kien-truc/module-json)
+
+## Các lệnh
+
+| Lệnh | Tác dụng |
+|---|---|
+| `FUIX: Kiểm tra & Thiết lập` | Rà soát môi trường |
+| `FUIX: Đăng nhập` · `Đăng xuất` | Xác thực |
+| `FUIX: Làm mới danh sách dự án` | Cập nhật danh sách project |
+| `FUIX: Clone dự án` · `Clone module` | Lấy code về lần đầu |
+| `FUIX: Kéo thêm module về dự án` | Thêm module vào project đã có |
+| `FUIX: Đồng bộ module` · `Đồng bộ dự án` | Kéo bản mới từ server về |
+| `FUIX: Push module lên FUI` | Đẩy module lên server |
+| `FUIX: Push project lên FUI` | Đẩy tài nguyên dùng chung — `components/`, `imports/` |
+| `FUIX: Live preview module` | Xem thử module ngay trong editor |
+| `FUIX: Serve toàn dự án` | Chạy cả project ở máy |
+| `FUIX: Tạo module mới` · `Sửa thông tin module` · `Xóa module khỏi local` | Quản lý module |
+| `FUIX: Tạo component mới` | Sinh khung `uc-*.vue` |
+| `FUIX: Mở/Tắt Auto-Push khi Save` | Tự push mỗi lần lưu (mặc định tắt) |
+| `FUIX: Cập nhật Agent Skill` | Cập nhật bộ skill cho AI |
+| `FUIX: Copy context` · `Gắn prompt cho AI` | Đưa ngữ cảnh module sang AI |
+
+## Push — thứ tự quan trọng
+
+<Callout type="error">
+**Push project trước, push module sau** — khi module dùng component hoặc import ở cấp project.
+
+`Push module` chỉ đẩy nội dung module. Component trong `{projectId}/components/` và file trong
+`{projectId}/imports/` phải đi bằng `Push project`. Push sai thứ tự thì trang lên server sẽ gọi
+một component chưa tồn tại.
+</Callout>
+
+Module chỉ dùng component của chính nó thì `Push module` là đủ.
+
+## Cơ chế chống ghi đè
+
+FUIX ghi lại một **mốc đồng bộ** cho mỗi lần clone/sync/push, lưu ở `.fuix/.cache/`. Nó im lặng
+khi an toàn và chỉ lên tiếng khi có rủi ro:
+
+- **Server đã đổi** kể từ lần bạn đồng bộ → cảnh báo trước khi ghi đè. Nên `Đồng bộ` lại trước.
+- **Local có thay đổi chưa push** → cảnh báo, cho chọn *Sao lưu & đồng bộ*.
+
+Bản sao lưu cũng nằm trong `.fuix/.cache/`.
+
+## Live preview
+
+**`FUIX: Live preview module`** dựng trang ở máy, không cần push. Đây là cách kiểm tra nhanh nhất
+trước khi đẩy lên.
+
+Preview đọc tham số URL bình thường, nên thử được các nhánh theo query string:
+
+```text
+?template=f-button
+?id=123&mode=edit
+```
+
+[Cách FUI đọc tham số URL →](/docs/fui/v2/kien-truc/url-params)
+
+## Trước khi push
+
+<Steps>
+
+<Step>
+### Đồng bộ lại nếu lâu không đụng tới
+Tránh đè lên thay đổi của người khác.
+</Step>
+
+<Step>
+### Xem lại diff
+Đọc kỹ những gì sắp đẩy lên.
+</Step>
+
+<Step>
+### Live preview
+Kiểm tra trang chạy đúng trước, đừng lấy production làm chỗ thử.
+</Step>
+
+<Step>
+### Push project trước nếu có đụng component/import dùng chung
+Rồi mới push module.
+</Step>
+
+</Steps>

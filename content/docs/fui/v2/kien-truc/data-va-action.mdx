@@ -1,0 +1,222 @@
+---
+title: data & Action Protocol
+description: API · IN · OUT · CALLBACK · CONFIRM · MESS · CALL · IF/THEN/ELSE · EXE · FUN
+icon: Workflow
+---
+
+Logic trong FUI viết bằng **action** — object JSON có các khoá viết hoa. Runtime kiểm tra
+theo thứ tự cố định và **dừng ở khoá đầu tiên khớp**.
+
+## Các khoá action
+
+| Khoá | Tác dụng |
+|---|---|
+| `API` | Endpoint cần gọi |
+| `IN` | Tham số đầu vào (tham chiếu `vueData.` hoặc `item.`) |
+| `OUT` | Tên biến lưu kết quả trả về |
+| `HEADER` | Header tuỳ chỉnh cho request |
+| `CALLBACK` | Action chạy sau khi API thành công |
+| `CONFIRM` | Hỏi xác nhận trước khi chạy phần còn lại |
+| `CANCEL` | Action chạy khi người dùng bấm huỷ ở hộp xác nhận |
+| `MESS` | Toast góc trên |
+| `MESSBOX` | Hộp thoại thông báo |
+| `CALL` | Gọi một action đã đặt tên |
+| `IF` / `THEN` / `ELSE` | Rẽ nhánh |
+| `EXE` | JS thô |
+| `FUN` | Gọi hàm global trong khối `<script>` |
+
+## Thứ tự xét
+
+<Callout type="warn">
+Runtime **dừng ở khoá đầu tiên khớp**. Một action có cả `API` và `EXE` thì chỉ `API` chạy.
+Muốn làm nhiều việc thì dùng **mảng action**, đừng nhồi nhiều khoá vào một object.
+</Callout>
+
+```text
+CONFIRM  (bọc ngoài — hỏi trước, đồng ý mới chạy phần còn lại)
+   ↓
+IN → API → CALL → EXE → FUN → IF → MESS → MESSBOX
+   ↓
+(không khớp khoá nào) → coi object là phép gán state
+```
+
+Nhánh cuối rất hay dùng: một object **không có** khoá action nào chính là lệnh gán vào `vueData`.
+
+```json
+{ "dsUser": [], "dangTai": false }
+```
+
+## Ba loại phần tử trong `data[]`
+
+```json
+"data": [
+  { "keyword": "", "dsUser": [], "dlOpen": false },
+  { "getUser": { "API": "SM_Users_Select", "IN": { "kw": "keyword" }, "OUT": "dsUser" } },
+  { "CALL": "getUser" }
+]
+```
+
+1. **Khởi tạo state** — không có khoá action
+2. **Action có tên** — key là tên, value là action. Gọi bằng `CALL`
+3. **Action tự chạy** — bản thân object là action, chạy ngay khi load
+
+Quy ước: state trước → action có tên → action khởi động ở cuối.
+
+## Gọi API
+
+```json
+{
+  "apiDanhSach": {
+    "API": "/api/nhanvien/list",
+    "IN":  { "PhongBanID": "filter.phongBanID", "TuKhoa": "filter.tuKhoa" },
+    "OUT": "dsNhanVien",
+    "CALLBACK": { "MESS": "Đã tải xong" }
+  }
+}
+```
+
+- `API` tương đối được tự động ghép với `apiDomain` của project
+- `IN` đi qua [quy tắc phân giải giá trị](/docs/fui/v2/kien-truc/value-resolution) — hằng nhớ bọc backtick
+- `OUT` là tên biến trong `vueData`; runtime tự khai báo nếu chưa có
+- `CALLBACK` chỉ chạy khi API thành công
+
+### `OUT` ghi vào đường dẫn sâu
+
+```json
+{ "API": "/api/user/detail", "IN": { "ID": "userID" }, "OUT": "form.thongTin" }
+```
+
+## `CALL` — dùng lại action
+
+```json
+"watch": { "phongBanID": { "CALL": "apiDanhSach" } }
+```
+
+```json
+{ "el": "f-button", "attr": { ":action": { "CALL": "apiDanhSach" } } }
+```
+
+Một action có thể là **mảng** — chạy tuần tự:
+
+```json
+{
+  "lamMoi": [
+    { "dsNhanVien": [] },
+    { "CALL": "apiDanhSach" },
+    { "MESS": "Đã làm mới" }
+  ]
+}
+```
+
+## `CONFIRM` — hỏi trước khi làm
+
+`CONFIRM` bọc ngoài mọi khoá khác. Đồng ý thì phần còn lại chạy; huỷ thì chạy `CANCEL` nếu có.
+
+```json
+{
+  "xoaNhanVien": {
+    "CONFIRM": "Xác nhận xoá nhân viên {{item.HoTen}}?",
+    "API": "/api/nhanvien/delete",
+    "IN":  { "ID": "item.ID" },
+    "CALLBACK": { "CALL": "apiDanhSach" }
+  }
+}
+```
+
+## `IF` / `THEN` / `ELSE`
+
+```json
+{
+  "IF": "filter.phongBanID",
+  "THEN": { "CALL": "apiDanhSach" },
+  "ELSE": { "dsNhanVien": [] }
+}
+```
+
+`IF` chạy qua lodash template nên **không cần prefix `vueData.`**. `THEN` và `ELSE` nhận cả
+chuỗi JS lẫn object action.
+
+## `EXE` — JavaScript thô
+
+```json
+{ "EXE": "vueData.tong = _.sumBy(dsNhanVien, 'Luong')" }
+```
+
+`EXE` chạy qua lodash template với `with(obj)`, nên bên trong viết được tên biến trần
+(`dsNhanVien`) mà không cần `vueData.`. Muốn *ghi* thì vẫn nên viết rõ `vueData.x = ...`.
+
+<Callout>
+Logic dài đừng nhồi vào `EXE`. Đưa vào khối `<script>` rồi gọi bằng `FUN` — dễ đọc và dùng lại được.
+</Callout>
+
+## `FUN` — gọi hàm global
+
+```vue
+<script>
+function tinhThanhTien(input) {
+  return input.soLuong * input.donGia;
+}
+</script>
+```
+
+```json
+{ "FUN": "tinhThanhTien", "IN": { "soLuong": "form.sl", "donGia": "form.gia" }, "OUT": "form.thanhTien" }
+```
+
+Runtime tra `window["tinhThanhTien"]` rồi gọi với **đúng một tham số** là object `IN` đã phân giải.
+
+## `MESS` và `MESSBOX`
+
+| | Hiển thị |
+|---|---|
+| `MESS` | Toast xanh ở góc trên, tự tắt |
+| `MESSBOX` | Hộp thoại, phải bấm đóng |
+
+Cả hai đều hỗ trợ `{{ }}`:
+
+```json
+{ "MESS": "Đã lưu {{form.hoTen}}" }
+{ "MESSBOX": "Lưu thất bại: {{errMessage.Message}}" }
+```
+
+## Ghi sang cửa sổ khác
+
+Key bắt đầu bằng `#` thì ghi sang cửa sổ khác thay vì `vueData`:
+
+```json
+{ "#PARENT.dsUser": "dsUser" }
+{ "#Win1.filterID":  "selectedID" }
+```
+
+## Ví dụ hoàn chỉnh
+
+```json
+"data": [
+  {
+    "filter": { "phongBanID": null, "tuKhoa": "" },
+    "dsNhanVien": [],
+    "dsPhongBan": []
+  },
+  {
+    "apiPhongBan": { "API": "/api/phongban/list", "OUT": "dsPhongBan" },
+
+    "apiDanhSach": {
+      "API": "/api/nhanvien/list",
+      "IN":  { "PhongBanID": "filter.phongBanID", "TuKhoa": "filter.tuKhoa" },
+      "OUT": "dsNhanVien"
+    },
+
+    "xoaNhanVien": {
+      "CONFIRM": "Xác nhận xoá {{item.HoTen}}?",
+      "API": "/api/nhanvien/delete",
+      "IN":  { "ID": "item.ID" },
+      "CALLBACK": [
+        { "MESS": "Đã xoá" },
+        { "CALL": "apiDanhSach" }
+      ]
+    }
+  },
+  { "CALL": "apiPhongBan" },
+  { "CALL": "apiDanhSach" }
+]
+```

@@ -1,0 +1,30 @@
+{
+  "title": "FUI V2",
+  "icon": "Layers",
+  "pages": [
+    "index",
+    "---Kiến trúc---",
+    "kien-truc/module-json",
+    "kien-truc/layout-grid",
+    "kien-truc/value-resolution",
+    "kien-truc/data-va-action",
+    "kien-truc/watch",
+    "kien-truc/url-params",
+    "kien-truc/script",
+    "kien-truc/custom-component",
+    "kien-truc/project-module",
+    "kien-truc/default-function",
+    "---Component---",
+    "components/index",
+    "components/f-button",
+    "components/f-date",
+    "components/f-table",
+    "components/f-echart",
+    "components/f-sheet",
+    "---Mẫu template---",
+    "mau-template/index",
+    "mau-template/crud-co-ban",
+    "mau-template/loc-va-bao-cao",
+    "mau-template/master-detail"
+  ]
+}

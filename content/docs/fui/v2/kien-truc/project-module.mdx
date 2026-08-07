@@ -1,0 +1,141 @@
+---
+title: Project và Module
+description: Ba thứ project tự động chảy xuống module, và chế độ HTMLOnly
+icon: Network
+---
+
+FUI có hai cấp: **project** (dùng chung) và **module** (một trang). Ba thành phần của project tự
+động chảy xuống mọi module — nhưng theo ba cơ chế **khác nhau**, và đây là chỗ hay nhầm.
+
+## `set` — ghi đè, module thắng
+
+Runtime tính cấu hình hiệu lực `v_Set` bằng:
+
+```js
+$.extend(vueData.v_Set, $projectGroupSetting, $projectData, $moduleUI.set);
+```
+
+Sau ghi đè trước, nên thứ tự ưu tiên là:
+
+```text
+$projectGroupSetting        (cấu hình nhóm project — thấp nhất)
+   ↓ bị ghi đè bởi
+$projectData                (cấu hình project)
+   ↓ bị ghi đè bởi
+set trong JSON của module   ← CAO NHẤT
+   ↓ cuối cùng bị ghi đè bởi
+v_Set.domainSetting[domain hiện tại]
+```
+
+Module **kế thừa toàn bộ** cấu hình project — menu, apiDomain, style, login — và chỉ khai báo
+phần khác biệt. Vì vậy `set` của một trang bình thường thường **rỗng**.
+
+```json
+"set": { "title": "Quản lý sinh viên", "menu": false }
+```
+
+## `imports` — nối vào nhau, không thay thế
+
+Import (JS/CSS) khai ở cấp project **và** cấp module đều được nạp cả.
+
+<Callout type="warn">
+**Thứ tự nạp không phải "framework → project → module".**
+
+Server gộp cả ba phạm vi rồi **sort chung một lần** theo `FileSort, FileName`. Nên một import
+cấp module có `FileSort` nhỏ vẫn nạp **trước** import cấp project.
+
+Phụ thuộc thứ tự phải thể hiện bằng `FileSort`, đừng trông vào phạm vi. Ví dụ `fechart.js` cần
+biến global `echarts` nên `FileSort` của nó phải lớn hơn `echarts.min.js`.
+</Callout>
+
+Import cũng **không tự động** theo component bạn dùng — thêm `f-echart` vào `controls` không tự
+kéo theo thư viện ECharts. Phải đăng ký import cho module.
+[Danh sách component cần import →](/docs/fui/v2/components#component-cần-import-thêm)
+
+## `components` — tự đăng ký global
+
+| Đặt ở | Dùng được ở |
+|---|---|
+| `{projectId}/components/uc-*.vue` | Mọi module trong project |
+| `{moduleId}/components/uc-*.vue` | Chỉ module đó |
+
+Trùng tên thì bản module-scope thắng. FUI tự quét và đăng ký ở cấp global — không cần khai báo gì
+thêm.
+
+[Cách viết `uc-*.vue` →](/docs/fui/v2/kien-truc/custom-component)
+
+## Một module gồm những gì
+
+Trên server, module là những phần tách biệt:
+
+| Phần | Nội dung |
+|---|---|
+| **moduleUI** | JSON: `data` · `watch` · `controls` · `set` |
+| **script** | JavaScript helper cho `FUN` / `EXE` |
+| **header** | Nội dung *bên trong* `<head>` — `<link>`, `<meta>`, `<script>` ngoài |
+| **body** | Nội dung *bên trong* `<body>` |
+| **style** | CSS của cả module |
+
+Cộng thêm `uc-*.vue` ở phạm vi module.
+
+<Callout>
+Meta tag mặc định đã có sẵn trên mọi trang FUI, **đừng khai lại** trong header:
+
+```html
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
+```
+
+Lưu ý `user-scalable=no` — người dùng **không pinch-zoom được**, nên chữ và nút phải đọc/bấm
+được ở cỡ tự nhiên trên điện thoại.
+</Callout>
+
+Đừng đặt thẻ `<title>` trong header — tiêu đề trang quản lý qua `set.title` hoặc metadata module.
+
+## Chế độ HTMLOnly
+
+`HTMLOnly` là một cờ boolean trong metadata của module. **Kiểm tra nó trước tiên** khi bắt đầu
+sửa một module lạ.
+
+| | `HTMLOnly: false` (mặc định) | `HTMLOnly: true` |
+|---|---|---|
+| JSON module | Là cốt lõi — runtime đọc `data`/`watch`/`controls`/`set` | **Bị bỏ qua hoàn toàn** |
+| `body` | Phụ trợ, thường trống | **Toàn bộ nội dung trang** |
+| `header` | Thường chỉ `<link>` CSS | Tự import mọi thư viện cần dùng |
+| Script framework + import project | Server tự chèn | **Không** được chèn |
+| `f-*`, `uc-*.vue`, `vueData` | Dùng được | Không có |
+
+Dùng `HTMLOnly: true` cho trang cần runtime hoặc layout riêng hoàn toàn — landing page, công cụ
+độc lập, trang in.
+
+<Callout type="warn">
+Bật `HTMLOnly: true` là **mất toàn bộ runtime FUI**: không `vueData`, không tự nạp tham số URL,
+không component `f-*`, không auto-đăng ký `uc-*.vue`, không kế thừa cấu hình project.
+
+Đừng bật chỉ để "dễ viết HTML hơn" — nếu chỉ cần một khối giao diện đặc thù thì viết
+`uc-*.vue` rồi gọi từ JSON.
+</Callout>
+
+## Hai chế độ thẩm mỹ
+
+Xác định **trước khi** viết dòng `controls` đầu tiên. Hai chế độ có bộ quy tắc riêng, không vay
+mượn qua lại.
+
+| | **App-mode** (mặc định) | **Web-mode** |
+|---|---|---|
+| Áp dụng cho | Phần mềm quản lý: CRUD, form, danh sách, dashboard | Landing page, trang giới thiệu công khai |
+| Thường đi kèm | `HTMLOnly: false` | `HTMLOnly: true` |
+| Nguồn thẩm mỹ | Chuẩn FUI + [bộ từ vựng đã duyệt](/docs/fui/v2/kien-truc/layout-grid#bộ-từ-vựng-được-duyệt) | Tự do CSS |
+| Style/class tự chế | **Cấm** | Được phép |
+
+Mọi trường hợp không rõ ràng → App-mode.
+
+Giới hạn `border-radius` áp dụng cho **cả hai** chế độ:
+
+| Loại khung | Tối đa |
+|---|---|
+| Khung lớn (card, dialog, panel chính) | `12px` |
+| Khung vừa (button lớn, input group, toolbar) | `8px` |
+| Khung nhỏ (button nhỏ, chip, badge, tag) | `6px` |
+
+Ngoại lệ: phần tử tròn hoàn toàn (avatar, icon button dạng chấm) dùng `border-radius: 50%`.

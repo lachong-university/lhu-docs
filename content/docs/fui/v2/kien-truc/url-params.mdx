@@ -1,0 +1,155 @@
+---
+title: Tham số URL
+description: Query string tự nạp vào vueData — và cái bẫy thứ tự khiến nó biến mất
+icon: Link
+---
+
+FUI tự đọc query string và gán **thẳng mỗi tham số lên `vueData`**. Không cần plugin, không
+cần `$route`, không cần `URLSearchParams`.
+
+```text
+/ex/MyModule?menu=0&mode=edit&id=123
+
+→ vueData.menu = "0"
+→ vueData.mode = "edit"
+→ vueData.id   = "123"
+```
+
+<Callout type="warn">
+Giá trị **luôn là chuỗi**. `?id=123` cho `"123"` chứ không phải `123`. So sánh nhớ dùng `==`
+hoặc ép kiểu bằng `Number(id)`.
+</Callout>
+
+Ngoài ra runtime còn cung cấp sẵn:
+
+| Biến | Nội dung |
+|---|---|
+| `vueData.p_params` | Query string thô, ví dụ `"?id=123"` |
+| `vueData.p_router` | Đường dẫn, đã bỏ phần query |
+| `vueData.p_routers` | Đường dẫn tách thành mảng các đoạn |
+| `vueData.p_domain` | Hostname hiện tại |
+
+## Cái bẫy thứ tự
+
+Đây là lỗi hay gặp nhất khi làm việc với tham số URL.
+
+```text
+buildParamURL()              ← query string nạp vào vueData
+        ↓
+runAction($moduleUI.data)    ← data[] chạy
+        ↓
+buildModuleUI(controls)      ← dựng DOM
+```
+
+Tham số URL nằm trên `vueData` **trước khi** `data[]` chạy. Nên khai báo lại biến đó trong
+`data[]` sẽ **xoá mất giá trị từ URL**:
+
+```json
+// ❌ SAI — ?id=123 bị xoá thành chuỗi rỗng
+"data": [
+  { "id": "", "dsItem": [] }
+]
+```
+
+Phải bọc guard:
+
+```json
+// ✅ ĐÚNG
+"data": [
+  { "IF": "typeof id == 'undefined'", "THEN": { "id": "`0" } },
+  { "dsItem": [] }
+]
+```
+
+Chú ý hai điểm trong guard:
+
+- `typeof id == 'undefined'` — kiểm tra bằng `typeof` để không ném ReferenceError khi biến chưa
+  tồn tại
+- `` "`0" `` — [backtick bắt buộc](/docs/fui/v2/kien-truc/value-resolution), nếu không `"0"`
+  sẽ bị eval
+
+<Callout>
+Guard này nên là **phần tử đầu tiên** của `data[]`, để các action phía sau đã thấy giá trị
+đúng.
+</Callout>
+
+## Làm cho tham số URL trở nên reactive
+
+Khai báo nó trong `watch` — runtime sẽ khai báo trước biến đó trên `vueData` trước khi
+`new Vue()` chạy:
+
+```json
+"watch": {
+  "id": { "CALL": "apiChiTiet" }
+}
+```
+
+## Hành động ngay khi trang load theo tham số
+
+Đặt một action `IF` ở **đầu** `data[]`:
+
+```json
+"data": [
+  { "IF": "typeof menu != 'undefined' && menu == '0'", "THEN": { "v_Set.menu": false } },
+  { "IF": "typeof id != 'undefined'", "THEN": { "CALL": "apiChiTiet" } }
+]
+```
+
+Ví dụ đầu tắt header menu khi URL có `?menu=0` — hữu ích khi nhúng trang vào iframe.
+
+## Đổi URL mà không tải lại trang
+
+```json
+{ "EXE": "pushRouter('/ex/bao-cao?pid=' + pid)" }
+```
+
+Ghép với `watch` để thanh địa chỉ luôn phản ánh trạng thái hiện tại, người dùng copy link là
+chia sẻ được đúng màn hình đang xem.
+
+`redirect(obj, query)` thì khác — nó **tải lại trang thật**. Truyền `query: true` để giữ nguyên
+query string hiện tại sang trang đích.
+
+## Ví dụ thật: gallery của tài liệu này
+
+Toàn bộ [thư viện component](/docs/fui/v2/components) chạy trên **một module duy nhất**, chọn
+demo bằng `?template=`. Đây là phần cốt lõi của nó:
+
+```json
+{
+  "data": [
+    {
+      "IF": "typeof template == 'undefined' || template == ''",
+      "THEN": { "template": "`f-button" }
+    }
+  ],
+
+  "watch": {
+    "template": { "EXE": "pushRouter('/ex/fui-v2?template=' + template)" }
+  },
+
+  "controls": [
+    {
+      "prop": { "v-if": "vueData.template=='f-button'", "fluid": "", "grid-list-md": "" },
+      "rows": [ ]
+    },
+    {
+      "prop": { "v-if": "vueData.template=='f-table'", "fluid": "", "grid-list-md": "" },
+      "rows": [ ]
+    }
+  ]
+}
+```
+
+Ba mảnh ghép:
+
+1. **Guard** đặt mặc định mà không phá giá trị từ URL
+2. **`watch`** làm `template` reactive và đồng bộ thanh địa chỉ khi đổi demo
+3. **`v-if` trên `prop` của container** chọn nhánh giao diện cần hiện
+
+Mở thử: [`?template=f-button`](https://fui.vn/ex/fui-v2?template=f-button) ·
+[`?template=f-table`](https://fui.vn/ex/fui-v2?template=f-table)
+
+<Callout type="warn">
+Cách này dựng **sẵn toàn bộ** các nhánh rồi mới ẩn bớt bằng `v-if`. Với một gallery thì không
+sao, nhưng nếu có hàng chục nhánh nặng thì nên tách thành nhiều module thay vì gom một chỗ.
+</Callout>
