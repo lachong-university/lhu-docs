@@ -1,0 +1,217 @@
+---
+title: Master–detail
+description: Mẫu chọn dòng bảng trái, hiển thị detail phải và sửa nhanh trong FUI V3
+icon: Columns2
+---
+
+Mẫu master–detail chia màn hình: bảng trái là danh sách, panel phải là chi tiết của dòng chọn.
+
+## JSON hoàn chỉnh
+
+```json
+{
+  "data": [
+    {
+      "filter": { "tuKhoa": "" },
+      "dsDonHang": [],
+      "donHangChon": null,
+      "dsChiTiet": []
+    },
+    {
+      "apiDanhSach": {
+        "API": "/api/donhang/list",
+        "IN": { "TuKhoa": "filter.tuKhoa" },
+        "OUT": "dsDonHang"
+      },
+      "apiChiTiet": {
+        "API": "/api/donhang/detail",
+        "IN": { "DonHangID": "donHangChon.ID" },
+        "OUT": "dsChiTiet"
+      },
+      "chonDonHang": [{ "donHangChon": "$row" }, { "CALL": "apiChiTiet" }],
+      "luuDonHang": {
+        "API": "/api/donhang/update",
+        "IN": { "ID": "donHangChon.ID", "jsonObj": "donHangChon" },
+        "CALLBACK": [{ "MESS": "Đã lưu" }, { "CALL": "apiDanhSach" }]
+      }
+    },
+    { "CALL": "apiDanhSach" }
+  ],
+  "watch": {
+    "filter.tuKhoa": { "CALL": "apiDanhSach" }
+  },
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "v-text-field",
+              "w": 4,
+              "attr": {
+                "v-model": "filter.tuKhoa",
+                "label": "Tìm đơn hàng",
+                ":required": false
+              }
+            }
+          ]
+        },
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-table",
+              "w": 7,
+              "attr": {
+                "label": "Đơn hàng",
+                ":items": "dsDonHang",
+                "item-key": "ID",
+                ":height": -16,
+                "v-on:click:row": "CALL(vueData.chonDonHang, { $row: $event })",
+                ":item-class": "item => item.ID == (vueData.donHangChon && vueData.donHangChon.ID) ? 'primary lighten-5' : ''",
+                ":headers": [
+                  { "text": "Mã đơn", "value": "MaDon", "width": "120px" },
+                  { "text": "Khách hàng", "value": "TenKhachHang" },
+                  {
+                    "text": "Ngày",
+                    "value": "NgayDat",
+                    "align": "center",
+                    "width": "110px",
+                    "el": "t-time"
+                  },
+                  {
+                    "text": "Tổng tiền",
+                    "value": "TongTien",
+                    "align": "right",
+                    "width": "140px",
+                    "el": "t-num",
+                    "attr": { "format": "0,0" }
+                  }
+                ]
+              }
+            },
+            {
+              "el": "v-card",
+              "w": 5,
+              "col": { "v-if": "vueData.donHangChon" },
+              "attr": { "class": "pa-2" },
+              "innerHTML": [
+                {
+                  "el": "f-title",
+                  "attr": { "label": "Chi tiết đơn {{donHangChon.MaDon}}" }
+                },
+                {
+                  "el": "v-text-field",
+                  "attr": {
+                    "v-model": "donHangChon.TenKhachHang",
+                    "label": "Khách hàng",
+                    "class": "mt-3",
+                    ":required": true
+                  }
+                },
+                {
+                  "el": "v-text-field",
+                  "attr": {
+                    "v-model": "donHangChon.DienThoai",
+                    "label": "Điện thoại",
+                    "class": "mt-2",
+                    ":required": false
+                  }
+                },
+                {
+                  "el": "v-textarea",
+                  "attr": {
+                    "v-model": "donHangChon.DiaChi",
+                    "label": "Địa chỉ giao",
+                    "rows": "2",
+                    "class": "mt-2",
+                    ":required": false
+                  }
+                },
+                {
+                  "el": "f-table",
+                  "attr": {
+                    "label": "Mặt hàng",
+                    ":items": "dsChiTiet",
+                    "item-key": "ID",
+                    "class": "mt-3",
+                    ":show-search": false,
+                    ":headers": [
+                      { "text": "Tên hàng", "value": "TenHang" },
+                      {
+                        "text": "SL",
+                        "value": "SoLuong",
+                        "align": "right",
+                        "width": "70px",
+                        "el": "t-num"
+                      },
+                      {
+                        "text": "Thành tiền",
+                        "value": "ThanhTien",
+                        "align": "right",
+                        "width": "120px",
+                        "el": "t-num",
+                        "attr": { "format": "0,0" }
+                      }
+                    ],
+                    ":sum-format": { "ThanhTien": "0,0" }
+                  }
+                },
+                {
+                  "el": "div",
+                  "attr": { "class": "d-flex justify-end mt-3" },
+                  "innerHTML": [
+                    {
+                      "el": "f-button",
+                      "attr": {
+                        "label": "Lưu",
+                        "icon-text": "mdi-content-save",
+                        ":ctrlhotkey": 83,
+                        ":action": { "CALL": "luuDonHang" }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "el": "v-card",
+              "w": 5,
+              "col": { "v-if": "!vueData.donHangChon" },
+              "attr": { "class": "pa-4 text-center grey--text" },
+              "innerHTML": "Chọn một đơn hàng để xem chi tiết"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": { "title": "Master-detail đơn hàng" }
+}
+```
+
+## Cơ chế chọn dòng
+
+`f-table` phát `click:row` và dùng `CALL` để gọi action chọn dòng:
+
+```json
+"v-on:click:row": "CALL(vueData.chonDonHang, { $row: $event })"
+```
+
+Sau đó action tách ra hai bước: gán `donHangChon` rồi gọi `apiChiTiet`.
+
+## Tô màu dòng
+
+Dùng `:item-class` để highlight dòng đang chọn.
+
+## Panel chi tiết
+
+Đặt `v-if` lên `col` thay vì `attr` để cả cột bị ẩn khi chưa có dòng nào.
+
+## Lưu ý
+
+- `v-model` trong panel chi tiết trỏ thẳng vào `donHangChon.Field`.
+- Nếu không muốn sửa trực tiếp dữ liệu danh sách, clone object ở bước chọn: `donHangChon: "_.cloneDeep($row)"`.
+- `f-table` ở panel phải khai `item-key` và `:headers` rõ ràng.

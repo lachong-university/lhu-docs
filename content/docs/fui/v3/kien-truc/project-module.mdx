@@ -1,0 +1,81 @@
+---
+title: Project và Module
+description: Cách cấu hình project chảy xuống module và khác biệt HTMLOnly trong FUI V3
+icon: Network
+---
+
+FUI V3 có hai cấp cấu hình: **project** và **module**.
+Project chứa cấu hình chung, module chứa JSON `data`, `watch`, `controls`, `set`.
+
+## `set` của module thắng
+
+Runtime V3 merge cấu hình theo thứ tự:
+
+```text
+project group → project → module set → domain override
+```
+
+Nghĩa là module chỉ cần khai phần khác với project.
+
+```json
+"set": {
+  "title": "Trang báo cáo",
+  "menu": false
+}
+```
+
+## `set` module thường bỏ trống
+
+Nếu trang chỉ hiển thị một module bình thường thì `set` có thể rỗng.
+Project đã cung cấp menu, apiDomain, theme, login, userInfo.
+
+## Import không tự động theo component
+
+FUI V3 vẫn giữ nguyên cơ chế import của V2: component FUI có thể cần thêm script/CSS.
+Thêm import ở dự án hoặc module, không trông chờ runtime kéo tự động.
+
+Ví dụ:
+
+- `f-echart` cần `/include/chart/echarts.min.js` và `/include/chart/fechart.js`
+- `f-sheet` cần AG Grid CSS/JS
+- `f-pdfmake` cần pdfmake + print + vfs_fonts
+
+## `uc-*` tự đăng ký global
+
+`uc-*.vue` đặt ở project hoặc module đều được quét và đăng ký global.
+Project-scope dùng được mọi module, module-scope chỉ dùng trong module đó.
+
+## Một module bao gồm
+
+| Phần         | Nội dung                                        |
+| ------------ | ----------------------------------------------- |
+| `moduleUI`   | JSON `data`, `watch`, `controls`, `set`         |
+| `script`     | JavaScript helper cho `FUN`, `EXE`, `attr`      |
+| `header`     | Import CSS/JS, meta tag, style module           |
+| `body`       | HTML body nếu cần thêm wrapper hoặc placeholder |
+| `style`      | CSS module chung                                |
+| `components` | `uc-*.vue` tùy chỉnh                            |
+
+## Chế độ `HTMLOnly`
+
+`HTMLOnly` là cờ metadata. Khi bật, FUI không dùng runtime module JSON.
+
+| `HTMLOnly` | Fallback                                                    |
+| ---------- | ----------------------------------------------------------- |
+| `false`    | Dùng JSON và runtime FUI                                    |
+| `true`     | Dùng HTML / JS thủ công, không có `vueData`, không có `f-*` |
+
+Chỉ bật khi trang cần layout hoặc chức năng cầu kỳ mà JSON FUI không phù hợp.
+
+<Callout type="warn">
+  `HTMLOnly: true` là mất toàn bộ runtime FUI. Đừng bật chỉ để tránh viết JSON.
+</Callout>
+
+## Hai phong cách thiết kế
+
+FUI V3 tiếp tục phân biệt hai kiểu:
+
+- App-mode: phần mềm quản lý, dùng JSON, component FUI, chuẩn layout.
+- Web-mode: landing page hoặc microsite, thường `HTMLOnly` và layout tự do.
+
+Với FUI V3, nếu không rõ thì chọn App-mode.

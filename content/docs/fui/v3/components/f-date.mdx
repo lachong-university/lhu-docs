@@ -1,0 +1,90 @@
+---
+title: f-date
+description: Nhập ngày cho FUI V3 — mask, picker và validate mặc định của FUI
+icon: Calendar
+---
+
+`f-date` là component nhập ngày chuẩn của FUI V3. Nó bọc field nhập và date picker, cho phép người
+dùng gõ ngày hoặc chọn bằng lịch.
+
+## Khi dùng
+
+Dùng `f-date` cho mọi field ngày trong filter, form, dialog và `update-form` của `f-table`. Không
+dùng `v-text-field` rồi tự parse ngày nếu chỉ cần nhập ngày thông thường.
+
+## Demo
+
+<FuiPreview template="f-date" height={300} />
+
+## Props chính
+
+| Prop | Kiểu | Ghi chú |
+|---|---|---|
+| `v-model` | string \| null | Giá trị ngày bind vào `vueData` hoặc field form |
+| `label` | string | Nhãn field |
+| `required` | boolean | Mặc định thường dùng như field bắt buộc; filter nên đặt `false` |
+| `date-add` | number | Set ngày mặc định tương đối khi khởi tạo; `0` hôm nay, `-7` bảy ngày trước |
+| `picker` | object | Props truyền xuống date picker |
+| `clearable` | boolean | Cho phép xóa giá trị |
+
+## Cách dùng tối giản
+
+```json
+{
+  "el": "f-date",
+  "w": 3,
+  "attr": {
+    "v-model": "filter.tuNgay",
+    "label": "Từ ngày",
+    ":required": false,
+    ":date-add": -7
+  }
+}
+```
+
+## Dùng trong filter
+
+```json
+{
+  "data": [
+    { "filter": { "tuNgay": null, "denNgay": null } },
+    {
+      "apiLoad": {
+        "API": "/api/baocao/list",
+        "IN": {
+          "TuNgay": "filter.tuNgay",
+          "DenNgay": "filter.denNgay"
+        },
+        "OUT": "rows"
+      }
+    }
+  ],
+  "watch": {
+    "filter.tuNgay": { "CALL": "apiLoad" },
+    "filter.denNgay": { "CALL": "apiLoad" }
+  }
+}
+```
+
+## Dùng trong `f-table update-form`
+
+Trong `update-form`, `v-model` trỏ thẳng field của dòng đang sửa, không cần `vueData.`:
+
+```json
+{
+  "el": "f-date",
+  "w": 12,
+  "attr": {
+    "v-model": "NgayVao",
+    "label": "Ngày vào",
+    ":required": false
+  }
+}
+```
+
+## Cạm bẫy
+
+- Ô lọc ngày phải đặt `":required": false`, nếu không validate form có thể chặn nút tìm kiếm.
+- `date-add` chỉ set giá trị lúc init, không phải watcher tự cộng ngày mỗi lần render.
+- Trong `controls`, biểu thức hiển thị cần prefix `vueData.`; trong `data[]` action mapping thì không.
+- Không dùng `@change`; event JSON phải viết dạng `v-on:*`.

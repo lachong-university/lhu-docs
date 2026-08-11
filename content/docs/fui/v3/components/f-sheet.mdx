@@ -1,0 +1,105 @@
+---
+title: f-sheet
+description: Bảng nhập liệu kiểu Excel trong FUI V3 — AG Grid, sửa trực tiếp và export
+icon: Sheet
+---
+
+`f-sheet` là lưới nhập liệu kiểu Excel, dựng trên **AG Grid Community**. Nó dùng cho nghiệp vụ cần
+sửa nhiều dòng trực tiếp, dán dữ liệu từ Excel, thêm/xóa dòng và lưu hàng loạt.
+
+## Khi dùng
+
+Dùng `f-sheet` khi người dùng cần nhập liệu theo bảng: điểm, định mức, kế hoạch, bảng kê, cấu hình
+nhiều dòng. Nếu nghiệp vụ chỉ xem dữ liệu hoặc sửa bằng form dialog, dùng `f-table`.
+
+## Demo
+
+<FuiPreview template="f-sheet" height={480} />
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu AG Grid thì `f-sheet` không render đúng.
+
+```text
+1. /include/ag-grid/ag-grid.min.css
+2. /include/ag-grid/ag-theme-alpine.min.css
+3. /include/ag-grid/ag-grid-community.min.js
+```
+</Callout>
+
+## Props chính
+
+| Prop | Ghi chú |
+|---|---|
+| `items` | Mảng dữ liệu dòng |
+| `columns` | Mảng `colDef` của AG Grid |
+| `row-key` | Khóa chính, bắt buộc để theo dõi dòng |
+| `allow-add` | Hiện nút thêm dòng |
+| `allow-delete` | Cho phép xóa dòng đã chọn |
+| `readonly` | Khóa toàn bộ lưới |
+| `height` | Cùng quy tắc với `f-table`; bảng chính nên dùng `-16` |
+| `update-api` | Endpoint lưu thay đổi |
+| `delete-api` | Endpoint xóa dòng |
+| `save-extra` | Tham số phụ gửi kèm khi lưu |
+| `default-item` | Giá trị mẫu cho dòng mới |
+
+## Định nghĩa cột
+
+`columns` dùng cấu hình AG Grid, nên có thể dùng `field`, `headerName`, `editable`, `width`,
+`minWidth`, `flex`, `pinned`, `cellEditor`, `valueFormatter`, `valueGetter`.
+
+FUI thêm shortcut `type: "number"` để căn phải, format nghìn và parse số khi nhập.
+
+## Ví dụ nhập điểm
+
+```json
+{
+  "el": "f-sheet",
+  "w": 12,
+  "attr": {
+    "label": "Bảng điểm",
+    ":items": "dsBangDiem",
+    "row-key": "DiemID",
+    ":allow-add": true,
+    ":allow-delete": true,
+    ":height": -16,
+    ":columns": [
+      { "field": "MaSV", "headerName": "Mã SV", "editable": false, "width": 120, "pinned": "left" },
+      { "field": "HoTen", "headerName": "Họ tên", "editable": false, "minWidth": 180, "flex": 1 },
+      { "field": "Diem", "headerName": "Điểm", "type": "number", "width": 120 },
+      { "field": "NgayThi", "headerName": "Ngày thi", "cellEditor": "fsheetDate", "width": 140 }
+    ],
+    "update-api": "/api/diem/save",
+    "delete-api": "/api/diem/delete",
+    ":save-extra": { "LopID": "vueData.lopID" },
+    ":default-item": { "Diem": 0 }
+  }
+}
+```
+
+## Nối với API load
+
+```json
+{
+  "data": [
+    { "dsBangDiem": [] },
+    {
+      "apiLoad": {
+        "API": "/api/diem/list",
+        "IN": { "LopID": "lopID" },
+        "OUT": "dsBangDiem"
+      }
+    },
+    { "CALL": "apiLoad" }
+  ]
+}
+```
+
+## Cạm bẫy
+
+- `row-key` là bắt buộc; thiếu khóa thì FUI không phân biệt được dòng mới, dòng sửa và dòng xóa.
+- `allow-add`/`allow-delete` chỉ bật UI; vẫn cần `update-api` hoặc `delete-api`.
+- `cellEditor: "fsheetDate"` vẫn lưu field dạng chuỗi ngày.
+- Không tự viết `uc-*.vue` để làm bảng nhập liệu nếu `f-sheet` đáp ứng được.
+- Bảng chính nên dùng `":height": -16` để tránh cả trang cuộn thay vì chỉ lưới cuộn.

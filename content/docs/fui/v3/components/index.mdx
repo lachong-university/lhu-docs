@@ -1,0 +1,78 @@
+---
+title: Components
+description: Các component FUI V3 và cách dùng chúng
+icon: Component
+---
+
+FUI V3 dựng giao diện bằng `module.json.controls`. Mỗi control là một component được khai bằng
+`el`, đặt trong grid `container > rows > cols`, và nhận props/event qua `attr`.
+
+## Cấu trúc component
+
+FUI V3 dùng bốn nhóm component:
+
+- `f-*`: component FUI có sẵn, bọc logic action, API, bảng, form, dialog, chart, upload.
+- `t-*`: renderer trong ô của `f-table`, chỉ dùng trong `headers`.
+- `v-*`: Vuetify 3, dùng khi không có FUI equivalent hoặc cần layout/field cơ bản.
+- `uc-*`: component tự viết bằng Vue, đặt trong project/module và gọi như component thường.
+
+## Gọi component trong JSON
+
+Trong `module.json`, `el` dùng kebab-case. Props tĩnh viết thường, props động thêm `:`, event viết
+đầy đủ `v-on:*`.
+
+```json
+{
+  "el": "f-button",
+  "w": 3,
+  "attr": {
+    "label": "Lưu",
+    ":checkvalid": true,
+    ":action": { "CALL": "saveForm" }
+  }
+}
+```
+
+`uc-*` không cần khai báo trong `components`; FUI tự đăng ký từ file `.vue`.
+
+```json
+{ "el": "uc-user-card", "w": 12, "attr": { ":items": "dsUsers" } }
+```
+
+## Danh mục nhanh
+
+| Trang | Nội dung |
+|---|---|
+| `f-button` | Nút chạy action FUI, validate form, hotkey, chống double-click |
+| `f-date` | Nhập ngày bằng mask + picker |
+| `f-table` | Bảng dữ liệu, CRUD dialog, search, Excel |
+| `table-cells` | Renderer `t-*` trong ô bảng |
+| `f-echart` | Biểu đồ Apache ECharts V5 |
+| `f-sheet` | Lưới nhập liệu kiểu Excel dựa trên AG Grid |
+| `input-controls` | `f-time`, `f-search`, `f-menu`, radio, upload, QR, Excel reader |
+| `display-dialog` | Label, box, title/header, dialog, window, editor, PDF |
+
+## Import bắt buộc
+
+Một số component không tồn tại nếu thiếu import JS/CSS:
+
+| Component | Import |
+|---|---|
+| `f-echart` | `/include/chart/echarts.min.js`, rồi `/include/chart/fechart.js` |
+| `f-sheet` | AG Grid CSS, theme CSS, `ag-grid-community.min.js` |
+| `f-pdfmake` | `pdfmake.min.js`, `print.min.js`, `vfs_fonts.js` |
+| `f-editor`, `f-editor-dialog` | `/include/ckeditor5/build/ckeditor.js` |
+| `f-file-upload` | `/include/plupload-2.3.7/plupload.full.min.js` |
+| `f-image-update` | cropper JS + CSS |
+| `f-qrcode`, `f-qrcode-reader` | thư viện QR tương ứng |
+
+Các component như `f-button`, `f-date`, `f-time`, `f-search`, `f-menu`, `f-table`, `f-dialog`,
+`f-label`, `f-box`, `f-header`, `f-title`, `f-excel-reader` đã bundled sẵn.
+
+## Quy tắc cần nhớ
+
+- `controls` luôn nằm trong grid wrapper, không đặt component ở gốc.
+- Event trong JSON dùng `v-on:click`, không dùng `@click`.
+- Slot trong JSON dùng `v-slot:*`, không dùng `#`.
+- Không dùng key `children`; lồng component bằng `innerHTML`.
+- Ưu tiên `f-*` trước `v-*` khi FUI đã có component tương đương.

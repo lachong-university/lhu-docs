@@ -1,0 +1,77 @@
+---
+title: Script
+description: Sử dụng script và helper trong module FUI V3
+disableToc: true
+icon: CodeBraces
+---
+
+FUI V3 cho phép khai `script` để chứa helper JavaScript dùng trong `FUN`, `EXE`, `attr`, hoặc `v-on`.
+
+## Khi nào dùng `script`
+
+- Cần hàm riêng để tái sử dụng trong nhiều control.
+- Cần logic phức tạp không nên viết trên một dòng `EXE`.
+- Cần định nghĩa `FUN` cho action JSON.
+
+## Cấu trúc `script`
+
+`script` là JavaScript thuần trong module, thường chứa hàm và biến helper.
+
+```js
+function tinhTienSauThue(item) {
+  if (!item || typeof item.Gia !== 'number') return 0;
+  return item.Gia * 1.1;
+}
+
+function openDetail(row) {
+  CALL({
+    API: '/api/chi-tiet',
+    IN: { ID: row.ID },
+    CALLBACK: { CALL: 'loadData' }
+  });
+}
+```
+
+Nếu cần binder cho control, gọi trực tiếp từ `attr`:
+
+```json
+{
+  "el": "f-button",
+  "attr": {
+    "label": "Chi tiết",
+    ":action": { "CALL": "openDetail(row)" }
+  }
+}
+```
+
+## Hạn chế
+
+- `script` không phải là module ES. Không dùng `import`/`export`.
+- Biến global nếu đặt trực tiếp sẽ vào scope module, nên ưu tiên hàm thuần.
+- Không dùng `async` / `await` nếu runtime FUI chưa hỗ trợ; dùng callback truyền vào `ajaxCALL`.
+
+## Dùng trong `FUN`
+
+Một hàm `script` có thể gọi từ `FUN`:
+
+```json
+"FUN": "function(){ return tinhTienSauThue(vueData.selectedRow); }"
+```
+
+Hoặc dùng kiểu object action:
+
+```json
+{
+  "EL": "f-button",
+  "ATTR": {
+    "label": "Tính",
+    ":action": { "CALL": "setAmount" }
+  }
+}
+```
+
+## Lưu ý
+
+- `script` là nơi tốt để gom các helper dùng nhiều lần.
+- Nếu logic chỉ dùng một lần, `EXE` vẫn là hợp lý.
+- Ép kiểu chuỗi và dùng `CALL` để gọi hàm giúp tránh lỗi `undefined` khi script chưa load.

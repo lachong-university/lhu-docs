@@ -1,0 +1,184 @@
+---
+title: Table cells
+description: Renderer t-* trong ô f-table FUI V3 — label, số, toggle, select, menu, link và button
+icon: Rows3
+---
+
+Các component `t-*` chỉ dùng trong `headers` của `f-table`. Khi cột có `el`, FUI sinh slot cell
+tương ứng và truyền context gồm `item` và `vueData`.
+
+## Khung cột có renderer
+
+```json
+{
+  "title": "Trạng thái",
+  "key": "Active",
+  "align": "center",
+  "width": "120px",
+  "el": "t-check",
+  "attr": {
+    "on-icon": "mdi-check",
+    "off-icon": "mdi-lock",
+    ":action": { "CALL": "toggleActive" }
+  }
+}
+```
+
+## Renderer hiển thị
+
+| Renderer | Dùng khi |
+|---|---|
+| `t-html` | Nội dung HTML đã kiểm soát |
+| `t-label` | Chip/tag/trạng thái |
+| `t-num` | Số, tiền, phần trăm; format bằng `numeral` |
+| `t-time` | Ngày giờ/thời gian cần format |
+| `t-boolean` | Hiển thị boolean dạng icon/label |
+
+Ví dụ số:
+
+```json
+{
+  "title": "Doanh thu",
+  "key": "DoanhThu",
+  "align": "end",
+  "el": "t-num",
+  "attr": { "format": "0,0" }
+}
+```
+
+## t-check
+
+`t-check` dùng cho toggle trong cell, thường gọi API rồi reload bảng.
+
+```json
+{
+  "title": "Active",
+  "key": "Enable",
+  "align": "center",
+  "el": "t-check",
+  "attr": {
+    "on-icon": "mdi-check",
+    "off-icon": "mdi-lock",
+    ":action": [
+      { "API": "/api/user/set-active", "IN": { "UserID": "item.UserID" } },
+      { "CALL": "loadUsers" }
+    ]
+  }
+}
+```
+
+## t-select và t-combobox
+
+Dùng để sửa nhanh một field ngay trong bảng.
+
+```json
+{
+  "title": "Quyền",
+  "key": "RoleID",
+  "width": "220px",
+  "el": "t-select",
+  "attr": {
+    ":items": "vueData.roles",
+    "item-title": "RoleName",
+    "item-value": "RoleID",
+    ":action": {
+      "API": "/api/user/update-role",
+      "IN": {
+        "UserID": "item.UserID",
+        "RoleID": "item.RoleID"
+      },
+      "CALLBACK": { "MESS": "Đã cập nhật" }
+    }
+  }
+}
+```
+
+`t-combobox` dùng khi người dùng được nhập giá trị ngoài danh sách.
+
+## t-menu
+
+`t-menu` là menu tác vụ trong từng dòng. Nên khai items trong `data[]` để dễ tái sử dụng.
+
+```json
+{
+  "menuDong": [
+    {
+      "text": "Xem chi tiết",
+      "icon-text": "mdi-eye",
+      "action": [
+        { "selectedRow": "item" },
+        { "detailDialog": true }
+      ]
+    },
+    {
+      "text": "Phân quyền",
+      "icon-text": "mdi-shield-account",
+      "action": {
+        "FUN": "openWindow",
+        "IN": {
+          "id": "`winRole",
+          "title": "`Phân quyền",
+          "url": "`/role?UserID=${item.UserID}"
+        }
+      }
+    }
+  ]
+}
+```
+
+```json
+{
+  "title": "Tác vụ",
+  "key": "actions",
+  "align": "center",
+  "width": "100px",
+  "el": "t-menu",
+  "attr": { ":items": "vueData.menuDong" }
+}
+```
+
+## t-link và t-button
+
+`t-link` dùng cho điều hướng; `t-button` dùng khi cần nút/icon chạy action trong cell.
+
+```json
+{
+  "title": "Hồ sơ",
+  "key": "ProfileUrl",
+  "el": "t-link",
+  "attr": {
+    "title": "Xem",
+    "url": "/profile",
+    "target": "_blank"
+  }
+}
+```
+
+```json
+{
+  "title": "Khóa",
+  "key": "Locked",
+  "align": "center",
+  "el": "t-button",
+  "attr": {
+    "color": "primary",
+    ":icon-text": "`${item.Locked ? 'mdi-lock' : 'mdi-lock-open'}`",
+    ":action": { "CALL": "toggleLock" }
+  }
+}
+```
+
+## ctrl-update
+
+`ctrl-update` không phải component `t-*`, nhưng là cột đặc biệt để bật CRUD mặc định của `f-table`.
+
+```json
+{ "title": "Cập nhật", "key": "ctrl-update", "align": "center", "width": "120px" }
+```
+
+## Cạm bẫy
+
+- Renderer `t-*` chỉ có ý nghĩa trong `headers` của `f-table`.
+- Action trong cell dùng context `item`; muốn đọc state module thì dùng `vueData.xxx`.
+- Với Vuetify 3, ưu tiên header `title`/`key`; ví dụ cũ `text`/`value` cần kiểm tra trước khi dùng.
+- Không nhồi quá nhiều nút vào bảng; từ hai tác vụ trở lên nên dùng `t-menu`.

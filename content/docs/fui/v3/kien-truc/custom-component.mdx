@@ -1,0 +1,143 @@
+---
+title: Component riêng (uc-*.vue)
+description: Viết component Vue của bạn và gọi lại từ JSON trong FUI V3
+ticon: Puzzle
+---
+
+JSON lo phần _dữ liệu, API, phân quyền, điều hướng_. Khi cần một khối giao diện mà `f-*` và
+`v-*` không làm được, viết `uc-*.vue` và gọi nó từ JSON bằng một dòng.
+
+```json
+{
+  "el": "uc-user-card",
+  "w": 12,
+  "attr": { ":items": "dsUsers", "label": "Khách hàng" }
+}
+```
+
+## Khi nào tách ra component
+
+- `controls` quá dài, khó đọc.
+- Cùng một khối giao diện được tái sử dụng nhiều nơi.
+- Cần logic hiển thị phức tạp: drag/drop, canvas, layout động, animation.
+- Cần tách UI ra khỏi logic `data` / `watch` để test dễ hơn.
+
+## Vị trí file
+
+| Vị trí                                   | Phạm vi | Dùng được ở             |
+| ---------------------------------------- | ------- | ----------------------- |
+| `modules/{moduleId}/components/uc-*.vue` | module  | Chỉ trong module đó     |
+| `{projectId}/components/uc-*.vue`        | project | Mọi module cùng project |
+
+Bạn không cần import thủ công — FUI tự quét và đăng ký toàn bộ component `uc-*` ở phạm vi global.
+
+## Ba quy tắc bắt buộc
+
+<Callout type="error">
+1. Không khai `name:` trong component.
+2. Không khai `components: { ... }`.
+3. Tên file phải bắt đầu bằng `uc-` và dùng kebab-case.
+</Callout>
+
+```js
+// ❌ SAI
+export default {
+  name: 'uc-user-card',
+  components: { 'uc-badge': UcBadge },
+  props: { ... }
+}
+
+// ✅ ĐÚNG
+export default {
+  props: { title: String, items: Array }
+}
+```
+
+## Props
+
+Khai bằng camelCase trong component, gọi bằng kebab-case từ JSON.
+
+```js
+props: {
+  title: { type: String, default: '' },
+  items: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false }
+}
+```
+
+```json
+{
+  "el": "uc-user-card",
+  "w": 12,
+  "attr": {
+    "title": "Danh sách khách hàng",
+    ":items": "dsUsers",
+    ":loading": "loading"
+  }
+}
+```
+
+### Chú ý chuỗi
+
+- Chuỗi có dấu cách: an toàn.
+- Chuỗi không có dấu cách: bị eval.
+
+```json
+"type": "`user-card" // chuỗi thật
+"type": "userCard"    // eval biến userCard
+```
+
+## Emit và event
+
+Luôn emit lên cha — `uc-*` không sửa thẳng `vueData` của module.
+
+```js
+methods: {
+  select(item) {
+    this.$emit('input', item.id);
+    this.$emit('select', item);
+  }
+}
+```
+
+Gọi từ JSON bằng `v-on:` đầy đủ.
+
+```json
+{
+  "el": "uc-user-card",
+  "attr": {
+    ":items": "dsUsers",
+    "v-model": "selectedUser",
+    "v-on:select": "CALL(vueData.onSelect, { item: $event })"
+  }
+}
+```
+
+## Slot
+
+`uc-*` có thể expose slot. Slot trong JSON phải dùng `v-slot:` chứ không dùng `#`.
+
+```json
+{
+  "el": "uc-user-card",
+  "attr": { ":items": "dsUsers", "v-slot:empty": "" },
+  "innerHTML": "Chưa có khách hàng"
+}
+```
+
+## Lưu ý CSS
+
+FUI V3 không compile SFC. `<style scoped>` không được scope thực sự, nên dùng selector có tiền tố
+riêng để tránh rò CSS.
+
+```css
+.uc-user-card {
+}
+.uc-user-card .title {
+}
+```
+
+## Kết luận
+
+Component `uc-*` là công cụ khi JSON không còn đủ. Dùng `f-*` nếu FUI đã hỗ trợ, chỉ tách component
+khi cần reuse hoặc khi UI phức tạp.

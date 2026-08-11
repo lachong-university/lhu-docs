@@ -1,0 +1,201 @@
+---
+title: Input controls
+description: Các component nhập liệu và tương tác FUI V3 — time, search, menu, radio, upload, QR, Excel
+icon: SlidersHorizontal
+---
+
+Trang này gom các component nhập liệu nhỏ của FUI V3. Các component này dùng trong `module.json`
+giống các control khác: `el`, `w`, `attr`, props động bằng `:prop`, event bằng `v-on:*`.
+
+## f-time
+
+`f-time` dùng để nhập giờ với mask và time picker.
+
+```json
+{
+  "el": "f-time",
+  "w": 3,
+  "attr": {
+    "v-model": "form.gioBatDau",
+    "label": "Giờ bắt đầu",
+    ":required": false,
+    ":time-add": 30
+  }
+}
+```
+
+Props chính: `v-model`, `label`, `time-add`, `required`. Giá trị emit thường là `HH:mm` hoặc
+`null`.
+
+## f-search
+
+`f-search` là autocomplete tìm kiếm qua API, có debounce và chỉ gọi khi keyword đủ dài.
+
+```json
+{
+  "el": "f-search",
+  "w": 6,
+  "attr": {
+    "v-model": "filter.userID",
+    "api": "/api/user/search",
+    ":api-data": { "Keyword": "TEXT", "GroupID": "vueData.groupID" },
+    "item-title": "UserName",
+    "item-value": "UserID",
+    ":required": false
+  }
+}
+```
+
+`TEXT` là keyword người dùng nhập. Nếu cần filter phụ từ module, lấy qua `vueData`.
+
+## f-menu
+
+`f-menu` là dropdown action. Mỗi item có thể chạy action FUI hoặc mở link.
+
+```json
+{
+  "el": "f-menu",
+  "w": 3,
+  "attr": {
+    "label": "Tác vụ",
+    "icon-text": "mdi-dots-vertical",
+    ":items": [
+      { "text": "Xem chi tiết", "icon-text": "mdi-eye", "action": { "CALL": "viewDetail" } },
+      { "text": "Xuất Excel", "icon-text": "mdi-file-excel", "action": { "CALL": "exportExcel" } },
+      { "text": "Trang chủ", "icon-text": "mdi-home", "href": "/", "target": "_blank" }
+    ]
+  }
+}
+```
+
+Nếu `label` rỗng, component hiển thị dạng icon-only.
+
+## f-radiobox
+
+`f-radiobox` render radio group từ mảng items.
+
+```json
+{
+  "el": "f-radiobox",
+  "w": 6,
+  "attr": {
+    "label": "Loại",
+    "v-model": "form.loai",
+    ":items": "loaiOptions",
+    "item-value": "value",
+    "item-title": "text"
+  }
+}
+```
+
+## f-file-upload
+
+`f-file-upload` dùng Plupload để chọn và upload file.
+
+<Callout type="error">
+Cần import `/include/plupload-2.3.7/plupload.full.min.js`.
+</Callout>
+
+```json
+{
+  "el": "f-file-upload",
+  "w": 4,
+  "attr": {
+    "label": "Tải tệp",
+    "url": "/api/upload/file",
+    ":filters": {
+      "max_file_size": "20mb",
+      "mime_types": [{ "title": "PDF", "extensions": "pdf" }]
+    },
+    ":onclose": { "CALL": "reloadFiles" }
+  }
+}
+```
+
+## f-image-update
+
+`f-image-update` upload và crop ảnh.
+
+<Callout type="error">
+Cần import cropper JS và CSS:
+
+```text
+/include/vue-advanced-cropper/index.umd.js
+/include/vue-advanced-cropper/style.css
+```
+</Callout>
+
+```json
+{
+  "el": "f-image-update",
+  "w": 4,
+  "attr": {
+    "v-model": "form.avatar",
+    "label": "Ảnh đại diện",
+    "api-upload": "/api/upload/avatar",
+    ":dialog-width": 600,
+    ":dialog-height": 420,
+    "v-on:update": "CALL(vueData.afterUploadAvatar, { item: $event })"
+  }
+}
+```
+
+## f-qrcode và f-qrcode-reader
+
+`f-qrcode` render mã QR từ giá trị, `f-qrcode-reader` đọc QR bằng camera.
+
+<Callout type="error">
+`f-qrcode` cần `/include/qrcode/qrcode.min.js`; `f-qrcode-reader` cần
+`/include/qrcode/qrcode-reader.min.js`.
+</Callout>
+
+```json
+{
+  "el": "f-qrcode",
+  "w": 4,
+  "attr": {
+    "v-model": "form.qrText",
+    ":size": 200,
+    "color": "#1e88e5"
+  }
+}
+```
+
+```json
+{
+  "el": "f-qrcode-reader",
+  "w": 12,
+  "attr": {
+    "v-model": "scanDialog",
+    "label": "Đọc mã QR",
+    "v-on:update": "CALL(vueData.handleScanResult, { item: $event })"
+  }
+}
+```
+
+## f-excel-reader
+
+`f-excel-reader` đọc sheet đầu tiên của file Excel/CSV thành JSON. Component này đã bundled sẵn.
+
+```json
+{
+  "el": "f-excel-reader",
+  "w": 4,
+  "attr": {
+    "label": "Đọc Excel",
+    "icon-text": "mdi-microsoft-excel",
+    ":header-format": 1,
+    ":raw-format": false,
+    ":action": { "CALL": "handleExcelImported" },
+    "v-model": "excelRows"
+  }
+}
+```
+
+## Cạm bẫy
+
+- Dùng `item-title` cho Vuetify 3 style; nếu project còn wrapper cũ cần kiểm tra runtime trước khi
+  đổi từ `item-text`.
+- Props động như `api-data`, `filters`, `action` phải có dấu `:`.
+- Component có import thiếu sẽ không render hoặc làm trang trắng.
+- Event trong JSON luôn dùng `v-on:update`, không dùng `@update`.

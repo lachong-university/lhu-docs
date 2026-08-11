@@ -1,0 +1,132 @@
+---
+title: Layout & lưới
+description: v-container → v-row → v-col, khoá w, và bộ từ vựng class được duyệt cho FUI V3
+icon: LayoutGrid
+---
+
+Trong FUI V3, `controls` vẫn phải theo cấu trúc ba tầng: **container → rows → cols**.
+Runtime dịch chúng thành Vuetify 3:
+
+| Tầng      | Khoá JSON          | Tag sinh ra            |
+| --------- | ------------------ | ---------------------- |
+| Container | `prop`, `rows`     | `<v-container>`        |
+| Row       | `prop`, `cols`     | `<v-row>`              |
+| Cột       | `w`, `col`, `attr` | `<v-col>` chứa control |
+
+```json
+"controls": [
+  {
+    "prop": "fluid grid-list-md",
+    "rows": [
+      {
+        "prop": "row",
+        "cols": [
+          { "el": "v-text-field", "w": 6, "attr": { "v-model": "name", "label": "Tên" } },
+          { "el": "f-button", "w": 2, "attr": { "label": "Tìm" } }
+        ]
+      }
+    ]
+  }
+]
+```
+
+## `el` và `layout`
+
+- `el` có thể là `v-*`, `f-*`, `t-*`, hoặc `uc-*`.
+- `el: "layout"` được runtime V3 chuyển thành `v-row`.
+
+### `w` — chia cột
+
+- `1`–`12`: sử dụng class `v-col-{w}`.
+- `> 12`: dùng `flex-basis` cố định.
+- `""` hoặc không khai: cột co phù hợp nội dung.
+
+Trên mobile, mọi cột có `w` tự động thêm `v-col-12`.
+
+### `col` — cấu hình cột bao ngoài
+
+`col` có thể là chuỗi hoặc object.
+
+```json
+{ "el": "f-button", "col": "text-end" }
+{ "el": "f-button", "col": { "class": "shrink", "v-if": "vueData.isAdmin" } }
+```
+
+Có `v-if` ở `col` thì cả ô lưới bị ẩn, không để lại khoảng trống.
+
+## `attr` — props của control
+
+Thuộc tính component được đặt trong `attr`.
+
+```json
+{ "el": "v-text-field", "attr": { "v-model": "keyword", "label": "Tìm kiếm" } }
+```
+
+`attr` được merge vào default của FUI nếu control có `defaultControlAttr`.
+
+### Lồng control bằng `innerHTML`
+
+`innerHTML` có thể là string hoặc array.
+
+```json
+{
+  "el": "v-card",
+  "w": 12,
+  "attr": { "class": "pa-4" },
+  "innerHTML": [
+    { "el": "div", "attr": { "class": "text-h6" }, "innerHTML": "Tiêu đề" },
+    {
+      "el": "v-text-field",
+      "attr": { "v-model": "filter.text", "label": "Tìm" }
+    }
+  ]
+}
+```
+
+Nếu phần tử cha là `v-row`, các phần tử con sẽ được bọc `v-col` tự động.
+
+## Ẩn / hiện control
+
+Dùng directive Vue đầy đủ. Ưu tiên đặt ở `col` khi muốn ẩn cả ô lưới.
+
+```json
+{ "el": "f-button", "col": { "v-if": "vueData.user.SystemRight >= 9" } }
+```
+
+Hoặc đặt `v-if` trên row/container khi ẩn cả nhóm.
+
+## Bộ từ vựng được duyệt
+
+FUI V3 giữ nguyên nguyên tắc: hạn chế custom style, ưu tiên prop và class tiện ích Vuetify.
+
+### Prop container / row thường dùng
+
+`fluid`, `grid-list-md`, `row`, `justify-center`, `justify-end`, `justify-start`, `mw-1000`, `hidden-container`.
+
+### Class `col` nên dùng
+
+`text-end`, `text-center`, `d-flex`, `align-center`, `flex-column`, `pa-0`, `pa-2`, `mt-2`, `mr-2`, `font-weight-bold`, `primary--text`.
+
+### Khi dùng `style`
+
+Chỉ dùng khi cần bề rộng cố định cho filter hoặc layout đặc biệt.
+
+```json
+{
+  "el": "v-select",
+  "col": { "class": "shrink" },
+  "attr": { "style": "width:200px" }
+}
+```
+
+## Hành vi cần nhớ
+
+- `el` không thể là biểu thức — nó được dựng một lần trước khi Vue khởi tạo.
+- `attr` là nơi duy nhất nhận giá trị động và directive reactive.
+- `col` đặt điều kiện hiển thị khi cần ẩn cả vị trí lưới.
+
+## Trường hợp đặc biệt
+
+- `v-row` và `v-col` trong V3 tương thích Vuetify 3.
+- `f-sheet` và `f-table` vẫn được bọc trong cột như control bình thường.
+- `uc-*` gọi được trực tiếp trong `el` mà không cần khai báo import.

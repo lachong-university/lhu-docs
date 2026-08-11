@@ -1,37 +1,253 @@
 ---
 title: FUI V3
-description: Vue 3 + Vuetify 3 — đang biên soạn tài liệu
+description: Vue 3 + Vuetify 3 — hướng dẫn chuyển đổi và viết module JSON cho FUI V3.
 icon: Construction
 ---
 
-<Callout type="warn">
-Tài liệu FUI V3 đang được biên soạn. Hiện tại hãy dùng
-[tài liệu FUI V2](/docs/fui/v2) — mô hình `data` / `watch` / `controls` / `set` là như nhau,
-khác biệt nằm ở lớp Vuetify bên dưới.
-</Callout>
+FUI V3 vẫn giữ được mô hình **JSON module** đã quen thuộc: `data`, `watch`, `controls`, `set`.
+Tuy nhiên runtime đã chuyển sang **Vue 3 + Vuetify 3**, và script engine V3 có một số khác biệt
+quan trọng cần biết để viết module đúng.
 
-## Khác biệt đã biết so với V2
+## 1. Cấu trúc module vẫn là 4 khối
 
-Ghi lại từ source code V3 (`component-3.0.js`, `componentTable-3.0.js`, `fastproject-3.0.js`)
-để bạn ước lượng được công sức chuyển đổi.
+Một module FUI V3 gồm đúng bốn khối:
 
-| | V2 | V3 |
-|---|---|---|
-| Vue / Vuetify | Vue 2 + Vuetify 2 | Vue 3 + Vuetify 3 |
-| Tên component khi đăng ký | kebab-case — `f-button`, `f-table` | PascalCase — `FButton`, `FTable` |
-| Số component đăng ký | 40 | 35 |
-| Component động | không có | có `FDynamicComponent` (bọc `<component :is>`) |
+- `data`: khai báo state và action.
+- `watch`: khai báo observer để kích hoạt action.
+- `controls`: khai báo UI bằng JSON.
+- `set`: cấu hình trang/module.
 
-Trong `controls` bạn vẫn viết `"el": "f-button"` như cũ — Vue tự khớp kebab-case với tên
-PascalCase đã đăng ký.
-
-## Xác định project đang chạy bản nào
-
-Xem trường `Framework` trong `.fuix/project.json`:
+Ví dụ tối thiểu:
 
 ```json
-{ "ProjectID": "ex", "ProjectName": "FUI - Example", "Framework": "V2" }
+{
+  "data": [
+    { "searchText": "", "dsItems": [] },
+    {
+      "loadItems": {
+        "API": "SM_Items_Select",
+        "OUT": "dsItems"
+      }
+    },
+    { "CALL": "loadItems" }
+  ],
+  "watch": {
+    "searchText": { "CALL": "loadItems" }
+  },
+  "controls": [
+    {
+      "prop": "fluid",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "v-text-field",
+              "w": 6,
+              "attr": { "v-model": "searchText", "label": "Tìm kiếm" }
+            },
+            {
+              "el": "f-button",
+              "w": 2,
+              "attr": { "label": "Tải lại", "v-on:click": "loadItems" }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {
+    "title": "FUI V3 Demo"
+  }
+}
 ```
 
-Giá trị hợp lệ: `V2`, `V3`. Từng module có thể khai đè trong
-`.fuix/modules/{moduleId}/info.json`.
+## 2. Thứ tự chạy của runtime V3
+
+Theo `fastproject-3.0.js`, V3 load module theo thứ tự sau:
+
+1. Merge cấu hình: `project group` → `project` → `module set`.
+2. Đọc query string vào `vueData`.
+3. Chạy `runAction($moduleUI.data)` để khởi tạo state và action.
+4. Dựng DOM từ `buildModuleUI($moduleUI.controls, vueData)`.
+5. Mount Vue app lên `#fastProjectAPP`.
+6. Tạo watcher từ `$moduleUI.watch`.
+
+> Lưu ý quan trọng: query string được inject vào `vueData` **trước khi** `data[]` chạy.
+> Điều này giống V2 và vẫn là nguyên nhân chính nếu bạn khai báo lại biến URL trong `data[]`.
+
+## 3. Những khác biệt chính so với V2
+
+| V2                                                          | V3                                                                                          |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Vue 2 + Vuetify 2                                           | Vue 3 + Vuetify 3                                                                           |
+| Component FUI đăng ký bằng `Vue.component('f-button', ...)` | Component FUI đăng ký bằng `Vue.component('FButton', ...)` nhưng JSON vẫn dùng `"f-button"` |
+| Không có `FDynamicComponent`                                | Có `FDynamicComponent` để dựng component động từ template runtime                           |
+| `component.js` + `componentTable.js`                        | `component-3.0.js` + `componentTable-3.0.js`                                                |
+| `app.use(Vuetify)` cũ                                       | `app.use(Vuetify.createVuetify(...))`                                                       |
+| `v-set.themeStyle` chưa có                                  | `v_Set.themeStyle` gộp với `vuetifyDefaultSetting` trước khi tạo Vuetify                    |
+
+### 3.1 Vẫn viết `el` như cũ
+
+Trong JSON `controls`, bạn tiếp tục dùng `el: "f-button"`, `el: "v-text-field"`, `el: "uc-custom"`.
+Runtime V3 tự động map kebab-case `f-button` vào component đã đăng ký PascalCase `FButton`.
+
+### 3.2 `layout` được hiểu như row
+
+Trong `buildControl`, nếu `c.el == 'layout'` thì runtime đổi thành `frameWorkSetting.rowTag`,
+đối với V3 là `v-row`. Vì vậy `el: "layout"` vẫn hoạt động như một hàng.
+
+### 3.3 Grid vẫn container > rows > cols
+
+`controls` V3 vẫn phải theo cấu trúc ba tầng:
+
+- container (`v-container` với `prop`, thường là `fluid`)
+- row (`v-row` với `prop`)
+- col (`v-col` với `w` hoặc `col`)
+
+`w` là cách phổ biến nhất để chia cột. Nếu `w > 24` thì V3 dùng `flex-basis` cố định,
+ngược lại dùng class `v-col-{w}`.
+
+## 4. `data` và `watch` trong V3
+
+### `data[]`
+
+`data[]` vẫn chạy tuần tự từ trên xuống.
+
+- Object không có key action: tạo state reactive trong `vueData`.
+- Object có key action: định nghĩa action tái sử dụng.
+- Object chứa `CALL` / `EXE` / `API`: chạy ngay khi module load.
+
+### `watch`
+
+V3 hỗ trợ hai dạng:
+
+- Bật watch thông thường: key là biến, value là action hoặc mảng action.
+- `deep-watch`: watch sâu trên object/mảng.
+
+```json
+"watch": {
+  "searchText": { "CALL": "loadItems" },
+  "deep-watch": {
+    "filterConfig": { "CALL": "refreshTable" }
+  }
+}
+```
+
+### Tự động tạo state cho `v-model` và `:items`
+
+Runtime V3 có hàm `buildVisualValForObj`:
+
+- nếu thấy `v-model` và biến chưa tồn tại, V3 tự tạo `vueData[variable] = undefined`.
+- nếu thấy `:items` là chuỗi đơn giản và biến chưa tồn tại, V3 tự tạo `vueData[variable] = []`.
+
+Vì vậy bạn có thể viết gọn `"v-model": "searchText"` mà không cần khai trước trong `data[]`,
+nhưng vẫn nên khai các biến quan trọng ở đầu `data[]` để tránh nhầm lẫn.
+
+## 5. `controls` V3 — cách viết chính
+
+### Attribute và event
+
+- Các prop của component ghi trong `attr`.
+- Event nên dùng đầy đủ `v-on:click`, không dùng `@click` trong JSON.
+- Slot nên dùng `v-slot:default`, không dùng `#default`.
+
+```json
+{
+  "el": "f-button",
+  "attr": {
+    "label": "Lưu",
+    "v-on:click": "saveData"
+  }
+}
+```
+
+### Các component FUI có default attr/import
+
+`component-3.0.js` định nghĩa `defaultControlAttr` cho một số component.
+Đặc biệt:
+
+- `v-text-field`, `v-combobox`, `v-select`, `v-autocomplete`, `f-radiobox` có `:required` + `:rules` mặc định.
+- `f-button` và `f-menu` có `col.align` mặc định trên mobile.
+- `f-sheet`, `f-pdfmake`, `f-chart`, `f-echart`, `f-code-editor`, `f-qrcode`, `f-image-update`, `f-q-and-a`, `f-etest-review`, `f-audio`, `f-editor`, `f-google-login` tự thêm import khi cần.
+
+Bạn không cần lặp lại thuộc tính mặc định, chỉ khai báo khi muốn override.
+
+### `f-table` trong V3
+
+`FTable` là component bảng chính của V3 và có những điểm sau:
+
+- Hỗ trợ `headers`, `items`, `updateForm`, `updateApi`.
+- Tự động hiển thị nút thêm mới / sửa / xóa nếu `updateApi` hợp lệ.
+- Hỗ trợ `slots` và `groupTemplate` để render cell động.
+- Dùng `FTableItemComponent` để chuyển template JSON thành component Vue runtime.
+
+Đây là cách bạn cấu hình `f-table`:
+
+```json
+{
+  "el": "f-table",
+  "attr": {
+    "label": "Danh sách",
+    ":headers": "tableHeaders",
+    ":items": "dsItems",
+    ":update-form": "editForm",
+    ":update-api": "apiUpdate",
+    ":item-key": "ID"
+  }
+}
+```
+
+## 6. `set` và theme V3
+
+`set` trong module vẫn dùng để cấu hình tiêu đề, menu, apiDomain, login, userInfo...
+
+Trong V3 có thêm: `vueData.v_Set.themeStyle` được merge vào `Vuetify.createVuetify(...)`.
+Nghĩa là bạn có thể override theme Vuetify 3 ở cấp module bằng `themeStyle`.
+
+Ví dụ:
+
+```json
+"set": {
+  "title": "Báo cáo V3",
+  "themeStyle": {
+    "defaults": {
+      "VBtn": { "variant": "tonal" }
+    }
+  }
+}
+```
+
+## 7. Các quy tắc nên nhớ
+
+- `controls` luôn có container > rows > cols.
+- Dùng `w` để chia cột; không dùng CSS inline trừ khi cần.
+- Nếu sử dụng expression trong `attr`, nên tham chiếu `vueData.` khi cần truy cập state:
+  - `":items": "dsItems"` là OK.
+  - `"v-if": "vueData.isAdmin"` an toàn hơn.
+- URL params được viết vào `vueData` trước `data[]`. Nếu muốn giữ giá trị URL,
+  phải guard khi khai báo lại state.
+- Không ghi chú trực tiếp trong JSON bằng `//`; dùng `_note` nếu cần.
+
+## 8. Phương pháp chuyển đổi từ V2 sang V3
+
+1. Giữ nguyên module JSON: `data`, `watch`, `controls`, `set`.
+2. Đổi component V2 → V3 khi cần:
+   - `f-table`, `f-sheet`, `f-button`, `f-dialog`, `f-editor` vẫn dùng như cũ.
+   - `f-echart` và `f-chart` tiếp tục import đúng.
+3. Chú ý event và slot trong JSON vẫn cần viết bằng `v-on:`/`v-slot:`.
+4. Nếu module dùng `layout` làm row, V3 vẫn hỗ trợ.
+5. Kiểm tra `Framework` trong `.fuix/project.json` để chắc module chạy V3.
+
+## 9. Tóm tắt
+
+FUI V3 là một bản nâng cấp về **runtime và giao diện**, nhưng bản chất module JSON vẫn giữ nguyên.
+
+- `data/watch/controls/set` vẫn là trung tâm.
+- V3 dùng Vue 3 và Vuetify 3, nhưng JSON `el` vẫn dùng `v-*`, `f-*`, `uc-*`.
+- `component-3.0.js` và `componentTable-3.0.js` chứa registry component, `fastproject-3.0.js` là engine.
+- Lưu ý: query param nạp vào `vueData` trước `data[]`, `v-model` có thể auto-create state,
+  và `f-table` V3 hỗ trợ template động, `groupTemplate` cùng `slots`.
+
+Bắt đầu bằng cách chuyển module V2 sang cấu trúc 4 khối, rồi kiểm tra các khác biệt `framework`
+và `themeStyle`.

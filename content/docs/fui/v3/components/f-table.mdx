@@ -1,0 +1,148 @@
+---
+title: f-table
+description: Bảng dữ liệu FUI V3 — CRUD, tìm kiếm, xuất Excel và renderer ô tùy biến
+icon: Table
+---
+
+`f-table` là bảng dữ liệu chính trong FUI V3. Nó bọc `v-data-table` của Vuetify 3 và thêm search,
+export Excel, CRUD qua dialog, auto header, slot động và các renderer ô `t-*`.
+
+## Khi dùng
+
+Dùng `f-table` cho mọi bảng hiển thị dữ liệu, kể cả bảng chỉ đọc. Chỉ dùng `f-sheet` khi người dùng
+cần sửa trực tiếp nhiều ô giống Excel.
+
+## Props quan trọng
+
+| Prop | Ghi chú |
+|---|---|
+| `items` | Mảng dữ liệu dòng |
+| `headers` | Mảng cột; nếu bỏ trống FUI có thể tự build từ dữ liệu |
+| `item-key` | Khóa chính của dòng |
+| `height` | `null` tự giãn, `<= 0` fill tới đáy màn hình, `> 0` px cố định |
+| `items-per-page` | Mặc định `50`; dùng `-1` để hiện tất cả |
+| `hide-default-footer` | Mặc định `true` |
+| `show-search` | Mặc định `true` |
+| `excel` | Mặc định `true` |
+| `update-form` | Form thêm/sửa |
+| `update-api` | Action/API cho `new`, `edit`, `delete` |
+| `slots`, `group-template` | Render nội dung động nâng cao |
+
+## Chiều cao bảng
+
+Với bảng chính của trang, đặt `":height": -16`. FUI sẽ tự đo vị trí thật của bảng và fill tới đáy
+màn hình, header cố định, phần data cuộn trong bảng.
+
+| Giá trị | Hành vi |
+|---|---|
+| Bỏ trống | Bảng tự giãn theo số dòng |
+| `<= 0` | Fill tới đáy màn hình, chừa `abs(height)` px |
+| `> 0` | Chiều cao px cố định, hợp với bảng trong dialog |
+
+## Bảng chỉ đọc
+
+```json
+{
+  "el": "f-table",
+  "w": 12,
+  "attr": {
+    "label": "Nhân viên",
+    ":items": "dsNhanVien",
+    "item-key": "ID",
+    ":height": -16,
+    ":headers": [
+      { "title": "Họ tên", "key": "HoTen", "width": "220px" },
+      { "title": "Email", "key": "Email" },
+      {
+        "title": "Lương",
+        "key": "Luong",
+        "align": "end",
+        "width": "130px",
+        "el": "t-num",
+        "attr": { "format": "0,0" }
+      }
+    ]
+  }
+}
+```
+
+## CRUD qua dialog
+
+Thêm cột có `key` hoặc `value` là `ctrl-update`, rồi khai `update-form` và `update-api`.
+
+```json
+{
+  "el": "f-table",
+  "w": 12,
+  "attr": {
+    "label": "Nhân viên",
+    ":items": "dsNhanVien",
+    "item-key": "ID",
+    ":height": -16,
+    ":headers": [
+      { "title": "Họ tên", "key": "HoTen" },
+      { "title": "Email", "key": "Email" },
+      { "title": "Tác vụ", "key": "ctrl-update", "align": "center", "width": "120px" }
+    ],
+    ":update-form": [
+      {
+        "el": "v-text-field",
+        "w": 12,
+        "attr": { "v-model": "HoTen", "label": "Họ tên", ":required": true }
+      },
+      {
+        "el": "v-text-field",
+        "w": 12,
+        "attr": { "v-model": "Email", "label": "Email", ":required": true }
+      }
+    ],
+    ":update-api": {
+      "default-item": { "HoTen": "", "Email": "" },
+      "new": {
+        "API": "/api/nhanvien/create",
+        "IN": { "jsonObj": "item" },
+        "CALLBACK": { "CALL": "loadData" }
+      },
+      "edit": {
+        "API": "/api/nhanvien/update",
+        "IN": { "ID": "item.ID", "jsonObj": "item" },
+        "CALLBACK": { "CALL": "loadData" }
+      },
+      "delete": {
+        "CONFIRM": "Xác nhận xoá {{item.HoTen}}?",
+        "API": "/api/nhanvien/delete",
+        "IN": { "ID": "item.ID" },
+        "CALLBACK": { "CALL": "loadData" }
+      }
+    }
+  }
+}
+```
+
+## Header và renderer ô
+
+Mỗi cột có thể khai renderer qua `el`:
+
+```json
+{
+  "title": "Trạng thái",
+  "key": "Active",
+  "align": "center",
+  "el": "t-check",
+  "attr": {
+    "on-icon": "mdi-check",
+    "off-icon": "mdi-lock",
+    ":action": { "CALL": "toggleActive" }
+  }
+}
+```
+
+Xem thêm trang `table-cells` để biết chi tiết từng `t-*`.
+
+## Cạm bẫy
+
+- Bảng chính thiếu `":height": -16` dễ tạo hai thanh cuộn lồng nhau.
+- Nếu không cần CRUD, bỏ hẳn `:update-api`; đừng khai object rỗng.
+- `update-form` dùng schema control bình thường, nhưng `v-model` là field của dòng đang sửa.
+- V3 dựa trên Vuetify 3 nên header dùng `title`/`key`; nếu gặp ví dụ V2 `text`/`value`, cần đối chiếu runtime hoặc chuyển sang cặp V3.
+- Action trong cell chạy với context có `item` và `vueData`.

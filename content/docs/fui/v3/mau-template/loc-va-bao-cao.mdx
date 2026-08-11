@@ -1,0 +1,177 @@
+---
+title: Lọc và báo cáo
+description: Mẫu báo cáo với filter ngày, dropdown, biểu đồ và bảng dữ liệu tự tải lại
+icon: ChartLine
+---
+
+Mẫu này dùng `f-date`, `v-select`, `f-echart` và `f-table`.
+
+## JSON hoàn chỉnh
+
+```json
+{
+  "data": [
+    {
+      "filter": { "tuNgay": null, "denNgay": null, "phongBanID": null },
+      "dsPhongBan": [],
+      "dsBaoCao": [],
+      "chartConfig": {
+        "title": "Doanh thu theo tháng",
+        "height": 340,
+        "dataView": true
+      },
+      "chartOption": {}
+    },
+    {
+      "apiPhongBan": {
+        "API": "/api/phongban/list",
+        "OUT": "dsPhongBan"
+      },
+      "apiBaoCao": {
+        "API": "/api/baocao/doanhthu",
+        "IN": {
+          "TuNgay": "filter.tuNgay",
+          "DenNgay": "filter.denNgay",
+          "PhongBanID": "filter.phongBanID"
+        },
+        "OUT": "dsBaoCao",
+        "CALLBACK": {
+          "FUN": "buildChartOption",
+          "IN": { "rows": "dsBaoCao" },
+          "OUT": "chartOption"
+        }
+      }
+    },
+    { "CALL": "apiPhongBan" },
+    { "CALL": "apiBaoCao" }
+  ],
+  "watch": {
+    "filter.tuNgay": { "CALL": "apiBaoCao" },
+    "filter.denNgay": { "CALL": "apiBaoCao" },
+    "filter.phongBanID": { "CALL": "apiBaoCao" }
+  },
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-date",
+              "w": 2,
+              "attr": {
+                "v-model": "filter.tuNgay",
+                "label": "Từ ngày",
+                ":required": false,
+                ":date-add": -30
+              }
+            },
+            {
+              "el": "f-date",
+              "w": 2,
+              "attr": {
+                "v-model": "filter.denNgay",
+                "label": "Đến ngày",
+                ":required": false,
+                ":date-add": 0
+              }
+            },
+            {
+              "el": "v-select",
+              "w": 3,
+              "attr": {
+                "v-model": "filter.phongBanID",
+                "label": "Phòng ban",
+                ":items": "dsPhongBan",
+                "item-text": "`TenPhongBan",
+                "item-value": "`ID",
+                ":clearable": true,
+                ":required": false
+              }
+            }
+          ]
+        },
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-echart",
+              "w": 12,
+              "attr": { ":config": "chartConfig", ":option": "chartOption" }
+            }
+          ]
+        },
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-table",
+              "w": 12,
+              "attr": {
+                "label": "Chi tiết báo cáo",
+                ":items": "dsBaoCao",
+                "item-key": "Thang",
+                ":excel": true,
+                ":headers": [
+                  { "text": "Tháng", "value": "Thang", "width": "120px" },
+                  { "text": "Phòng ban", "value": "TenPhongBan" },
+                  {
+                    "text": "Số đơn",
+                    "value": "SoDon",
+                    "align": "right",
+                    "width": "120px",
+                    "el": "t-num",
+                    "attr": { "format": "0,0" }
+                  },
+                  {
+                    "text": "Doanh thu",
+                    "value": "DoanhThu",
+                    "align": "right",
+                    "width": "160px",
+                    "el": "t-num",
+                    "attr": { "format": "0,0" }
+                  }
+                ],
+                ":sum-format": { "SoDon": "0,0", "DoanhThu": "0,0" }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": { "title": "Báo cáo doanh thu" }
+}
+```
+
+## Chú ý
+
+- `f-date` cần `":required": false`.
+- Biểu đồ dựng qua `FUN` trong `CALLBACK` để dữ liệu API vừa về là cập nhật luôn.
+- `f-table` dùng `:excel` để bật nút xuất Excel.
+
+## Script helper
+
+```js
+function buildChartOption(rows) {
+  return {
+    grid: { left: 20, right: 20, containLabel: true },
+    xAxis: { type: "category", data: _.map(rows, "Thang") },
+    yAxis: { type: "value" },
+    series: [
+      {
+        name: "Doanh thu",
+        type: "bar",
+        data: _.map(rows, "DoanhThu"),
+        label: { show: true, position: "top" },
+      },
+    ],
+  };
+}
+```
+
+## Biến thể
+
+- Thêm `watch` `filter.tuNgay` / `filter.denNgay` / `filter.phongBanID` để tự tải.
+- Muốn lưu query vào URL, thêm `EXE` `pushRouter('/report?tuNgay=' + filter.tuNgay + '&denNgay=' + filter.denNgay)`.

@@ -1,0 +1,75 @@
+---
+title: Mẫu template
+description: Mẫu module FUI V3 phổ biến — CRUD, báo cáo, master-detail
+icon: LayoutTemplate
+---
+
+Mỗi mẫu ở đây là module hoàn chỉnh. Copy, đổi API và field là chạy.
+
+<Cards>
+  <Card
+    title="CRUD một bảng"
+    href="/docs/fui/v3/mau-template/crud-co-ban"
+    description="Danh sách + tìm kiếm + thêm/sửa/xoá qua dialog. Khung xương màn hình quản lý."
+  />
+  <Card
+    title="Lọc và báo cáo"
+    href="/docs/fui/v3/mau-template/loc-va-bao-cao"
+    description="Thanh lọc theo ngày và danh mục, biểu đồ + bảng tự tải lại."
+  />
+  <Card
+    title="Master–detail"
+    href="/docs/fui/v3/mau-template/master-detail"
+    description="Chọn một dòng trái, xem và sửa chi tiết phải."
+  />
+</Cards>
+
+## Khung mẫu
+
+```json
+{
+  "data": [
+    { "dsItem": [] },
+    { "apiDanhSach": { "API": "/api/item/list", "OUT": "dsItem" } },
+    { "CALL": "apiDanhSach" }
+  ],
+  "watch": {},
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-table",
+              "w": 12,
+              "attr": {
+                "label": "Danh sách",
+                ":items": "dsItem",
+                "item-key": "ID"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}
+```
+
+`f-table` tự dựng cột nếu bạn không khai `:headers`.
+
+## Nguyên tắc chung
+
+- `data[]`: state → action có tên → action tự chạy.
+- Mỗi filter nên có `watch` gọi API.
+- Chuỗi không có dấu cách phải bọc backtick để không bị eval.
+- Ô lọc phải khai `":required": false`.
+- Chia cột bằng `w`, không dùng `style` để thay thế layout.
+
+## Khi nào tách component
+
+Nếu module quá dài, tách phần UI sang `uc-*.vue` và giữ JSON chỉ còn dữ liệu,
+API và điều kiện hiển thị.

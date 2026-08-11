@@ -1,0 +1,73 @@
+---
+title: Hàm dựng sẵn
+description: Thư viện helper global dùng được trong EXE, FUN và controls của FUI V3
+icon: SquareFunction
+---
+
+FUI V3 có sẵn một số hàm global và biến tiện ích. Chúng dùng được trong `EXE`, `FUN`, `attr`, `v-on`.
+Không cần import thêm các thư viện core.
+
+## Thư viện bundled
+
+| Thư viện       | Biến global   |
+| -------------- | ------------- |
+| jQuery         | `$`, `jQuery` |
+| Lodash         | `_`           |
+| Moment         | `moment`      |
+| Numeral        | `numeral`     |
+| Vuetify        | `Vuetify`     |
+| vue-toast      | `Vue.$toast`  |
+| jquery-confirm | `confirm()`   |
+
+## Biến global quan trọng
+
+- `vueData`: state chính của module.
+- `vm`: instance Vue của app.
+- `$isMobile`, `$isPhone`, `$isApple`: nhận diện thiết bị.
+- `$awt`: bearer token hiện tại.
+
+## Hàm dùng thường xuyên
+
+| Hàm                                      | Mô tả                                                    |
+| ---------------------------------------- | -------------------------------------------------------- |
+| `ajaxCALL(url, data, cb, errCb, header)` | Gọi AJAX (có bearer token, CORS chuẩn).                  |
+| `fixURL(url)`                            | Ghép `apiDomain` nếu URL tương đối.                      |
+| `CALL(obj, includeData)`                 | Chạy action object.                                      |
+| `pushRouter(router)`                     | Thay URL thanh địa chỉ, KHÔNG reload.                    |
+| `redirect(obj, query)`                   | Điều hướng có reload. `query = true` giữ query hiện tại. |
+| `openWindow(obj)`                        | Mở dialog / window FUI.                                  |
+| `showMessage(obj)`                       | Hiện toast/hộp thoại thông báo.                          |
+| `confirm(obj)`                           | Hiện hộp xác nhận.                                       |
+| `groupBy(array, field, sumArr)`          | Nhóm mảng theo field.                                    |
+| `buildHeader(obj, mapCol)`               | Sinh header cho `f-table`.                               |
+| `fillData(obj)`                          | Map dữ liệu theo `src`, `des`, `map`, `key`.             |
+| `jsonToExcel(obj)`                       | Xuất Excel.                                              |
+| `printPDF(obj)`                          | In hoặc tải PDF bằng pdfMake.                            |
+| `generateID()`                           | Tạo ID duy nhất.                                         |
+| `copyToClipboard(text)`                  | Copy văn bản.                                            |
+| `colorLib(color)`                        | Công cụ màu.                                             |
+| `pushRouter(router)`                     | Đổi URL mà không nạp lại.                                |
+
+## Cách dùng `FUN`
+
+```json
+{
+  "FUN": "calcTotal",
+  "IN": { "items": "dsItems" },
+  "OUT": "total"
+}
+```
+
+```js
+function calcTotal(payload) {
+  return payload.items.reduce((sum, row) => sum + row.price, 0);
+}
+```
+
+Hàm nhận đúng một object.
+
+## Lưu ý
+
+- Dùng `ajaxCALL`, không dùng `fetch()`.
+- `CALL()` hữu ích khi muốn gọi action từ `script` hoặc `attr`.
+- Nếu cần logic phức tạp, gom vào `script` rồi gọi bằng `FUN` hoặc `EXE`.

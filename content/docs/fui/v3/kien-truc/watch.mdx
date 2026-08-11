@@ -1,0 +1,125 @@
+---
+title: watch
+description: Theo dõi state để chạy action — bộ lọc phân tầng, deep-watch, tránh vòng lặp
+icon: Eye
+---
+
+`watch` trong FUI V3 là object ánh xạ **tên biến → action**. Khi biến đổi thì action chạy.
+
+```json
+"watch": {
+  "filter.text": { "CALL": "loadItems" },
+  "selectedID": [ { "CALL": "loadDetail" }, { "CALL": "logChange" } ]
+}
+```
+
+## Nguyên tắc cơ bản
+
+1. Watch biến đầu vào nhỏ nhất: `filter.status`, `branchID`.
+2. Tránh watch object lớn hoặc mảng dữ liệu.
+3. Nếu cần theo dõi toàn bộ object, dùng `deep-watch` chọn lọc.
+4. Không watch biến output của chính action đó.
+5. `watch` cũng có tác dụng khai báo biến reactive trước khi Vue mount.
+
+## `deep-watch`
+
+```json
+"watch": {
+  "deep-watch": {
+    "filter": { "CALL": "loadItems" }
+  }
+}
+```
+
+Chỉ dùng cho object nhỏ, ví dụ bộ lọc cấu trúc.
+
+## Watch nested key
+
+Support dot notation.
+
+```json
+"watch": {
+  "form.filter.text": { "CALL": "loadItems" }
+}
+```
+
+## Ví dụ phân tầng
+
+```json
+{
+  "data": [
+    {
+      "form": { "provinceID": null, "districtID": null, "wardID": null },
+      "provinceList": [],
+      "districtList": [],
+      "wardList": []
+    },
+    {
+      "apiLoadProvince": { "API": "/api/province", "OUT": "provinceList" },
+      "apiLoadDistrict": {
+        "API": "/api/district",
+        "IN": { "ProvinceID": "form.provinceID" },
+        "OUT": "districtList"
+      },
+      "apiLoadWard": {
+        "API": "/api/ward",
+        "IN": { "DistrictID": "form.districtID" },
+        "OUT": "wardList"
+      }
+    },
+    {
+      "handleProvince": [
+        {
+          "districtList": [],
+          "wardList": [],
+          "form.districtID": null,
+          "form.wardID": null
+        },
+        { "IF": "form.provinceID", "THEN": { "CALL": "apiLoadDistrict" } }
+      ]
+    },
+    { "CALL": "apiLoadProvince" }
+  ],
+  "watch": {
+    "form.provinceID": { "CALL": "handleProvince" },
+    "form.districtID": { "CALL": "loadWard" }
+  }
+}
+```
+
+Điểm mấu chốt: **reset cấp dưới trước, gọi API sau**.
+
+## Bẫy thường gặp
+
+- Watch biến mà biến chưa reactive → không chạy. Khai biến trong `data[]` trước, hoặc để `watch`
+  tự khai báo.
+- Watch `items` rồi trong action gán lại `items` → vòng lặp.
+- Có `CALL` tự chạy trong `data[]` và watch trên biến vốn được gán trong cùng action.
+
+## Debounce và race condition
+
+Watcher chỉ điều phối. Nếu cần debounce hoặc chống response cũ, đặt logic trong `script`
+hoặc hàm helper, rồi gọi bằng `FUN` hoặc `EXE`.
+
+## Đồng bộ URL
+
+```json
+"watch": {
+  "filter.page": [
+    { "CALL": "loadItems" },
+    { "EXE": "pushRouter('/items?page=' + filter.page)" }
+  ]
+}
+```
+
+## Khi dùng `watch` làm reactive URL
+
+Nếu bạn muốn giá trị URL trở thành reactive và được Vue theo dõi, khai nó trong `watch`:
+
+```json
+"watch": {
+  "id": { "CALL": "loadDetail" }
+}
+```
+
+Runtime V3 sẽ khai báo trước biến đó trên `vueData`.

@@ -1,0 +1,195 @@
+---
+title: data & Action Protocol
+description: API · IN · OUT · CALLBACK · CONFIRM · MESS · CALL · IF/THEN/ELSE · EXE · FUN trong FUI V3
+icon: Workflow
+---
+
+Logic trong FUI V3 vẫn viết bằng **action object** — các khoá viết hoa trong JSON.
+Runtime V3 chạy `runAction(obj, includeData)` và kiểm tra action theo thứ tự cố định.
+
+## Các khoá action quan trọng
+
+| Khoá                   | Tác dụng                       |
+| ---------------------- | ------------------------------ |
+| `API`                  | Gọi backend                    |
+| `IN`                   | Tham số vào                    |
+| `OUT`                  | Biến nhận dữ liệu trả về       |
+| `CALLBACK`             | Action chạy sau khi thành công |
+| `CONFIRM`              | Yêu cầu xác nhận trước         |
+| `CANCEL`               | Action khi huỷ xác nhận        |
+| `MESS`                 | Toast góc trên                 |
+| `MESSBOX`              | Hộp thoại thông báo            |
+| `CALL`                 | Gọi action đặt tên             |
+| `IF` / `THEN` / `ELSE` | Rẽ nhánh                       |
+| `EXE`                  | Chạy JavaScript thô            |
+| `FUN`                  | Gọi hàm global                 |
+
+<Callout type="warn">
+  Runtime V3 **dừng ở khoá đầu tiên khớp**. Một object chứa cả `API` và `EXE`
+  chỉ chạy `API`. Muốn nhiều bước, dùng mảng action.
+</Callout>
+
+## Thứ tự xử lý
+
+```text
+CONFIRM
+  ↓
+IN → API → CALL → EXE → FUN → IF → MESS → MESSBOX
+```
+
+Object không có khoá action nào được coi là lệnh gán state.
+
+```json
+{ "dsUser": [], "loading": false }
+```
+
+## `CALL` — dùng lại action
+
+```json
+"watch": {
+  "keyword": { "CALL": "searchUser" }
+}
+```
+
+Hoặc trong control:
+
+```json
+{ "el": "f-button", "attr": { ":action": { "CALL": "searchUser" } } }
+```
+
+Action cũng có thể là mảng tuần tự:
+
+```json
+{
+  "refresh": [
+    { "dsUser": [] },
+    { "CALL": "searchUser" },
+    { "MESS": "Đã làm mới" }
+  ]
+}
+```
+
+## Gọi API
+
+```json
+{
+  "apiLoad": {
+    "API": "/api/user/list",
+    "IN": { "Keyword": "filter.text" },
+    "OUT": "dsUser",
+    "CALLBACK": { "MESS": "Đã tải xong" }
+  }
+}
+```
+
+- `API` có thể là đường dẫn tương đối; runtime sẽ ghép `apiDomain` nếu cần.
+- `IN` đi qua quy tắc phân giải giá trị.
+- `OUT` là tên biến `vueData` nhận response.
+- `CALLBACK` chỉ chạy khi request thành công.
+
+### `OUT` sâu
+
+```json
+{ "OUT": "form.user" }
+```
+
+FUI V3 tự tạo object trung gian nếu cần.
+
+## `CONFIRM`
+
+```json
+{
+  "deleteUser": {
+    "CONFIRM": "Xác nhận xoá {{item.name}}?",
+    "API": "/api/user/delete",
+    "IN": { "ID": "item.ID" },
+    "CALLBACK": { "CALL": "loadUser" }
+  }
+}
+```
+
+`CONFIRM` bọc ngoài phần còn lại. Đồng ý mới chạy tiếp.
+
+## `IF` / `THEN` / `ELSE`
+
+```json
+{
+  "IF": "filter.status == 'ACTIVE'",
+  "THEN": { "CALL": "loadActive" },
+  "ELSE": { "CALL": "loadAll" }
+}
+```
+
+`IF` dùng lodash template, nên không cần prefix `vueData.`.
+
+## `EXE` — JavaScript thuần
+
+```json
+{ "EXE": "vueData.total = _.sumBy(dsUser, 'salary')" }
+```
+
+`EXE` chạy trong scope lodash template. Có thể dùng tên biến trần như `dsUser`, nhưng khi gán
+nên viết rõ `vueData.`.
+
+<Callout>
+  Logic dài nên để trong `script` và gọi bằng `FUN`, thay vì nhồi cả vào `EXE`.
+</Callout>
+
+## `FUN` — gọi hàm global
+
+```js
+function calcTotal(payload) {
+  return payload.items.reduce((sum, item) => sum + item.amount, 0);
+}
+```
+
+```json
+{ "FUN": "calcTotal", "IN": { "items": "dsOrder" }, "OUT": "totalAmount" }
+```
+
+Hàm nhận đúng một tham số object từ `IN`.
+
+## `MESS` / `MESSBOX`
+
+- `MESS`: toast nhỏ góc trên.
+- `MESSBOX`: hộp thoại thông báo.
+
+```json
+{ "MESS": "Đã lưu {{form.name}}" }
+{ "MESSBOX": "Lỗi: {{error.message}}" }
+```
+
+## Ghi sang cửa sổ khác
+
+Key bắt đầu bằng `#` ghi dữ liệu sang iframe/parent.
+
+```json
+{ "#PARENT.result": "dsUser" }
+```
+
+## Ví dụ hoàn chỉnh
+
+```json
+{
+  "data": [
+    { "filter": { "text": "" }, "dsUser": [] },
+    {
+      "apiLoad": {
+        "API": "/api/user/list",
+        "IN": { "Keyword": "filter.text" },
+        "OUT": "dsUser"
+      },
+      "apiDelete": {
+        "CONFIRM": "Xác nhận xoá {{item.name}}?",
+        "API": "/api/user/delete",
+        "IN": { "ID": "item.ID" },
+        "CALLBACK": { "CALL": "apiLoad" }
+      }
+    },
+    { "CALL": "apiLoad" }
+  ],
+  "watch": {
+    "filter.text": { "CALL": "apiLoad" }
+  }
+}
+```

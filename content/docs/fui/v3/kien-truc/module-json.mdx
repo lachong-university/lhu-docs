@@ -1,0 +1,214 @@
+---
+title: Cấu trúc JSON của module
+description: Bốn khối data · watch · controls · set và cách chúng tương tác trong FUI V3
+icon: FileBraces
+---
+
+FUI V3 vẫn dùng mô hình module JSON quen thuộc: `data`, `watch`, `controls`, `set`.
+Runtime V3 đọc `moduleUI` từ server, merge cấu hình, rồi dựng UI bằng Vue 3.
+
+## 1. Bốn khối bắt buộc
+
+```json
+{
+  "data": [
+    /* state + action */
+  ],
+  "watch": {
+    /* observer → action */
+  },
+  "controls": [
+    /* bố cục giao diện */
+  ],
+  "set": {
+    /* cấu hình trang */
+  }
+}
+```
+
+`script`, `header`, `body`, `style` là phần tách riêng, không nằm trong JSON này.
+
+<Callout type="warn">
+  Đây là JSON thật — không comment, không trailing comma, không `undefined`.
+  Muốn ghi chú thì đặt key bắt đầu bằng `_` (ví dụ `"_note"`).
+</Callout>
+
+## 2. `data[]` — state và action
+
+`data[]` chạy tuần tự từ trên xuống khi trang load. Có ba loại phần tử:
+
+| Loại           | Nhận biết                          | Tác dụng                          |
+| -------------- | ---------------------------------- | --------------------------------- |
+| Khởi tạo state | Không có key action                | Tạo biến reactive trong `vueData` |
+| Action có tên  | Key là tên, value là object action | Định nghĩa action tái sử dụng     |
+| Action tự chạy | Object chứa khoá action            | Chạy ngay khi module load         |
+
+```json
+"data": [
+  { "dsUser": [], "currentPage": 1, "filter": { "text": "" } },
+  {
+    "loadUser": {
+      "API": "/api/user/list",
+      "IN": { "keyword": "filter.text" },
+      "OUT": "dsUser"
+    }
+  },
+  { "CALL": "loadUser" }
+]
+```
+
+Quy tắc chuẩn: **state trước → action có tên giữa → action tự chạy ở cuối**.
+
+## 3. `watch` — observer
+
+`watch` là object ánh xạ biến sang action. Khi giá trị bị thay đổi, action chạy.
+
+```json
+"watch": {
+  "filter.text": { "CALL": "loadUser" }
+}
+```
+
+Một biến có thể map tới mảng action.
+
+```json
+"watch": {
+  "selectedBranch": [
+    { "CALL": "clearDetail" },
+    { "CALL": "loadBranchData" }
+  ]
+}
+```
+
+[Chi tiết →](/docs/fui/v3/kien-truc/watch)
+
+## 4. `controls` — layout UI
+
+`controls` là nơi khai báo giao diện. FUI V3 vẫn yêu cầu ba tầng:
+
+- Container: `v-container`
+- Row: `v-row`
+- Col: `v-col`
+
+```json
+"controls": [
+  {
+    "prop": "fluid grid-list-md",
+    "rows": [
+      {
+        "prop": "row",
+        "cols": [
+          { "el": "v-text-field", "w": 6, "attr": { "v-model": "filter.text", "label": "Tìm" } },
+          { "el": "f-button", "w": 2, "attr": { "label": "Tải", ":action": { "CALL": "loadUser" } } }
+        ]
+      }
+    ]
+  }
+]
+```
+
+FUI V3 dịch `el` thành component Vue và bọc cột vào `v-col` khi cần.
+
+[Chi tiết →](/docs/fui/v3/kien-truc/layout-grid)
+
+## 5. `set` — cấu hình trang
+
+`set` chứa cấu hình module, ghi đè lên cấu hình project.
+
+```json
+"set": {
+  "title": "Danh sách khách hàng",
+  "menu": false,
+  "themeStyle": { "defaults": { "VBtn": { "variant": "tonal" } } }
+}
+```
+
+`set` trong module V3 có thể điều chỉnh `themeStyle` cho Vuetify 3.
+
+## 6. Luồng runtime V3
+
+Theo `fastproject-3.0.js`:
+
+1. Merge cấu hình: `project group` → `project` → module `set`.
+2. Nạp query string vào `vueData`.
+3. Chạy `runAction($moduleUI.data)`.
+4. Dựng DOM từ `buildModuleUI($moduleUI.controls, vueData)`.
+5. `app.use(Vuetify.createVuetify(...))` và mount app.
+6. Tạo watcher từ `createWatch($moduleUI.watch)`.
+
+> Vì query string nạp trước `data[]`, khai lại biến URL trong `data[]` dễ vô tình xóa giá trị URL.
+
+## 7. Quan hệ giữa bốn khối
+
+```text
+URL params → vueData
+      ↓
+   data[] → tạo state + action → chạy action
+      ↓
+ controls → bind vào state / gọi action
+      ↓
+  watch → state đổi → gọi action → cập nhật state
+```
+
+## 8. Mẫu module V3 hoàn chỉnh
+
+```json
+{
+  "data": [
+    { "filter": { "text": "" }, "dsItems": [] },
+    {
+      "loadItems": {
+        "API": "/api/items",
+        "IN": { "Keyword": "filter.text" },
+        "OUT": "dsItems"
+      }
+    },
+    { "CALL": "loadItems" }
+  ],
+
+  "watch": {
+    "filter.text": { "CALL": "loadItems" }
+  },
+
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "v-text-field",
+              "w": 6,
+              "attr": { "v-model": "filter.text", "label": "Từ khóa" }
+            },
+            {
+              "el": "f-button",
+              "w": 2,
+              "attr": { "label": "Tải", ":action": { "CALL": "loadItems" } }
+            }
+          ]
+        },
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-table",
+              "w": 12,
+              "attr": {
+                "label": "Kết quả",
+                ":items": "dsItems",
+                "item-key": "ID"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "set": {
+    "title": "Tra cứu items"
+  }
+}
+```

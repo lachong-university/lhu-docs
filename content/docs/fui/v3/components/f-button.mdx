@@ -1,0 +1,124 @@
+---
+title: f-button
+description: Nút bấm FUI V3 — action, validate form, hotkey và chống double-click
+icon: MousePointerClick
+---
+
+`f-button` là nút chuẩn khi cần chạy action FUI từ `module.json`. Nó bọc `v-btn`, tự validate form
+khi cần, hỗ trợ hotkey, và debounce click 500ms để tránh gửi lặp.
+
+## Khi dùng
+
+Dùng `f-button` cho các lệnh `Lưu`, `Tìm kiếm`, `Xóa`, `Xuất`, `Mở dialog`, hoặc bất kỳ thao tác nào
+cần chạy `CALL`, `API`, `EXE`, `FUN`, `CONFIRM`.
+
+Nếu chỉ cần một nút trang trí không chạy action FUI, có thể dùng `v-btn`, nhưng trong module CRUD
+nên ưu tiên `f-button`.
+
+## Props quan trọng
+
+| Prop | Kiểu | Ghi chú |
+|---|---|---|
+| `label` | string | Chữ trên nút |
+| `icon-text` | string | Icon MDI bên trái label |
+| `action` | object \| array | Action FUI chạy khi click |
+| `checkvalid` | boolean | Mặc định `true`; validate form trước khi chạy action |
+| `ctrlhotkey` | number | Mã phím cho Ctrl/Cmd, ví dụ `83` là Ctrl+S |
+| `includeData` | object | Dữ liệu bổ sung truyền vào action |
+
+Các attr Vuetify như `color`, `variant`, `size`, `density`, `disabled`, `loading` vẫn truyền qua
+được bằng `attr`.
+
+## Cách dùng tối giản
+
+```json
+{
+  "el": "f-button",
+  "w": 3,
+  "attr": {
+    "label": "Tìm kiếm",
+    "icon-text": "mdi-magnify",
+    ":checkvalid": false,
+    ":action": { "CALL": "loadData" }
+  }
+}
+```
+
+## Ví dụ gọi API
+
+```json
+{
+  "el": "f-button",
+  "w": 3,
+  "attr": {
+    "label": "Lưu",
+    "icon-text": "mdi-content-save",
+    ":ctrlhotkey": 83,
+    ":checkvalid": true,
+    ":action": {
+      "API": "/api/nhanvien/save",
+      "IN": { "Data": "form" },
+      "CALLBACK": [
+        { "MESS": "Đã lưu" },
+        { "CALL": "loadData" }
+      ]
+    }
+  }
+}
+```
+
+## Ví dụ xóa có xác nhận
+
+```json
+{
+  "el": "f-button",
+  "w": 2,
+  "attr": {
+    "label": "Xóa",
+    "icon-text": "mdi-delete",
+    "color": "error",
+    ":checkvalid": false,
+    ":action": {
+      "CONFIRM": "Bạn có chắc muốn xóa bản ghi này?",
+      "API": "/api/nhanvien/delete",
+      "IN": { "ID": "form.ID" },
+      "CALLBACK": { "CALL": "loadData" }
+    }
+  }
+}
+```
+
+## Trong grid đầy đủ
+
+```json
+{
+  "controls": [
+    {
+      "prop": "fluid pa-0",
+      "rows": [
+        {
+          "cols": [
+            {
+              "el": "f-button",
+              "w": 3,
+              "attr": {
+                "label": "Lưu",
+                "icon-text": "mdi-content-save",
+                ":action": { "CALL": "saveForm" }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Cạm bẫy
+
+- `checkvalid` mặc định là `true`; nút lọc, đóng dialog, export, mở cửa sổ nên đặt
+  `":checkvalid": false`.
+- Event trong JSON phải viết `v-on:click`, không dùng `@click`.
+- `action` động phải dùng `":action"`. Nếu viết `"action"` không có `:`, FUI xem là chuỗi tĩnh.
+- Không tự chống double-click thêm ở action; component đã debounce click.

@@ -1,0 +1,223 @@
+---
+title: CRUD một bảng
+description: Mẫu màn hình quản lý danh sách + tìm kiếm + thêm/sửa/xoá
+icon: Database
+---
+
+Mẫu CRUD cơ bản dùng `f-table` với `:update-form` và `:update-api`.
+
+## JSON hoàn chỉnh
+
+```json
+{
+  "data": [
+    {
+      "filter": { "tuKhoa": "", "phongBanID": null },
+      "dsNhanVien": [],
+      "dsPhongBan": []
+    },
+    {
+      "apiPhongBan": {
+        "API": "/api/phongban/list",
+        "OUT": "dsPhongBan"
+      },
+      "apiDanhSach": {
+        "API": "/api/nhanvien/list",
+        "IN": { "TuKhoa": "filter.tuKhoa", "PhongBanID": "filter.phongBanID" },
+        "OUT": "dsNhanVien"
+      }
+    },
+    { "CALL": "apiPhongBan" },
+    { "CALL": "apiDanhSach" }
+  ],
+
+  "watch": {
+    "filter.tuKhoa": { "CALL": "apiDanhSach" },
+    "filter.phongBanID": { "CALL": "apiDanhSach" }
+  },
+
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "v-text-field",
+              "w": 4,
+              "attr": {
+                "v-model": "filter.tuKhoa",
+                "label": "Tìm theo tên hoặc email",
+                ":required": false
+              }
+            },
+            {
+              "el": "v-select",
+              "w": 4,
+              "attr": {
+                "v-model": "filter.phongBanID",
+                "label": "Phòng ban",
+                ":items": "dsPhongBan",
+                "item-text": "`TenPhongBan",
+                "item-value": "`ID",
+                ":clearable": true,
+                ":required": false
+              }
+            }
+          ]
+        },
+        {
+          "prop": "row",
+          "cols": [
+            {
+              "el": "f-table",
+              "w": 12,
+              "attr": {
+                "label": "Danh sách nhân viên",
+                ":items": "dsNhanVien",
+                "item-key": "ID",
+                ":excel": true,
+                ":headers": [
+                  { "text": "Họ tên", "value": "HoTen", "width": "200px" },
+                  { "text": "Email", "value": "Email" },
+                  {
+                    "text": "Phòng ban",
+                    "value": "TenPhongBan",
+                    "width": "160px"
+                  },
+                  {
+                    "text": "Lương",
+                    "value": "Luong",
+                    "align": "right",
+                    "width": "130px",
+                    "el": "t-num",
+                    "attr": { "format": "0,0" }
+                  },
+                  {
+                    "text": "Ngày vào",
+                    "value": "NgayVao",
+                    "align": "center",
+                    "width": "120px",
+                    "el": "t-time"
+                  },
+                  {
+                    "text": "Đang làm",
+                    "value": "Active",
+                    "align": "center",
+                    "width": "100px",
+                    "el": "t-boolean"
+                  },
+                  {
+                    "text": "Tác vụ",
+                    "value": "ctrl-update",
+                    "align": "center",
+                    "width": "120px"
+                  }
+                ],
+                ":update-form": [
+                  {
+                    "el": "v-text-field",
+                    "attr": {
+                      "v-model": "HoTen",
+                      "label": "Họ tên",
+                      ":required": true
+                    }
+                  },
+                  {
+                    "el": "v-text-field",
+                    "attr": {
+                      "v-model": "Email",
+                      "label": "Email",
+                      ":required": true
+                    }
+                  },
+                  {
+                    "el": "v-select",
+                    "attr": {
+                      "v-model": "PhongBanID",
+                      "label": "Phòng ban",
+                      ":items": "vueData.dsPhongBan",
+                      "item-text": "`TenPhongBan",
+                      "item-value": "`ID",
+                      ":required": true
+                    }
+                  },
+                  {
+                    "el": "v-text-field",
+                    "attr": {
+                      "v-model.number": "Luong",
+                      "label": "Lương",
+                      "type": "number",
+                      ":required": false
+                    }
+                  },
+                  {
+                    "el": "f-date",
+                    "attr": {
+                      "v-model": "NgayVao",
+                      "label": "Ngày vào làm",
+                      ":required": false
+                    }
+                  },
+                  {
+                    "el": "v-switch",
+                    "attr": { "v-model": "Active", "label": "Đang làm việc" }
+                  }
+                ],
+                ":update-form-attr": { "width": 700 },
+                ":update-api": {
+                  "default-item": {
+                    "HoTen": "",
+                    "Email": "",
+                    "Luong": 0,
+                    "Active": true
+                  },
+                  "new": {
+                    "API": "/api/nhanvien/create",
+                    "IN": { "jsonObj": "$row" },
+                    "CALLBACK": [
+                      { "MESS": "Đã thêm" },
+                      { "CALL": "apiDanhSach" }
+                    ]
+                  },
+                  "edit": {
+                    "API": "/api/nhanvien/update",
+                    "IN": { "ID": "item.ID", "jsonObj": "$row" },
+                    "CALLBACK": [
+                      { "MESS": "Đã lưu" },
+                      { "CALL": "apiDanhSach" }
+                    ]
+                  },
+                  "delete": {
+                    "CONFIRM": "Xác nhận xoá {{item.HoTen}}?",
+                    "API": "/api/nhanvien/delete",
+                    "IN": { "ID": "item.ID" },
+                    "CALLBACK": [
+                      { "MESS": "Đã xoá" },
+                      { "CALL": "apiDanhSach" }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": { "title": "Quản lý nhân viên" }
+}
+```
+
+## Chú ý
+
+- `item-key` bắt buộc để `f-table` nhận diện dòng.
+- Cột `"value": "ctrl-update"` là cần thiết để hiển thị nút sửa/xoá.
+- `:items` trong `:update-form` phải dùng `vueData.` vì dialog chạy trong scope module.
+- Ô lọc phải khai `":required": false`.
+
+## Biến thể nhẹ
+
+- Bỏ nút thêm/sửa/xoá: bỏ `:update-form`, `:update-api`, `ctrl-update`.
+- Chỉ xem: giữ `:excel` và `:headers`, không cần `:update-api`.

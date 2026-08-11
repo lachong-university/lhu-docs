@@ -1,0 +1,138 @@
+---
+title: f-echart
+description: Biểu đồ Apache ECharts V5 trong FUI V3 — option, config, import và DataView
+icon: ChartColumn
+---
+
+`f-echart` là wrapper của FUI cho **Apache ECharts V5**. Prop `option` truyền thẳng vào
+`echarts.setOption()`, còn `config` là lớp tiện ích của FUI cho chiều cao, theme, title, toolbox,
+data view và auto refresh.
+
+## Khi dùng
+
+Dùng `f-echart` cho mọi biểu đồ: bar, line, pie, gauge, radar, scatter, heatmap, sankey, tree, map.
+Không dùng `f-chart` cho module V3 mới.
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì `<f-echart>` không tồn tại.
+
+```text
+1. /include/chart/echarts.min.js
+2. /include/chart/fechart.js
+```
+
+`fechart.js` phụ thuộc global `echarts`, nên phải đứng sau `echarts.min.js`.
+</Callout>
+
+## Props
+
+| Prop | Kiểu | Mặc định | Ghi chú |
+|---|---|---|---|
+| `option` | object | `{}` | ECharts option đầy đủ |
+| `config` | object | `{}` | Shortcut riêng của FUI |
+
+`f-echart` không có prop `data`. Dữ liệu nằm trong `option.dataset` hoặc `option.series`.
+
+## Config thường dùng
+
+| Key | Ghi chú |
+|---|---|
+| `height` | Số là px, chuỗi là CSS height; mặc định `400` |
+| `theme` | Theme ECharts, mặc định theme FUI nếu runtime đăng ký |
+| `title`, `subtitle` | Gán nhanh vào `option.title` |
+| `titleLeft` | `left`, `center`, `right` |
+| `color` | Mảng màu |
+| `legend` | Object cấu hình legend hoặc `false` để ẩn |
+| `dataView` | Hiện nút xem bảng dữ liệu |
+| `toolbox` | Hiện toolbox lưu ảnh/restore |
+| `zoom` | Bật dataZoom |
+| `animation` | Bật/tắt animation |
+| `refreshInterval` | Tự render lại theo milliseconds |
+
+`config` dựng nền trước, `option` ghi đè sau.
+
+## Ví dụ tối giản
+
+```json
+{
+  "el": "f-echart",
+  "w": 12,
+  "attr": {
+    ":config": { "title": "Doanh thu", "height": 360, "dataView": true },
+    ":option": "chartOption"
+  }
+}
+```
+
+## Ví dụ đầy đủ
+
+```json
+{
+  "data": [
+    {
+      "chartOption": {
+        "grid": { "left": 20, "right": 20, "containLabel": true },
+        "tooltip": { "trigger": "axis" },
+        "xAxis": { "type": "category", "data": ["Q1", "Q2", "Q3", "Q4"] },
+        "yAxis": { "type": "value" },
+        "series": [
+          {
+            "name": "Năm 2026",
+            "type": "bar",
+            "data": [1390, 1655, 1580, 1910],
+            "label": { "show": true, "position": "top" }
+          }
+        ]
+      }
+    }
+  ],
+  "controls": [
+    {
+      "prop": "fluid pa-0",
+      "rows": [
+        {
+          "cols": [
+            {
+              "el": "f-echart",
+              "w": 12,
+              "attr": {
+                ":config": { "title": "Doanh thu theo quý", "height": 360, "dataView": true },
+                ":option": "chartOption"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Dựng option từ API
+
+Khi API trả dữ liệu động, dựng `option` trong `script` hoặc action `FUN`, rồi gán vào `vueData`.
+
+```js
+function buildRevenueChart(rows) {
+  return {
+    grid: { left: 20, right: 20, containLabel: true },
+    xAxis: { type: 'category', data: _.map(rows, 'Thang') },
+    yAxis: { type: 'value' },
+    series: [{
+      type: 'bar',
+      data: _.map(rows, 'DoanhThu'),
+      label: { show: true, position: 'top' }
+    }]
+  };
+}
+```
+
+## Cạm bẫy
+
+- Không truyền `:data`; `f-echart` chỉ nhận `:option` và `:config`.
+- Import sai thứ tự sẽ làm chart trắng.
+- Chart trong tab/dialog ẩn có thể cần render lại sau khi vùng chứa hiện ra.
+- Luôn đặt `grid.containLabel: true` để nhãn trục không bị cắt.
+- Với bar/line dashboard, nên bật label giá trị ngay từ đầu.

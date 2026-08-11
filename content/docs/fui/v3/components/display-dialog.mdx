@@ -1,0 +1,202 @@
+---
+title: Display & Dialog
+description: Component hiển thị, dialog, window, editor và PDF trong FUI V3
+icon: PanelsTopLeft
+---
+
+Trang này gom các component hiển thị và overlay của FUI V3. Chúng thường dùng để trình bày thông tin,
+mở form phụ, soạn nội dung HTML hoặc render PDF.
+
+## f-label
+
+`f-label` render chip/label trạng thái từ `text` hoặc `items`.
+
+```json
+{
+  "el": "f-label",
+  "w": 12,
+  "attr": {
+    "text": "Đang hoạt động",
+    "color": "success",
+    "icon-text": "mdi-check-circle"
+  }
+}
+```
+
+## f-box
+
+`f-box` hiển thị hoặc chỉnh sửa dữ liệu dạng key-value.
+
+```json
+{
+  "el": "f-box",
+  "w": 12,
+  "attr": {
+    "label": "Thông tin hồ sơ",
+    ":items": "detailData",
+    ":edit": "isEditMode",
+    ":row-format": [
+      { "text": "Mã", "value": "StudentID", "noEdit": true },
+      { "text": "Họ tên", "value": "FullName" },
+      { "text": "Ngày sinh", "value": "BirthDate" }
+    ]
+  }
+}
+```
+
+`items` có thể là object hoặc array. Nếu truyền object, FUI tự wrap thành một dòng.
+
+## f-header và f-title
+
+`f-header` dùng cho tiêu đề lớn của module/section; `f-title` dùng cho tiêu đề nhỏ hơn.
+
+```json
+{
+  "el": "f-header",
+  "w": 12,
+  "attr": { "label": "Báo cáo tổng hợp" }
+}
+```
+
+```json
+{
+  "el": "f-title",
+  "w": 12,
+  "attr": { "label": "Danh sách hồ sơ" }
+}
+```
+
+## f-dialog
+
+`f-dialog` là dialog tự build form từ mảng `controls`, có data cục bộ, watcher cục bộ, validation
+và button action.
+
+```json
+{
+  "el": "f-dialog",
+  "w": 12,
+  "attr": {
+    "v-model": "dialogOpen",
+    ":data": "dialogData",
+    "title": "Nhập dữ liệu",
+    ":width": 800,
+    ":controls": [
+      {
+        "el": "v-text-field",
+        "w": 12,
+        "attr": { "v-model": "HoTen", "label": "Họ tên", ":required": true }
+      },
+      {
+        "el": "f-date",
+        "w": 12,
+        "attr": { "v-model": "NgaySinh", "label": "Ngày sinh", ":required": false }
+      }
+    ],
+    ":button": [
+      {
+        "label": "Lưu",
+        "icon-text": "mdi-content-save",
+        "checkvalid": true,
+        "action": [
+          { "dialogData": "dData" },
+          { "dialogOpen": false },
+          { "CALL": "saveDialog" }
+        ]
+      },
+      {
+        "label": "Đóng",
+        "checkvalid": false,
+        "action": { "dialogOpen": false }
+      }
+    ]
+  }
+}
+```
+
+<Callout>
+Không đặt `f-dialog` bên trong template của `uc-*.vue`. Component này được thiết kế để khai trực
+tiếp trong `module.json.controls`.
+</Callout>
+
+## f-window
+
+`f-window` là host iframe dialog nội bộ, thường mở bằng `openWindow`.
+
+```json
+{
+  "FUN": "openWindow",
+  "IN": {
+    "id": "`winUser",
+    "url": "`/ex/user-detail?UserID=${item.UserID}",
+    "title": "`Chi tiết user",
+    "width": 1100
+  }
+}
+```
+
+## f-editor và f-editor-dialog
+
+`f-editor` là CKEditor inline trong trang; `f-editor-dialog` là editor trong modal.
+
+<Callout type="error">
+Cần import `/include/ckeditor5/build/ckeditor.js`.
+</Callout>
+
+```json
+{
+  "el": "f-editor",
+  "w": 12,
+  "attr": {
+    "v-model": "form.contentHtml",
+    "imageapi": "/api/editor/upload",
+    ":height": 360
+  }
+}
+```
+
+```json
+{
+  "el": "f-editor-dialog",
+  "w": 6,
+  "attr": {
+    ":value": "editorState",
+    "label": "Nội dung mở rộng",
+    ":width": 1000,
+    "imageapi": "/api/editor/upload"
+  }
+}
+```
+
+Với `f-editor-dialog`, `value` là object trạng thái dialog/editor, không phải chuỗi HTML đơn.
+
+## f-pdfmake
+
+`f-pdfmake` render PDF trong iframe từ pdfmake document definition.
+
+<Callout type="error">
+Cần import:
+
+```text
+/include/pdfmake/pdfmake.min.js
+/include/pdfmake/print.min.js
+/include/pdfmake/vfs_fonts.js
+```
+</Callout>
+
+```json
+{
+  "el": "f-pdfmake",
+  "w": 12,
+  "attr": {
+    ":data": "pdfDefinition",
+    "height": "550"
+  }
+}
+```
+
+## Cạm bẫy
+
+- Biến dùng trong `f-dialog.controls` nên được khai trước trong `data[]` nếu bind tới `vueData.*`.
+- Trong controls của dialog, `v-model` không prefix `vueData.` sẽ là data cục bộ của dialog.
+- PDF/editor/upload đều cần import; thiếu import thường gây vùng trắng.
+- Với dialog CRUD đơn giản trong bảng, ưu tiên `f-table` + `ctrl-update` thay vì tự dựng dialog.

@@ -1,0 +1,93 @@
+---
+title: Quy tắc phân giải giá trị
+description: Vì sao "active" không phải chuỗi "active" — luật quan trọng nhất của FUI V3
+icon: TriangleAlert
+---
+
+Quy tắc này là nguồn lỗi đầu tiên khi viết module FUI. Mọi giá trị chuỗi trong `data[]`, `IN`,
+`attr` và action đều được FUI V3 phân giải.
+
+## Bảng quy tắc
+
+| Bạn viết                        | FUI xử lý       | Kết quả               |
+| ------------------------------- | --------------- | --------------------- |
+| Số, boolean, null, object, mảng | Giữ nguyên      | Giá trị gốc           |
+| Chuỗi bắt đầu bằng `` ` ``      | Lodash template | Chuỗi sau render      |
+| Chuỗi có `{{ }}`                | Lodash template | Nội suy vào biểu thức |
+| Chuỗi có dấu cách               | Lodash template | Chuỗi nguyên văn      |
+| Chuỗi không dấu cách            | Eval JS         | Giá trị biểu thức     |
+| `""`                            | Giữ nguyên      | Chuỗi rỗng            |
+
+<Callout type="error">
+  Chuỗi không có dấu cách được eval như JS. `"active"` không phải chuỗi "active"
+  mà là giá trị của biến `active`. Muốn chuỗi thật, dùng `` "`active" ``.
+</Callout>
+
+## Ví dụ
+
+```json
+"data": [
+  {
+    "a": "Hang So",
+    "b": 3,
+    "c": true,
+    "d": null,
+    "e": "val1",
+    "f": "val4.prop2",
+    "g": "[1,2,3].map(x=>x*2)",
+    "h": "`active",
+    "i": "Xin chao {{user.name}}"
+  }
+]
+```
+
+- `a` → chuỗi "Hang So"
+- `e` → giá trị biến `val1`
+- `h` → chuỗi "active"
+- `i` → nội suy giá trị `user.name`
+
+## Khi viết `IN` cho API
+
+```json
+"IN": {
+  "Status": "`ACTIVE",
+  "UserID": "userID"
+}
+```
+
+- `"`ACTIVE"` là một hằng chuỗi.
+- `"userID"` nghĩa là giá trị biến `userID`.
+
+## Key cũng có thể là đường dẫn sâu
+
+```json
+{ "form.name": "`Nguyen Van A" }
+```
+
+`form.name` được tạo ra trong `vueData` nếu chưa tồn tại.
+
+## Prefix `vueData.`
+
+Trong `controls`, nên dùng `vueData.` cho `v-if`, `v-model`, `:items`:
+
+```json
+{ "attr": { "v-if": "vueData.isAdmin", "v-model": "vueData.filter.text" } }
+```
+
+Trong `data[]` và action, không cần prefix khi dùng trong biểu thức Lodash:
+
+```json
+{ "IF": "user.SystemRight == 9", "THEN": { "CALL": "loadAdmin" } }
+```
+
+## Cách kiểm tra nhanh
+
+1. Chuỗi này có dấu cách không? Nếu không, nó đang bị eval.
+2. Muốn chuỗi hay biến? Muốn chuỗi → thêm backtick.
+3. Biến đã tồn tại khi dòng này chạy chưa? `data[]` chạy tuần tự.
+
+## Mẹo
+
+- Dùng backtick cho tất cả hằng chuỗi không có dấu cách: ``"`SAVE"``.
+- Dùng `{{ }}` khi cần chèn giá trị vào chuỗi lớn: `"Đang có {{dsUser.length}} bản ghi"`.
+- Trường hợp `attr` static mà trông như biến: `"type": "text"` nên viết ``"`text"``.

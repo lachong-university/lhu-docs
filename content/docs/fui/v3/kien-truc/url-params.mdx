@@ -1,0 +1,47 @@
+---
+title: URL Params
+description: Cách FUI V3 tự nạp và dùng tham số URL
+disableToc: true
+icon: LinkVariant
+---
+
+FUI V3 tự nạp query string và hash từ URL vào `vueData` khi module khởi tạo.
+
+## Tự nạp tham số
+
+- Query string (`?a=1&b=2`) được parse thành các trường trong `vueData`.
+- Hash (`#tab=2`) được parse nếu module có logic xử lý hash.
+
+Trong V3, bạn thường khai `data` để định nghĩa mặc định, sau đó giá trị URL ghi đè.
+
+```json
+"data": [
+  { "Query": { "page": 1, "search": "" } }
+]
+```
+
+Nếu URL có `?page=2`, `vueData.Query.page` sẽ nhận `2`.
+
+## Dùng tham số trong controls
+
+```json
+{
+  "el": "v-text-field",
+  "attr": {
+    "v-model": "Query.search",
+    "label": "Tìm kiếm"
+  }
+}
+```
+
+Với `?search=hoa`, trường tìm kiếm sẽ hiển thị ngay khi trang load.
+
+## Thay đổi URL từ runtime
+
+- `pushRouter({ path: '/page', query: { page: 2 } })` — thay URL không reload.
+- `redirect({ path: '/page' }, true)` — tải lại trang và giữ query hiện tại.
+
+## Ghi chú
+
+- Nếu module dùng `HTMLOnly: true`, FUI không tự nạp `vueData`, nên bạn phải parse URL thủ công.
+- `vueData` không chia rõ `query` và `hash`; giá trị URL được merge vào state.
