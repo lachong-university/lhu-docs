@@ -1,0 +1,110 @@
+---
+title: f-time-counter
+description: Đếm ngược hoặc đồng hồ thời gian thực
+icon: TimerReset
+---
+
+Không phải ô nhập — `f-time-counter` chỉ hiển thị. Ba chế độ: đếm ngược đầy đủ, đếm ngược rút
+gọn, hoặc đồng hồ thời gian thực.
+
+## Demo
+
+<FuiPreview template="f-time-counter" height={200} />
+
+## Props
+
+<TypeTable
+  type={{
+    value: {
+      description: "Số giây còn lại (Number), hoặc chuỗi datetime 'yyyy-MM-dd HH:mm:ss'.",
+      type: "Number | String",
+      default: "0",
+    },
+    type: {
+      description: "0 = đếm ngược đầy đủ (ngày/giờ/phút/giây) · 1 = đếm ngược chỉ tổng số giây · 2 = đồng hồ thời gian thực.",
+      type: "Number",
+      default: "0",
+    },
+    format: {
+      description: "Nhãn đơn vị: { label, day, hour, minute, second }.",
+      type: "Object",
+      default: "{ label: '', day: ' ngày', hour: ' giờ', minute: ' phút', second: ' giây' }",
+    },
+    labelFormat: { description: "Style cho phần nhãn.", type: "Object" },
+  }}
+/>
+
+**Event**: `input` (số giây còn lại — chỉ khi `value` là Number) · `time-end` (khi đếm về 0)
+
+## Cách dùng
+
+<Tabs items={['Đếm ngược đầy đủ (demo)', 'Đồng hồ thời gian thực', 'Đếm ngược đến hạn']}>
+
+<Tab value="Đếm ngược đầy đủ (demo)">
+```json
+{
+  "el": "f-time-counter",
+  "w": 6,
+  "attr": {
+    ":value": 3600,
+    ":type": 0,
+    ":format": {
+      "label": "Còn lại: ",
+      "day": " ngày", "hour": " giờ", "minute": " phút", "second": " giây"
+    }
+  }
+}
+```
+</Tab>
+
+<Tab value="Đồng hồ thời gian thực">
+```json
+{ "el": "f-time-counter", "w": 4, "attr": { ":type": 2 } }
+```
+</Tab>
+
+<Tab value="Đếm ngược đến hạn">
+Đếm tới một mốc thời gian tuyệt đối thay vì số giây tương đối — truyền chuỗi datetime:
+
+```json
+{
+  "el": "f-time-counter",
+  "w": 6,
+  "attr": {
+    ":value": "'2026-12-31 23:59:59'",
+    ":type": 0,
+    "v-on:time-end": "CALL(vueData.hetHan)"
+  }
+}
+```
+</Tab>
+
+</Tabs>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**`time-end` chỉ bắn khi bộ đếm chạm 0** — không bắn khi component bị unmount hay `value` đổi
+giữa chừng. Cần dọn dẹp khi rời trang thì tự xử lý ở nơi khác.
+</Callout>
+
+<Callout>
+Muốn phát âm thanh hoặc mở dialog khi hết giờ, bắt `v-on:time-end` như ví dụ "Đếm ngược đến hạn"
+ở trên.
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi một bộ đếm ngược [THỜI LƯỢNG], khi hết giờ thì tự động gọi action [HÀNH ĐỘNG].
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-time-counter`, `":type": 0` cho đếm ngược đầy đủ
+- Bắt sự kiện hết giờ bằng `"v-on:time-end": "CALL(...)"` — viết đầy đủ `v-on:`, không dùng `@`
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `controls` liên quan.
+</AiPrompt>

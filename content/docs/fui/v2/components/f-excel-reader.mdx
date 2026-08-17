@@ -1,0 +1,129 @@
+---
+title: f-excel-reader
+description: Đọc file Excel/CSV thành JSON ngay trên client, không cần upload lên server
+icon: FileSpreadsheet
+---
+
+`f-excel-reader` đọc sheet đầu tiên của một file Excel/CSV và phát ra mảng object — toàn bộ xử
+lý diễn ra ở trình duyệt, không gọi API upload. Thư viện XLSX được tự nạp khi cần (lazy-load).
+
+## Demo
+
+<FuiPreview template="f-excel-reader" height={240} />
+
+## Props
+
+<TypeTable
+  type={{
+    label: { description: "Chữ trên nút.", type: "String", default: "'Load Excel'" },
+    iconText: { description: "Icon Material Design.", type: "String", default: "'mdi-grid'" },
+    headerFormat: {
+      description: "null = dùng hàng đầu tiên làm header · 1 = dùng số thứ tự cột thay tên.",
+      type: "String",
+    },
+    rawFormat: {
+      description: "false = tự parse số/ngày · true = giữ nguyên chuỗi thô.",
+      type: "String",
+    },
+    dateFormat: {
+      description: "Định dạng ngày khi parse. Mặc định 'FMT 14' (dd/mm/yyyy).",
+      type: "String",
+    },
+    action: {
+      description: "Object action FUI chạy ngay sau khi parse xong.",
+      type: "Object",
+    },
+  }}
+/>
+
+**Event**: `input` — mảng object đã parse.
+
+### Default FUI tự thêm
+
+```json
+{ "elevation": "1", ":depressed": true, "color": "primary" }
+```
+
+## Cách dùng
+
+<Tabs items={['Tối giản (demo)', 'Có action sau khi đọc']}>
+
+<Tab value="Tối giản (demo)">
+```json
+{
+  "el": "f-excel-reader",
+  "w": "",
+  "attr": {
+    "label": "Nhập từ Excel",
+    "icon-text": "mdi-microsoft-excel",
+    "v-model": "dsExcelDoc"
+  }
+}
+```
+
+Kết quả bind vào `dsExcelDoc` — thử đưa vào `f-table` để xem ngay:
+
+```json
+{ "el": "f-table", "w": 12, "attr": { "label": "Xem trước", ":items": "dsExcelDoc" } }
+```
+</Tab>
+
+<Tab value="Có action sau khi đọc">
+```json
+{
+  "el": "f-excel-reader",
+  "w": "",
+  "attr": {
+    "label": "Nhập điểm từ Excel",
+    "icon-text": "mdi-microsoft-excel",
+    ":header-format": 1,
+    ":raw-format": false,
+    "v-model": "dsDiemNhap",
+    ":action": { "CALL": "xuLyDiemNhap" }
+  }
+}
+```
+
+```json
+{
+  "xuLyDiemNhap": {
+    "FUN": "chuanHoaDiem",
+    "IN": { "rows": "dsDiemNhap" },
+    "OUT": "dsDiemDaChuan"
+  }
+}
+```
+</Tab>
+
+</Tabs>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**Chỉ đọc sheet đầu tiên.** File nhiều sheet thì các sheet sau bị bỏ qua — báo người dùng gộp về
+một sheet trước khi tải lên.
+</Callout>
+
+<Callout>
+Muốn kiểm tra dữ liệu trước khi lưu, đổ thẳng kết quả vào một `f-table` tạm để người dùng xem
+lại, rồi mới có nút "Xác nhận lưu" gọi API riêng — đừng lưu thẳng ngay khi đọc xong.
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi chức năng nhập [ĐỐI TƯỢNG] hàng loạt từ Excel: đọc file, xem trước trong bảng,
+rồi mới lưu khi bấm xác nhận.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-excel-reader`, kết quả bind qua `v-model` vào một mảng state
+- Đổ mảng đó vào `f-table` tạm để xem trước, không lưu thẳng ngay khi đọc xong
+- Nút "Xác nhận lưu" riêng, gọi API lưu hàng loạt
+- Không khai lại `elevation: "1"` và `color: "primary"` — FUI đã tự thêm
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `data[]` và `controls` liên quan.
+</AiPrompt>

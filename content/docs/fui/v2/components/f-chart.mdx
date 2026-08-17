@@ -1,0 +1,32 @@
+---
+title: f-chart
+description: Bọc Chart.js — vẫn có trong runtime nhưng không còn được khuyến nghị, dùng f-echart thay thế
+icon: ChartNoAxesColumn
+---
+
+<Callout type="warn">
+**Đừng dùng cho code mới.** `f-chart` (Chart.js) vẫn tồn tại trong `component.js` nên module cũ
+dùng nó vẫn chạy, nhưng nó **không còn xuất hiện** trong danh mục chọn component chính thức của
+FUI — chỗ đó chỉ liệt kê [`f-echart`](/docs/fui/v2/components/f-echart) (Apache ECharts V5) cho
+mọi nhu cầu biểu đồ.
+
+Đang sửa module cũ có `f-chart` → cân nhắc chuyển sang `f-echart` khi có dịp, thay vì thêm biểu
+đồ `f-chart` mới.
+</Callout>
+
+## Vì sao chuyển sang `f-echart`
+
+| | `f-chart` (cũ) | `f-echart` (khuyến nghị) |
+|---|---|---|
+| Nền tảng | Chart.js | Apache ECharts V5 |
+| Loại chart | Cơ bản | Đầy đủ: bar, line, pie, gauge, scatter, radar, heatmap, sankey, tree, map, graph… |
+| Bảng xem dữ liệu | Không có sẵn | `config.dataView: true` |
+| Theme FUI | Không | Có (`'fui'`, `'shine'`, `'v5'`) |
+| Tài liệu này | Không viết tiếp | [Đầy đủ →](/docs/fui/v2/components/f-echart) |
+
+## Props (tham khảo nhanh, cho module cũ)
+
+`data`, `type`, `options`, `reverseData`. Import bắt buộc:
+`/include/chart/chart.min.js`.
+
+Không đi sâu thêm ở đây — xem [`f-echart`](/docs/fui/v2/components/f-echart) cho biểu đồ mới.

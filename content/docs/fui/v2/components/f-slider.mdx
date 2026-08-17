@@ -1,0 +1,72 @@
+---
+title: f-slider
+description: Carousel ảnh, bọc v-carousel
+icon: GalleryHorizontal
+---
+
+`f-slider` bọc `v-carousel` — dựng slideshow ảnh từ một mảng URL.
+
+## Demo
+
+<FuiPreview template="f-slider" height={280} />
+
+## Props
+
+<TypeTable
+  type={{
+    items: { description: "Mảng URL ảnh (chuỗi), hoặc mảng object nếu cần thêm thuộc tính khác.", type: "Array" },
+    itemAttr: {
+      description: "Thuộc tính truyền vào từng v-carousel-item, vd { contain: true }.",
+      type: "Object",
+    },
+  }}
+/>
+
+Mọi prop khác rơi xuống `v-carousel` bên dưới — `height`, `cycle`, `hide-delimiters`,
+`show-arrows` dùng bình thường.
+
+## Cách dùng
+
+```json
+{
+  "el": "f-slider",
+  "w": 12,
+  "attr": {
+    ":items": "dsAnhSanPham",
+    ":item-attr": { "contain": true },
+    "height": "320",
+    ":cycle": true
+  }
+}
+```
+
+```json
+{ "dsAnhSanPham": [
+  "https://cdn.example.com/sp1.jpg",
+  "https://cdn.example.com/sp2.jpg",
+  "https://cdn.example.com/sp3.jpg"
+] }
+```
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+Ảnh không cùng tỉ lệ thì thêm `:item-attr: { "contain": true }` — nếu không `v-carousel` sẽ crop
+ảnh (`cover` là mặc định của Vuetify) và ảnh bị cắt xén không đều.
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi một carousel ảnh [ĐỐI TƯỢNG], tự chuyển ảnh, ảnh không bị crop.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-slider`, không dùng `v-carousel` trần
+- Đặt `:item-attr: { "contain": true }` để ảnh không bị crop nếu tỉ lệ khác nhau
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `controls` liên quan.
+</AiPrompt>

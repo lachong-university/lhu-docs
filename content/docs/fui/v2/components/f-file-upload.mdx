@@ -1,0 +1,145 @@
+---
+title: f-file-upload
+description: Tải file lên qua Plupload — có dialog tiến trình và tự upload khi chọn file
+icon: Upload
+---
+
+`f-file-upload` bọc Plupload: bấm nút, chọn file, tự động tải lên ngay, có dialog tiến trình
+sẵn.
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì component không tồn tại.
+
+```text
+/include/plupload-2.3.7/plupload.full.min.js
+```
+</Callout>
+
+## Demo
+
+<FuiPreview template="f-file-upload" height={200} />
+
+## Props
+
+<TypeTable
+  type={{
+    label: { description: "Chữ trên nút.", type: "String", default: "'file upload'" },
+    url: { description: "Endpoint nhận file.", type: "String", default: "''" },
+    iconText: { description: "Icon nút.", type: "String", default: "'mdi-cloud-upload-outline'" },
+    autoclose: {
+      description: "Tự đóng dialog tiến trình khi upload xong.",
+      type: "Boolean",
+      default: "true",
+    },
+    filters: {
+      description: "Giới hạn dung lượng và loại file cho phép.",
+      type: "Object",
+      default: "{ max_file_size: '5mb', mime_types: [{ title: 'All files', extensions: '*' }] }",
+    },
+    resize: {
+      description: "Tự resize ảnh trước khi upload — chỉ áp dụng cho file ảnh.",
+      type: "Object",
+      default: "{ width: 1900, height: 1600, quality: 80 }",
+    },
+    onclose: { description: "Action chạy khi dialog tiến trình đóng.", type: "Object" },
+  }}
+/>
+
+**Event**: `input` — kết quả trả về từ `url` sau khi upload xong.
+
+### Default FUI tự thêm
+
+```json
+{ "elevation": 1, ":depressed": true, "color": "primary" }
+```
+
+## Cách dùng
+
+<Tabs items={['Tối giản (demo)', 'Giới hạn loại file', 'Xử lý sau khi upload']}>
+
+<Tab value="Tối giản (demo)">
+```json
+{
+  "el": "f-file-upload",
+  "w": "",
+  "attr": {
+    "label": "Tải tệp lên",
+    "url": "/api/upload/file",
+    "v-on:input": "CALL(vueData.xuLyKetQuaUpload, { item: $event })"
+  }
+}
+```
+</Tab>
+
+<Tab value="Giới hạn loại file">
+```json
+{
+  "el": "f-file-upload",
+  "w": "",
+  "attr": {
+    "label": "Tải PDF",
+    "url": "/api/upload/pdf",
+    ":filters": {
+      "max_file_size": "20mb",
+      "mime_types": [{ "title": "PDF", "extensions": "pdf" }]
+    }
+  }
+}
+```
+</Tab>
+
+<Tab value="Xử lý sau khi upload">
+```json
+{
+  "el": "f-file-upload",
+  "w": "",
+  "attr": {
+    "label": "Tải ảnh minh chứng",
+    "url": "/api/upload/file",
+    ":resize": { "width": 1200, "height": 1200, "quality": 80 },
+    ":onclose": { "CALL": "apiDanhSach" }
+  }
+}
+```
+
+`onclose` chạy khi dialog tiến trình đóng lại — dùng để tải lại danh sách sau khi thêm file.
+</Tab>
+
+</Tabs>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**`resize` chỉ tác động lên file ảnh.** File PDF, Word… đi qua nguyên vẹn, không bị resize.
+</Callout>
+
+<Callout type="warn">
+**`filters.mime_types` không tự động khớp phần mở rộng.** Khai đúng `extensions` (không có dấu
+chấm, ví dụ `"pdf"` chứ không phải `".pdf"`), nếu không dialog chọn file sẽ không lọc đúng.
+</Callout>
+
+## Component liên quan
+
+- [`f-image-update`](/docs/fui/v2/components/f-image-update) — tải ảnh kèm cắt ảnh, dành riêng cho avatar/ảnh đại diện
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi nút tải [LOẠI FILE] lên, giới hạn dung lượng [KÍCH THƯỚC], sau khi tải xong thì
+tải lại danh sách.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-file-upload`, không tự viết input file + XHR
+- Giới hạn loại file bằng `:filters.mime_types`, `extensions` không có dấu chấm ở đầu
+- Dùng `:onclose` để tải lại danh sách sau khi dialog tiến trình đóng
+- Nhắc tôi đăng ký import `/include/plupload-2.3.7/plupload.full.min.js`
+- Không khai lại `elevation: 1` và `color: "primary"` — FUI đã tự thêm
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `controls` liên quan.
+</AiPrompt>

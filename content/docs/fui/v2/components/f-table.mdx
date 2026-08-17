@@ -41,7 +41,7 @@ Bảng chỉ đọc = `f-table` **không khai** `:update-api`.
       default: "50",
     },
     height: {
-      description: "Chiều cao vùng cuộn. Hay dùng: '$( window ).height()-285'",
+      description: "Chiều cao vùng cuộn — xem bảng chế độ bên dưới. Bảng chính của trang dùng -16.",
       type: "String | Number",
     },
     fixedHeader: { description: "Ghim dòng tiêu đề khi cuộn.", type: "Boolean", default: "true" },
@@ -82,6 +82,26 @@ Bảng chỉ đọc = `f-table` **không khai** `:update-api`.
 ```
 
 **Event**: `input` (dòng được chọn) · `click:row` · `mouseover:row` · `mouseleave:row`
+
+## Chiều cao
+
+`f-table` tự **đo vị trí thật** của bảng trên trang (`getBoundingClientRect().top`) rồi tính
+chiều cao còn lại — không cần tự cộng trừ chiều cao header/toolbar phía trên.
+
+| `:height` | Hành vi |
+|---|---|
+| *(bỏ trống)* | Tự giãn theo số dòng — hợp cho bảng ngắn/lookup. Bảng chính của trang thì **sai**, cả trang sẽ cuộn |
+| `<= 0` | Fill tới đáy màn hình, chừa `abs(height)` px — **chuẩn cho bảng chính**, dùng `":height": -16` |
+| `> 0` | px cố định — dùng khi bảng nằm **trong dialog**, ví dụ `":height": 360` |
+
+Tự cập nhật khi resize cửa sổ và khi `items` đổi. Cùng ba chế độ này áp dụng cho
+[`f-sheet`](/docs/fui/v2/components/f-sheet#chiều-cao).
+
+<Callout type="warn">
+**Pattern cũ `":height": "$( window ).height()-285"` không dùng nữa.** Nó bắt tự đoán tổng
+chiều cao mọi thứ phía trên bảng — sai một chút là bảng hụt hoặc tràn. Thấy pattern này trong
+module cũ thì thay bằng `":height": -16`.
+</Callout>
 
 ## Định nghĩa cột
 
@@ -264,7 +284,7 @@ Là chuỗi tĩnh → khai **không** có prefix `:`.
 `body.append` — dùng `sum-format`.
 </Callout>
 
-## Cạm bẫy
+## Lỗi thường gặp
 
 <Callout type="warn">
 **`item-key` bắt buộc khi dùng chọn dòng hoặc CRUD.** Thiếu nó thì việc chọn dòng hoạt động
@@ -281,11 +301,6 @@ phân trang.
 **Đừng dùng `f-button` + `f-dialog` để làm form thêm mới** — không ổn định trong FUI V2. Dùng
 `ctrl-update` như trên. Cần dialog có logic riêng thì dựng `v-dialog` thủ công trong container
 `"prop": "hidden-container"`.
-</Callout>
-
-<Callout>
-Bảng chiếm cả màn hình nên đặt `:height` để chỉ vùng dữ liệu cuộn, còn trang thì không:
-`":height": "$( window ).height()-285"`. Bảng nằm trong dialog thì dùng `max-height` với số px cố định.
 </Callout>
 
 ## Prompt cho AI
@@ -306,6 +321,8 @@ Yêu cầu bắt buộc khi viết JSON FUI:
 - Cột số dùng `"el": "t-num"`, cột ngày dùng `"el": "t-time"`, cột boolean dùng `"el": "t-boolean"`
 - Hàng tổng dùng `:sum-format` dạng object (`{ "Luong": "0,0" }`), tuyệt đối không push dòng
   "Tổng" vào items
+- Bảng chính của trang khai `":height": -16` (fill tới đáy màn hình, chừa 16px). Đừng dùng pattern
+  cũ `"$( window ).height()-285"` — đã bị bỏ
 - Không khai lại các default FUI đã tự thêm: `:dense`, `:show-search`, `:fixed-header`,
   `:items-per-page 50`, `:hide-default-footer`
 - Chuỗi cố định **không có dấu cách** phải bọc backtick ở đầu, ví dụ `` "`active" ``

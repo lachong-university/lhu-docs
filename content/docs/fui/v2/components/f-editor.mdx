@@ -1,0 +1,88 @@
+---
+title: f-editor
+description: Rich text editor (CKEditor 5), có upload ảnh kèm bearer token
+icon: PenLine
+---
+
+`f-editor` bọc CKEditor 5 — soạn thảo nội dung HTML ngay trong trang, không mở dialog.
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì component không tồn tại.
+
+```text
+/include/ckeditor5/build/ckeditor.js
+```
+</Callout>
+
+## Demo
+
+<FuiPreview template="f-editor" height={380} />
+
+## Props
+
+<TypeTable
+  type={{
+    value: { description: "Nội dung HTML. Dùng qua v-model.", type: "String" },
+    imageapi: {
+      description: "Endpoint nhận ảnh khi người dùng chèn ảnh vào bài. Tự gửi kèm bearer token.",
+      type: "String",
+      default: "'https://fap.vn'",
+    },
+    height: { description: "Chiều cao vùng soạn thảo, px.", type: "Number" },
+    toolbar: { description: "Danh sách nút toolbar, phân cách bởi dấu phẩy.", type: "String" },
+  }}
+/>
+
+**Event**: `input` — nội dung HTML.
+
+## Cách dùng
+
+```json
+{
+  "el": "f-editor",
+  "w": 12,
+  "attr": {
+    "v-model": "form.noiDungHtml",
+    "imageapi": "/api/editor/upload",
+    ":height": 360
+  }
+}
+```
+
+<Callout type="warn">
+**`imageapi` mặc định trỏ về `https://fap.vn`** — gần như chắc chắn không phải endpoint bạn
+muốn. Luôn khai rõ `imageapi` trỏ về API upload của project mình.
+</Callout>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+Nội dung là **HTML thô** — hiển thị lại ở nơi khác (ví dụ trong `f-table`) phải dùng renderer
+`t-html`, không phải `t-label`, nếu không sẽ hiện nguyên thẻ HTML thay vì render.
+</Callout>
+
+## Component liên quan
+
+- [`f-editor-dialog`](/docs/fui/v2/components/f-editor-dialog) — cùng CKEditor 5 nhưng mở trong modal thay vì inline
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi ô soạn thảo nội dung [LOẠI NỘI DUNG] dạng rich text, cho phép chèn ảnh.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-editor`, không dùng textarea thường
+- **Phải** khai rõ `imageapi` trỏ về API upload thật — mặc định trỏ `https://fap.vn`, không dùng
+  được cho project khác
+- Nhắc tôi đăng ký import `/include/ckeditor5/build/ckeditor.js`
+- Nội dung ra là HTML thô; hiển thị lại ở `f-table` phải dùng renderer `t-html`, không phải
+  `t-label`
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `controls` liên quan.
+</AiPrompt>

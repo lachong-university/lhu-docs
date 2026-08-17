@@ -1,0 +1,89 @@
+---
+title: f-label
+description: Chip/badge hiển thị nhãn hoặc trạng thái
+icon: Tag
+---
+
+`f-label` render một hoặc nhiều `v-chip` — dùng cho nhãn trạng thái, tag, badge nhỏ gọn.
+
+## Demo
+
+<FuiPreview template="f-label" height={160} />
+
+## Props
+
+<TypeTable
+  type={{
+    text: { description: "Chip đơn — nội dung hiển thị.", type: "String" },
+    iconText: { description: "Icon bên trái, dùng cho chip đơn (text).", type: "String" },
+    color: {
+      description: "Màu chip đơn. Với mảng items, chỉ áp dụng khi item không tự khai color.",
+      type: "String",
+    },
+    items: {
+      description: "Mảng nhiều chip: [{ text, color, 'icon-text' }]. Dùng cùng lúc với text nếu cần cả hai.",
+      type: "Array",
+    },
+  }}
+/>
+
+### Default FUI tự thêm
+
+```json
+{ ":outlined": true }
+```
+
+Mọi prop khác rơi xuống `v-chip` bên dưới — `small`, `label`, `close`… dùng bình thường.
+
+## Cách dùng
+
+<Tabs items={['Chip đơn (demo)', 'Nhiều chip từ mảng']}>
+
+<Tab value="Chip đơn (demo)">
+```json
+{
+  "el": "f-label",
+  "w": "",
+  "attr": { "text": "Đang hoạt động", "color": "success", "icon-text": "mdi-check-circle" }
+}
+```
+</Tab>
+
+<Tab value="Nhiều chip từ mảng">
+```json
+{
+  "el": "f-label",
+  "w": "",
+  "attr": {
+    ":items": [
+      { "text": "VIP", "color": "amber darken-2", "icon-text": "mdi-star" },
+      { "text": "Đã xác thực", "color": "success", "icon-text": "mdi-check" }
+    ]
+  }
+}
+```
+
+Dùng trong cột của `f-table` để hiện nhiều badge trên một dòng:
+
+```json
+{ "text": "Nhãn", "value": "dsNhan", "el": "f-label", "attr": { ":items": "item.dsNhan" } }
+```
+</Tab>
+
+</Tabs>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi nhãn trạng thái [TRẠNG THÁI], màu đổi theo giá trị.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-label`, không dùng `v-chip` trần
+- Chip đơn dùng prop `text` + `color` + `icon-text`; nhiều chip trên một chỗ thì dùng `:items`
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `controls` liên quan.
+</AiPrompt>

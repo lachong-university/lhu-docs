@@ -1,0 +1,39 @@
+---
+title: f-header
+description: Tiêu đề lớn cho đầu trang
+icon: Heading1
+---
+
+`f-header` render một dòng tiêu đề lớn (`display-1`, màu `primary`) — dùng cho tiêu đề chính đầu
+trang.
+
+## Demo
+
+<FuiPreview template="f-header" height={120} />
+
+## Props
+
+<TypeTable
+  type={{
+    label: {
+      description: "Nội dung tiêu đề. Render bằng v-html nên nhận cả HTML đơn giản.",
+      type: "String",
+    },
+  }}
+/>
+
+## Cách dùng
+
+```json
+{ "el": "f-header", "w": 12, "attr": { "label": "Quản lý nhân viên" } }
+```
+
+<Callout>
+`label` render qua `v-html` — nhận `{{ }}` để ghép động: `"label": "Báo cáo {{'tháng ' + thangHienTai}}"`.
+Đừng đưa dữ liệu người dùng nhập thẳng vào đây nếu chưa qua kiểm soát, vì HTML sẽ được thực thi
+nguyên văn.
+</Callout>
+
+## Component liên quan
+
+- [`f-title`](/docs/fui/v2/components/f-title) — tiêu đề nhỏ hơn, dùng cho tiêu đề khối/section

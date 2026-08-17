@@ -28,28 +28,27 @@ chúng thì viết ít JSON hơn nhiều.
 |---|---|
 | [`f-button`](/docs/fui/v2/components/f-button) | Nút bấm có action, phím tắt, validate form |
 | [`f-date`](/docs/fui/v2/components/f-date) | Nhập ngày, có picker và mask |
-| `f-time` | Nhập giờ, có picker và mask |
-| `f-time-counter` | Đếm ngược hoặc đồng hồ thời gian thực |
-| `f-search` | Autocomplete tìm qua API |
-| `f-menu` | Nút dropdown có icon, action, link |
-| `f-radiobox` | Nhóm radio dựng từ mảng |
-| `f-file-upload` | Tải file lên (Plupload, có dialog tiến trình) |
-| `f-image-update` | Tải ảnh lên kèm cắt ảnh |
-| `f-excel-reader` | Đọc file Excel/CSV thành JSON |
-| `f-qrcode` | Vẽ mã QR |
-| `f-qrcode-reader` | Đọc QR bằng camera |
+| [`f-time`](/docs/fui/v2/components/f-time) | Nhập giờ, có picker và mask |
+| [`f-time-counter`](/docs/fui/v2/components/f-time-counter) | Đếm ngược hoặc đồng hồ thời gian thực |
+| [`f-search`](/docs/fui/v2/components/f-search) | Autocomplete tìm qua API |
+| [`f-menu`](/docs/fui/v2/components/f-menu) | Nút dropdown có icon, action, link |
+| [`f-radiobox`](/docs/fui/v2/components/f-radiobox) | Nhóm radio dựng từ mảng |
+| [`f-file-upload`](/docs/fui/v2/components/f-file-upload) | Tải file lên (Plupload, có dialog tiến trình) |
+| [`f-image-update`](/docs/fui/v2/components/f-image-update) | Tải ảnh lên kèm cắt ảnh |
+| [`f-excel-reader`](/docs/fui/v2/components/f-excel-reader) | Đọc file Excel/CSV thành JSON |
+| [`f-qrcode`](/docs/fui/v2/components/f-qrcode) | Vẽ mã QR |
+| [`f-qrcode-reader`](/docs/fui/v2/components/f-qrcode-reader) | Đọc QR bằng camera |
 
 ## Hiển thị
 
 | Component | Dùng khi nào |
 |---|---|
-| `f-label` | Chip/badge hiển thị nhãn, trạng thái |
-| `f-box` | Hiển thị và sửa dữ liệu dạng key–value |
-| `f-header` | Tiêu đề lớn |
-| `f-title` | Tiêu đề nhỏ |
-| `f-slider` | Carousel ảnh |
-| `f-pdfmake` | Render PDF trong iframe |
-| `fp-profile` | Khối thông tin người dùng |
+| [`f-label`](/docs/fui/v2/components/f-label) | Chip/badge hiển thị nhãn, trạng thái |
+| [`f-box`](/docs/fui/v2/components/f-box) | Hiển thị và sửa dữ liệu dạng key–value |
+| [`f-header`](/docs/fui/v2/components/f-header) | Tiêu đề lớn |
+| [`f-title`](/docs/fui/v2/components/f-title) | Tiêu đề nhỏ |
+| [`f-slider`](/docs/fui/v2/components/f-slider) | Carousel ảnh |
+| [`f-pdfmake`](/docs/fui/v2/components/f-pdfmake) | Render PDF trong iframe |
 
 ## Bảng dữ liệu
 
@@ -58,9 +57,10 @@ chúng thì viết ít JSON hơn nhiều.
 | [`f-table`](/docs/fui/v2/components/f-table) | **Mọi bảng dữ liệu** — CRUD qua dialog hoặc chỉ đọc |
 | [`f-sheet`](/docs/fui/v2/components/f-sheet) | Nhập liệu kiểu Excel — sửa thẳng trên ô, dán nhiều dòng |
 
-Renderer dùng trong `headers` của `f-table`:
-`t-html` · `t-label` · `t-num` · `t-time` · `t-boolean` · `t-check` · `t-text` · `t-select` ·
-`t-combobox` · `t-menu` · `t-link` · `t-button`
+Renderer dùng trong `headers` của `f-table`: tóm tắt cả 12 ở
+[trang f-table](/docs/fui/v2/components/f-table#renderer-trong-ô), đi sâu 6 renderer có hành vi
+riêng (`t-check`, `t-text`, `t-select`, `t-combobox`, `t-menu`, `t-link`) ở
+[trang renderer trong ô](/docs/fui/v2/components/table-cell-renderers).
 
 <Callout>
 **`f-table` hay `f-sheet`?** `f-table` sửa từng dòng qua dialog form riêng. `f-sheet` sửa ngay
@@ -72,10 +72,13 @@ nhập liệu bằng `uc-*.vue`.
 
 | Component | Dùng khi nào |
 |---|---|
-| `f-dialog` | Modal có form, watch, nút bấm — chỉ hợp form rất nhỏ |
-| `f-window` | Dialog mở URL trong iframe |
-| `f-editor` | Soạn thảo rich text (CKEditor 5) |
-| `f-editor-dialog` | Soạn thảo rich text trong modal |
+| [`f-dialog`](/docs/fui/v2/components/f-dialog) | Modal có form, watch, nút bấm — chỉ hợp form rất nhỏ |
+| [`f-editor`](/docs/fui/v2/components/f-editor) | Soạn thảo rich text tại chỗ (CKEditor 5) |
+| [`f-editor-dialog`](/docs/fui/v2/components/f-editor-dialog) | Soạn thảo rich text trong modal |
+
+Mở một trang khác trong dialog/iframe (chi tiết một dòng, form phụ) thì dùng
+[`openWindow()`](/docs/fui/v2/kien-truc/mo-cua-so) — **không** đặt `f-window` trực tiếp trong
+`controls`, nó là component nội bộ do `openWindow` tự dựng.
 
 <Callout type="warn">
 **Không dùng `f-button` + `f-dialog` để mở form thêm mới** — không ổn định trong FUI V2. Dùng
@@ -87,6 +90,7 @@ nhập liệu bằng `uc-*.vue`.
 | Component | Dùng khi nào |
 |---|---|
 | [`f-echart`](/docs/fui/v2/components/f-echart) | Mọi loại biểu đồ — bar, line, pie, gauge, scatter, radar, sankey, tree, map |
+| [`f-chart`](/docs/fui/v2/components/f-chart) | **Đừng dùng cho code mới** — bản Chart.js cũ, vẫn chạy nhưng không còn khuyến nghị |
 
 ## Component cần import thêm
 
@@ -114,7 +118,22 @@ buộc phải có `FileSort` **lớn hơn** `echarts.min.js` (ví dụ 100 và 1
 `f-date`, `f-time`, `f-search`, `f-menu`, `f-radiobox`, `f-box`, `f-label`, `f-header`,
 `f-title`, `f-slider`, `f-excel-reader` — và mọi component không có tên trong bảng trên.
 
-## Component nội bộ
+## Ngoài phạm vi tài liệu này
 
-`header-bar` và `f-window` do runtime tự dựng (menu header, cửa sổ `openWindow`). **Đừng đặt
-trực tiếp vào `controls`.**
+`defaultControlAttr` (bảng import mặc định trong `component.js`) còn khai 8 tag `f-*` cùng
+`v-jsoneditor` **không có định nghĩa `Vue.component()`** trong `component.js` /
+`componentTable.js` / `fechart.js` — component thật của chúng nằm ở file import riêng, không có
+trong bộ script skill đọc được. Không đủ nguồn để viết props chính xác:
+
+`f-account-manager` · `f-json-tree` · `f-code-editor` · `f-q-and-a` · `f-etest-review` ·
+`f-audio` · `f-audio-recorder` · `f-google-login` · `v-jsoneditor`
+
+Cần dùng một trong số này thì đọc trực tiếp file import tương ứng của project (qua
+`file_import_get` nếu dùng FUI MCP), đừng đoán prop theo tên.
+
+## Component nội bộ — đừng đặt trực tiếp trong `controls`
+
+`header-bar` (khung menu trên cùng), `fp-profile` (khối hồ sơ người dùng, hiện qua
+`set.userProfile`) và `f-window` (dialog do [`openWindow()`](/docs/fui/v2/kien-truc/mo-cua-so)
+tự dựng) đều là component runtime tự quản lý theo cấu hình — không khai `{ "el": "..." }` trực
+tiếp cho ba component này.

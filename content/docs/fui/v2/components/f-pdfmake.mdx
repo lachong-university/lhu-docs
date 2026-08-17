@@ -1,0 +1,106 @@
+---
+title: f-pdfmake
+description: Render PDF trong iframe từ định nghĩa pdfMake
+icon: FileText
+---
+
+`f-pdfmake` render PDF ngay trong trang bằng thư viện pdfMake — nhận một object định nghĩa tài
+liệu (docDefinition của pdfMake), tự vẽ lại khi dữ liệu đổi.
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì component không tồn tại. Ba file, đúng thứ tự:
+
+```text
+/include/pdfmake/pdfmake.min.js
+/include/pdfmake/print.min.js
+/include/pdfmake/vfs_fonts.js
+```
+</Callout>
+
+## Demo
+
+<FuiPreview template="f-pdfmake" height={420} />
+
+## Props
+
+<TypeTable
+  type={{
+    data: {
+      description: "docDefinition của pdfMake — nội dung PDF. Theo dõi deep-watch, tự vẽ lại khi đổi.",
+      type: "Object",
+    },
+  }}
+/>
+
+### Default FUI tự thêm
+
+```json
+{ "width": "100%", "height": "500px" }
+```
+
+## Cách dùng
+
+```json
+{
+  "el": "f-pdfmake",
+  "w": 12,
+  "attr": { ":data": "pdfDinhNghia", "height": "550" }
+}
+```
+
+```json
+{
+  "pdfDinhNghia": {
+    "content": [
+      { "text": "Hoá đơn #{{donHang.MaDon}}", "style": "header" },
+      { "text": "Khách hàng: {{donHang.TenKhachHang}}" },
+      { "table": {
+          "headerRows": 1,
+          "body": [ ["Mặt hàng", "SL", "Đơn giá"] ]
+        } }
+    ],
+    "styles": { "header": { "fontSize": 18, "bold": true } }
+  }
+}
+```
+
+## In và tải PDF ngoài `f-pdfmake`
+
+Cần nút "In" hoặc "Tải PDF" riêng, không hiện trong iframe, thì dùng hàm dựng sẵn
+[`printPDF`](/docs/fui/v2/kien-truc/default-function):
+
+```json
+{ "el": "f-button", "attr": {
+    "label": "Tải PDF", "icon-text": "mdi-download",
+    ":checkvalid": false,
+    ":action": { "EXE": "printPDF({ data: pdfDinhNghia, download: true })" } } }
+```
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**`data` là docDefinition thô của pdfMake**, không phải HTML. Cần tra cú pháp bảng, font, ảnh
+nhúng thì dùng thẳng tài liệu pdfMake (http://pdfmake.org/) — `f-pdfmake` chỉ là khung hiển thị.
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi bản xem trước PDF cho [LOẠI TÀI LIỆU], dựng từ dữ liệu [NGUỒN DỮ LIỆU], kèm nút
+tải PDF.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-pdfmake` để xem trước, `printPDF({ data, download: true })` cho nút tải
+- `data`/tham số của `printPDF` là docDefinition thô của thư viện pdfMake — dùng cú pháp
+  `content`/`styles`/`table` của pdfMake
+- Nhắc tôi đăng ký đủ 3 import: `pdfmake.min.js`, `print.min.js`, `vfs_fonts.js`
+- Không khai lại `width: "100%"`, `height: "500px"` nếu không cần đổi
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `data[]` và `controls` liên quan.
+</AiPrompt>

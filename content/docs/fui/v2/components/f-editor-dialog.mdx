@@ -1,0 +1,93 @@
+---
+title: f-editor-dialog
+description: Rich text editor trong modal — ghi lại giá trị khi bấm OK
+icon: NotebookPen
+---
+
+Cùng CKEditor 5 với [`f-editor`](/docs/fui/v2/components/f-editor), nhưng mở trong một dialog
+thay vì soạn thảo tại chỗ. Hợp cho nội dung phụ, không chiếm chỗ trên form chính.
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì component không tồn tại.
+
+```text
+/include/ckeditor5/build/ckeditor.js
+```
+</Callout>
+
+## Demo
+
+<FuiPreview template="f-editor-dialog" height={200} />
+
+## Props
+
+<TypeTable
+  type={{
+    value: {
+      description: "Object trạng thái { open, text, object, ok } — KHÔNG phải chuỗi thường.",
+      type: "Object",
+    },
+    label: { description: "Tiêu đề dialog.", type: "String", default: "''" },
+    width: { description: "Bề rộng dialog, px.", type: "Number", default: "800" },
+    imageapi: { description: "Endpoint upload ảnh chèn vào bài.", type: "String" },
+    toolbar: { description: "Danh sách nút toolbar.", type: "String" },
+  }}
+/>
+
+<Callout type="warn">
+**`value` là một object có hình dạng cố định**, không phải chuỗi HTML như `f-editor`. Khai state
+ban đầu đúng dạng `{ open: false, text: '' }` trong `data[]`.
+</Callout>
+
+## Cách dùng
+
+```json
+{
+  "data": [
+    { "editorState": { "open": false, "text": "" } }
+  ],
+  "controls": [
+    { "el": "f-button", "attr": {
+        "label": "Soạn ghi chú", ":checkvalid": false,
+        ":action": { "editorState.open": true } } },
+
+    { "el": "f-editor-dialog", "attr": {
+        ":value": "editorState",
+        "label": "Nội dung ghi chú",
+        ":width": 900,
+        "imageapi": "/api/editor/upload" } }
+  ]
+}
+```
+
+Nội dung sau khi bấm OK nằm ở `editorState.text` — đọc field đó khi lưu.
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**`imageapi` cũng nên khai rõ**, cùng lý do như `f-editor` — đừng để mặc định.
+</Callout>
+
+## Component liên quan
+
+- [`f-editor`](/docs/fui/v2/components/f-editor) — cùng CKEditor 5, soạn thảo tại chỗ thay vì trong dialog
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi nút mở dialog soạn [LOẠI NỘI DUNG] dạng rich text, cho phép chèn ảnh.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-editor-dialog`. `value` là **object** `{ open, text }`, không phải chuỗi HTML như
+  `f-editor` — nhớ khai state ban đầu đúng dạng trong `data[]`
+- Khai rõ `imageapi` trỏ về API upload thật của project
+- Nhắc tôi đăng ký import `/include/ckeditor5/build/ckeditor.js`
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `data[]` và `controls` liên quan.
+</AiPrompt>

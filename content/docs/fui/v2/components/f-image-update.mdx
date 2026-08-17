@@ -1,0 +1,127 @@
+---
+title: f-image-update
+description: Tải ảnh lên kèm cắt ảnh — dành cho avatar và ảnh đại diện
+icon: ImageUp
+---
+
+`f-image-update` mở dialog chọn ảnh, cắt theo tỉ lệ cố định, rồi upload — dùng cho avatar, ảnh
+đại diện, logo.
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì component không tồn tại.
+
+```text
+/include/vue-advanced-cropper/index.umd.js
+/include/vue-advanced-cropper/style.css
+```
+</Callout>
+
+## Demo
+
+<FuiPreview template="f-image-update" height={280} />
+
+## Props
+
+<TypeTable
+  type={{
+    value: { description: "URL ảnh hiện tại. Dùng qua v-model.", type: "String" },
+    apiUpload: { description: "Endpoint nhận ảnh đã cắt.", type: "String", default: "''" },
+    label: { description: "Chữ trên nút.", type: "String", default: "'image upload'" },
+    title: { description: "Tiêu đề dialog cắt ảnh.", type: "String", default: "'Cập nhật hình'" },
+    iconText: { description: "Icon nút.", type: "String", default: "'mdi-camera'" },
+    dialogWidth: { description: "Bề rộng dialog, px.", type: "Number", default: "500" },
+    dialogHeight: { description: "Chiều cao dialog, px.", type: "Number", default: "350" },
+    quality: { description: "Chất lượng ảnh xuất ra (0–1).", type: "Number", default: "0.9" },
+    croperAttr: {
+      description: "Cấu hình vue-advanced-cropper — vd stencil-props: { aspectRatio: 1 } để ép vuông.",
+      type: "Object",
+    },
+  }}
+/>
+
+**Event**: `update` — `{ returnData, imageData }` sau khi upload thành công.
+
+### Default FUI tự thêm
+
+```json
+{ "elevation": 1, "color": "primary", ":text": true }
+```
+
+## Cách dùng
+
+<Tabs items={['Avatar vuông (demo)', 'Ảnh bìa tỉ lệ 16:9']}>
+
+<Tab value="Avatar vuông (demo)">
+```json
+{
+  "el": "f-image-update",
+  "w": "",
+  "attr": {
+    "v-model": "form.anhDaiDien",
+    "label": "Ảnh đại diện",
+    "api-upload": "/api/upload/avatar",
+    ":dialog-width": 500,
+    ":dialog-height": 400
+  }
+}
+```
+
+Mặc định `croperAttr` đã ép `aspectRatio: 1` (hình vuông) — hợp cho avatar.
+</Tab>
+
+<Tab value="Ảnh bìa tỉ lệ 16:9">
+```json
+{
+  "el": "f-image-update",
+  "w": "",
+  "attr": {
+    "v-model": "form.anhBia",
+    "label": "Ảnh bìa",
+    "api-upload": "/api/upload/cover",
+    ":croper-attr": { "stencil-props": { "aspectRatio": 1.777 } },
+    ":dialog-width": 700,
+    ":dialog-height": 500
+  }
+}
+```
+</Tab>
+
+</Tabs>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**`apiUpload` phải trả về đúng cấu trúc mà `update` mong đợi** — component đọc field ảnh từ
+response để cập nhật `v-model`. Kiểm tra lại field trả về của SP nếu ảnh không hiện sau khi
+upload.
+</Callout>
+
+<Callout>
+Cần crop tỉ lệ khác vuông (banner, ảnh bìa) thì luôn khai `:croper-attr.stencil-props.aspectRatio`
+— bỏ qua thì mặc định ép vuông.
+</Callout>
+
+## Component liên quan
+
+- [`f-file-upload`](/docs/fui/v2/components/f-file-upload) — tải file bất kỳ, không crop, dùng Plupload thay vì cropper
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi ô cập nhật [ảnh đại diện / ảnh bìa], tỉ lệ crop [TỈ LỆ].
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-image-update`, không tự viết input file + cropper riêng
+- Tỉ lệ crop khác vuông thì phải khai `:croper-attr.stencil-props.aspectRatio` — mặc định là
+  hình vuông
+- Nhắc tôi đăng ký import `/include/vue-advanced-cropper/index.umd.js` và `style.css`
+- Không khai lại `elevation: 1`, `color: "primary"`, `:text: true` — FUI đã tự thêm
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `controls` liên quan.
+</AiPrompt>

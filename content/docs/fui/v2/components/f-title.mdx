@@ -1,0 +1,38 @@
+---
+title: f-title
+description: Tiêu đề nhỏ cho từng khối/section trong trang
+icon: Heading2
+---
+
+`f-title` render một dòng tiêu đề nhỏ (`title`, màu `primary`) — dùng cho tiêu đề của từng khối
+hoặc section, nhỏ hơn [`f-header`](/docs/fui/v2/components/f-header).
+
+## Demo
+
+<FuiPreview template="f-title" height={100} />
+
+## Props
+
+<TypeTable
+  type={{
+    label: {
+      description: "Nội dung tiêu đề. Render bằng v-html nên nhận cả HTML đơn giản.",
+      type: "String",
+    },
+  }}
+/>
+
+## Cách dùng
+
+```json
+{ "el": "f-title", "w": 12, "attr": { "label": "Thông tin liên hệ" } }
+```
+
+<Callout>
+Đây là component xuất hiện nhiều nhất trong bộ demo của tài liệu này — mỗi trang component đều
+dùng `f-title` làm tiêu đề khối.
+</Callout>
+
+## Component liên quan
+
+- [`f-header`](/docs/fui/v2/components/f-header) — tiêu đề lớn hơn, dùng cho tiêu đề chính đầu trang

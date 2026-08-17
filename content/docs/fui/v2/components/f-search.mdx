@@ -1,0 +1,145 @@
+---
+title: f-search
+description: Autocomplete tìm kiếm qua API, có debounce và trạng thái loading sẵn
+icon: Search
+---
+
+Dùng `f-search` thay `v-autocomplete` khi danh sách gợi ý phải lấy từ API thay vì đã có sẵn ở
+client. Debounce, trạng thái loading và gọi API đều đã tích hợp.
+
+## Demo
+
+Demo dùng `items` tĩnh để chạy được không cần backend thật — xem tab "Nối API" bên dưới cho
+cách dùng thật.
+
+<FuiPreview template="f-search" height={220} />
+
+## Props
+
+<TypeTable
+  type={{
+    api: {
+      description: "Endpoint gọi khi người dùng gõ (≥ 2 ký tự). Bỏ trống thì component chỉ lọc trong prop items.",
+      type: "String",
+    },
+    apiData: {
+      description: "Tham số tĩnh gửi kèm mỗi lần gọi API, trộn với { TEXT: <chuỗi đang gõ> }.",
+      type: "Object",
+      default: "{}",
+    },
+    items: {
+      description: "Danh sách gợi ý tĩnh — dùng khi không có api, hoặc làm giá trị khởi tạo.",
+      type: "Array",
+      default: "[]",
+    },
+  }}
+/>
+
+**Event**: `input` — giá trị được chọn.
+
+### Default FUI tự thêm
+
+```json
+{
+  ":cache-items": true, ":outlined": true, ":dense": true,
+  ":hide-no-data": true, ":hide-details": true, ":auto-select-first": true
+}
+```
+
+Mọi prop khác rơi xuống `v-autocomplete` bên dưới — `item-text`, `item-value`, `label`… dùng
+bình thường.
+
+## Cách dùng
+
+<Tabs items={['Danh sách tĩnh (demo)', 'Nối API']}>
+
+<Tab value="Danh sách tĩnh (demo)">
+JSON đang chạy trong demo ở trên:
+
+```json
+{
+  "el": "f-search",
+  "w": 6,
+  "attr": {
+    "v-model": "form.nhanVienChon",
+    "label": "Tìm nhân viên",
+    ":items": "dsNhanVien",
+    "item-text": "`HoTen",
+    "item-value": "`ID",
+    ":required": false
+  }
+}
+```
+</Tab>
+
+<Tab value="Nối API">
+```json
+{
+  "el": "f-search",
+  "w": 6,
+  "attr": {
+    "v-model": "form.nhanVienID",
+    "label": "Tìm nhân viên",
+    "api": "/api/nhanvien/search",
+    ":api-data": { "PhongBanID": "vueData.filter.phongBanID" },
+    "item-text": "`HoTen",
+    "item-value": "`ID",
+    ":required": false
+  }
+}
+```
+
+SP nhận field `TEXT` — component tự gửi kèm nội dung đang gõ:
+
+```sql
+CREATE PROCEDURE spAPI_NhanVien_Search
+  @TEXT NVARCHAR(200) = NULL,
+  @PhongBanID INT = NULL
+AS
+SELECT TOP 20 ID, HoTen, Email
+FROM NhanVien
+WHERE HoTen LIKE '%' + @TEXT + '%'
+  AND (@PhongBanID IS NULL OR PhongBanID = @PhongBanID)
+```
+</Tab>
+
+</Tabs>
+
+## Hành vi
+
+- Debounce **500ms**
+- Bỏ qua truy vấn khi chuỗi gõ **dưới 2 ký tự**
+- `apiData` đi qua `mapData` nên các giá trị bên trong cũng tuân [quy tắc phân giải giá trị](/docs/fui/v2/kien-truc/value-resolution) — tham chiếu state thì cần prefix `vueData.`
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**SP phải trả về mảng phẳng** (`item-text`/`item-value` trỏ vào cột nào thì SP phải có đúng cột
+đó). `f-search` chấp nhận cả `{ data: [...] }` lẫn mảng trần — nhưng cấu trúc lồng sâu hơn sẽ
+không tự parse được.
+</Callout>
+
+<Callout>
+Không có API mà chỉ cần lọc trong danh sách đã tải sẵn ở client — bỏ hẳn `api`, chỉ dùng `items`.
+Component tự chuyển sang lọc cục bộ.
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi một ô tìm kiếm [ĐỐI TƯỢNG] qua API, có thể lọc thêm theo [ĐIỀU KIỆN PHỤ].
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-search`, không dùng `v-autocomplete` tự viết debounce
+- SP nhận tham số `@TEXT` — component tự gửi nội dung đang gõ vào field đó qua `apiData`
+- `item-text`/`item-value` phải bọc backtick vì là tên field cố định không dấu cách, ví dụ
+  `` "`HoTen" ``
+- Không khai lại `:outlined`, `:dense`, `:hide-details`, `:auto-select-first` — FUI đã tự thêm
+- `":required": false` nếu ô tìm kiếm không bắt buộc
+- Chia cột bằng khoá `w` (1–12); không tự thêm `class`/`style`
+
+Trả về `controls` liên quan, kèm chữ ký SP cần viết.
+</AiPrompt>

@@ -1,0 +1,90 @@
+---
+title: f-qrcode
+description: Vẽ mã QR từ một chuỗi giá trị
+icon: QrCode
+---
+
+`f-qrcode` render một mã QR từ chuỗi `value` — dùng cho link chia sẻ, mã checkin, mã tra cứu.
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì component không tồn tại.
+
+```text
+/include/qrcode/qrcode.min.js
+```
+</Callout>
+
+## Demo
+
+<FuiPreview template="f-qrcode" height={280} />
+
+## Props
+
+<TypeTable
+  type={{
+    value: { description: "Nội dung mã hoá vào QR. Dùng qua v-model.", type: "String" },
+    size: { description: "Kích thước ảnh, px.", type: "Number", default: "300" },
+    color: { description: "Màu mã QR.", type: "String", default: "'#000'" },
+    logo: { description: "URL ảnh logo chèn giữa mã QR.", type: "String" },
+  }}
+/>
+
+## Cách dùng
+
+<Tabs items={['Tối giản (demo)', 'Kèm logo']}>
+
+<Tab value="Tối giản (demo)">
+```json
+{
+  "el": "f-qrcode",
+  "w": "",
+  "attr": { "v-model": "linkChiaSe", ":size": 200 }
+}
+```
+</Tab>
+
+<Tab value="Kèm logo">
+```json
+{
+  "el": "f-qrcode",
+  "w": "",
+  "attr": {
+    "v-model": "maCheckin",
+    ":size": 240,
+    "logo": "https://cdn.example.com/logo-small.png"
+  }
+}
+```
+</Tab>
+
+</Tabs>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+`value` rỗng thì không render gì — khai giá trị mặc định trong `data[]` hoặc bọc `v-if` để tránh
+khoảng trống trước khi dữ liệu tải xong.
+</Callout>
+
+## Component liên quan
+
+- `f-qrcode-reader` — chiều ngược lại, đọc mã QR bằng camera
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi mã QR hiển thị [NỘI DUNG MÃ HOÁ], kích thước 240px.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-qrcode`
+- Nhắc tôi đăng ký import `/include/qrcode/qrcode.min.js` cho module, nếu không component sẽ
+  không tồn tại
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `controls` liên quan.
+</AiPrompt>

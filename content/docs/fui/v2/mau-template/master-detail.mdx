@@ -84,7 +84,7 @@ Cơ chế: `f-table` phát event `click:row`, action lưu dòng vào state, pane
                 "label": "Đơn hàng",
                 ":items": "dsDonHang",
                 "item-key": "ID",
-                ":height": "$( window ).height()-285",
+                ":height": -16,
                 "v-on:click:row": "CALL(vueData.chonDonHang, { $row: $event })",
                 ":item-class": "item => item.ID == (vueData.donHangChon && vueData.donHangChon.ID) ? 'primary lighten-5' : ''",
                 ":headers": [

@@ -1,0 +1,170 @@
+---
+title: f-dialog
+description: Modal tự dựng form từ mảng controls — chỉ hợp cho form rất nhỏ
+icon: PanelTop
+---
+
+`f-dialog` tự build một form bên trong modal từ mảng `controls` bạn truyền vào, kèm watcher cục
+bộ và nút bấm cấu hình sẵn. Tiện cho form nhỏ, độc lập — không hợp cho CRUD một bảng.
+
+<Callout type="warn">
+**Không dùng `f-button` + `f-dialog` để mở form thêm mới cho bảng** — không ổn định trong FUI V2.
+Dùng `ctrl-update` của [`f-table`](/docs/fui/v2/components/f-table)
+(`:update-form` + `:update-api`) cho CRUD. `f-dialog` chỉ hợp cho form rất nhỏ, độc lập với bảng
+nào — ví dụ hộp nhập một giá trị đơn, xác nhận có kèm input.
+</Callout>
+
+## Demo
+
+<FuiPreview template="f-dialog" height={200} />
+
+## Props
+
+<TypeTable
+  type={{
+    value: { description: "Đóng/mở dialog. Dùng qua v-model.", type: "Boolean", default: "false" },
+    data: {
+      description: "Dữ liệu đầu vào, bind bằng :data.sync. Copy vào các field khi dialog mở.",
+      type: "Object",
+      default: "{}",
+    },
+    dataOut: {
+      description: "Dữ liệu đầu ra, bind bằng :data-out.sync. Nhận instance component khi dialog mở.",
+      type: "Object",
+      default: "{}",
+    },
+    title: { description: "Tiêu đề dialog.", type: "String", default: "''" },
+    controls: {
+      description: "Mảng Control Object dựng form. v-model không bắt đầu bằng vueData. sẽ tự tạo field cục bộ.",
+      type: "Array",
+      default: "[]",
+    },
+    watch: {
+      description: "Watcher cục bộ trong dialog — đăng ký khi mở, huỷ khi đóng.",
+      type: "Object",
+      default: "{}",
+    },
+    button: { description: "Mảng nút bấm — xem cấu trúc bên dưới.", type: "Array", default: "[]" },
+    disableValidate: { description: "Bỏ qua validate form.", type: "Boolean", default: "false" },
+    width: { description: "Bề rộng dialog, px.", type: "Number", default: "800" },
+    openAction: { description: "Action chạy ngay khi dialog mở.", type: "Object" },
+  }}
+/>
+
+**Event**: `input` (đóng/mở) · `update:data-out` (phát instance khi mở) ·
+`update:data` (phát `v_outData` khi bấm nút có `getoutdata: true`)
+
+### Cấu trúc một phần tử `button`
+
+| Khoá | Tác dụng |
+|---|---|
+| `label` | Chữ trên nút |
+| `color` | Mặc định `primary` |
+| `text` | `true` = dạng text button (mặc định) |
+| `type` | Ví dụ `"submit"` |
+| `:disabled` | Biểu thức Vue, vd `"!checkBoxValue"` |
+| `v-if` | Ẩn/hiện nút, vd `"ModuleID==1"` |
+| `icon-text` | Icon bên trái label |
+| `checkvalid` | Validate form trước khi chạy `action` — không qua thì dừng |
+| `getoutdata` | Đồng bộ field vào `v_outData` rồi phát `update:data` |
+| `action` | Mảng action chạy khi bấm |
+
+### Default FUI tự thêm
+
+```json
+{ ":outlined": true, ":dense": true }
+```
+
+## Cách dùng
+
+<Tabs items={['Tối giản (demo)', 'Đầy đủ với watch']}>
+
+<Tab value="Tối giản (demo)">
+```json
+{
+  "el": "f-dialog",
+  "attr": {
+    "v-model": "dlNhapGhiChu",
+    "title": "Nhập ghi chú",
+    ":controls": [
+      { "el": "v-textarea", "attr": { "v-model": "noiDung", "label": "Ghi chú", "rows": 3 } }
+    ],
+    ":button": [
+      { "label": "Lưu", "type": "submit", "checkvalid": true,
+        "action": [ { "MESS": "Đã lưu ghi chú" }, { "dlNhapGhiChu": false } ] },
+      { "label": "Đóng", "action": [ { "dlNhapGhiChu": false } ] }
+    ]
+  }
+}
+```
+</Tab>
+
+<Tab value="Đầy đủ với watch">
+```json
+{
+  "el": "f-dialog",
+  "attr": {
+    "v-model": "dlChonModule",
+    ":data.sync": "dialogData",
+    "title": "Chọn module",
+    ":controls": [
+      { "el": "v-select", "attr": {
+          "v-model": "moduleID", "label": "Module",
+          ":items": "vueData.dsModule", "item-text": "`ModuleName", "item-value": "`ModuleID" } }
+    ],
+    ":watch": {
+      "moduleID": { "MESSBOX": "Đã chọn {{moduleID}}" }
+    },
+    ":button": [
+      { "label": "Xác nhận", "type": "submit", "checkvalid": true, "getoutdata": true,
+        "action": [ { "dlChonModule": false } ] },
+      { "label": "Huỷ", "action": [ { "dlChonModule": false } ] }
+    ]
+  }
+}
+```
+
+`getoutdata: true` phát `update:data` — bắt bằng `:data-out.sync` để nhận giá trị vừa chọn ở
+component cha.
+</Tab>
+
+</Tabs>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**Biến bind trong `:controls` với `vueData.` phải đã khai trước trong `data[]`.** Vue không thiết
+lập được reactivity cho biến chưa tồn tại lúc `data()` init. Field không có prefix `vueData.` thì
+`f-dialog` tự tạo field cục bộ, không bị ràng buộc này.
+</Callout>
+
+<Callout type="warn">
+**Template dựng tĩnh lúc khởi tạo** — đổi `controls` sau khi dialog đã mount một lần sẽ không
+re-render. Cấu hình `controls` phải cố định, không dựng động theo state khác.
+</Callout>
+
+<Callout type="error">
+**Không đặt `f-dialog` bên trong template của một `uc-*.vue`.** Nó chỉ hoạt động khi khai trực
+tiếp trong `controls` của module JSON. Cần dialog trong component thì dựng `v-dialog` thủ công
+— xem [cách viết component riêng](/docs/fui/v2/kien-truc/custom-component#dialog-trong-component).
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi một dialog nhỏ để [MỤC ĐÍCH — không phải CRUD bảng], gồm field: [LIỆT KÊ].
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-dialog`. Nếu mục đích thực ra là thêm/sửa một dòng của bảng thì dừng lại và nói tôi nên
+  dùng `ctrl-update` của `f-table` thay vì `f-dialog` — cặp `f-button`+`f-dialog` không ổn định
+  cho CRUD trong V2
+- Field bind vào `vueData.x` phải đã khai trong `data[]` trước
+- Nút submit dùng `checkvalid: true`, nút đóng/huỷ không cần
+- Chuỗi hằng không dấu cách phải bọc backtick, ví dụ `` "`ModuleName" ``
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `data[]` và `controls` liên quan.
+</AiPrompt>

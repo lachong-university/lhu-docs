@@ -1,0 +1,134 @@
+---
+title: f-menu
+description: Nút dropdown có icon, action và link — thay v-menu + v-btn
+icon: EllipsisVertical
+---
+
+Dùng `f-menu` thay `v-menu` + `v-btn` khi cần một nút mở ra danh sách hành động. Cấu hình gọn
+hơn — mỗi mục chỉ là một object trong mảng `items`.
+
+## Demo
+
+<FuiPreview template="f-menu" height={220} />
+
+## Props
+
+<TypeTable
+  type={{
+    label: {
+      description: "Chữ trên nút. Bỏ trống hoặc không khai → nút chỉ hiện icon.",
+      type: "String",
+    },
+    iconText: { description: "Icon Material Design bên trái chữ.", type: "String" },
+    items: {
+      description: "Danh sách mục menu — xem cấu trúc bên dưới.",
+      type: "Array",
+    },
+    menuAttr: { description: "Thuộc tính truyền thẳng vào v-menu bên dưới.", type: "Object" },
+  }}
+/>
+
+### Cấu trúc một phần tử `items`
+
+| Khoá | Tác dụng |
+|---|---|
+| `text` | Nhãn hiển thị |
+| `icon-text` | Icon bên trái |
+| `color` | Màu icon |
+| `action` | Object action FUI — chạy qua `runAction` khi bấm |
+| `href` + `target` | Điều hướng như thẻ `<a>` — dùng thay `action` |
+| `visible` | Ẩn/hiện mục. Mặc định `true` |
+
+### Default FUI tự thêm
+
+```json
+{ "elevation": "1", ":depressed": true, "color": "primary" }
+```
+
+## Cách dùng
+
+<Tabs items={['Tối giản', 'Đầy đủ (demo)']}>
+
+<Tab value="Tối giản">
+```json
+{
+  "el": "f-menu",
+  "w": "",
+  "attr": {
+    "label": "Tác vụ",
+    "icon-text": "mdi-dots-vertical",
+    ":items": [
+      { "text": "Xem chi tiết", "icon-text": "mdi-eye", "action": { "CALL": "vueData.xemChiTiet" } },
+      { "text": "Xuất Excel",   "icon-text": "mdi-file-excel", "action": { "CALL": "vueData.xuatExcel" } }
+    ]
+  }
+}
+```
+</Tab>
+
+<Tab value="Đầy đủ (demo)">
+JSON đang chạy trong demo ở trên — trộn cả `action` lẫn `href`:
+
+```json
+{
+  "el": "f-menu",
+  "w": "",
+  "attr": {
+    "label": "Tác vụ",
+    "icon-text": "mdi-dots-vertical",
+    ":items": [
+      { "text": "Xem chi tiết",  "icon-text": "mdi-eye",         "action": { "MESSBOX": "Xem chi tiết" } },
+      { "text": "Xuất Excel",    "icon-text": "mdi-file-excel",  "action": { "MESSBOX": "Xuất Excel" } },
+      { "text": "Trang chủ FUI", "icon-text": "mdi-open-in-new", "href": "https://fui.vn", "target": "_blank" }
+    ]
+  }
+}
+```
+</Tab>
+
+</Tabs>
+
+## Ẩn mục theo điều kiện
+
+```json
+{
+  ":items": [
+    { "text": "Duyệt",  "icon-text": "mdi-check",
+      "visible": "vueData.user.SystemRight >= 9",
+      "action": { "CALL": "apiDuyet" } },
+    { "text": "Xoá",    "icon-text": "mdi-delete", "color": "error",
+      "action": { "CONFIRM": "Xác nhận xoá?", "CALL": "apiXoa" } }
+  ]
+}
+```
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**Không khai `label`, hoặc để rỗng, thì nút chỉ hiện icon** (`icon-only`). Đây là hành vi có chủ
+đích, không phải lỗi — hữu ích trong cột `t-menu` của `f-table` khi cần nút gọn.
+</Callout>
+
+## Component liên quan
+
+- `t-menu` — cùng cơ chế, dùng trong `headers` của `f-table` để mở menu ngữ cảnh trên từng dòng
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi một nút menu tác vụ gồm: Xem chi tiết, Xuất Excel, và Xoá (màu error, có hỏi
+xác nhận, chỉ hiện với người có quyền SystemRight >= 9).
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-menu`, không dùng `v-menu` + `v-btn` tự viết
+- Mỗi mục trong `:items` dùng `action` (object action FUI) hoặc `href`+`target`, có thể thêm
+  `visible` để ẩn theo điều kiện quyền
+- Không khai lại `elevation: "1"` và `color: "primary"` — FUI đã tự thêm cho `f-menu`
+- Event viết đầy đủ `v-on:click`, không dùng `@click`
+- Không tự thêm `class` hay `style` để làm đẹp
+
+Trả về đoạn `controls` liên quan.
+</AiPrompt>

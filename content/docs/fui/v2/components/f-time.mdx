@@ -1,0 +1,105 @@
+---
+title: f-time
+description: Nhập giờ — gõ theo mask HH:mm hoặc chọn từ picker
+icon: Clock
+---
+
+Cùng cơ chế với [`f-date`](/docs/fui/v2/components/f-date), dành cho giờ. Gõ trực tiếp theo mask
+hoặc bấm icon để mở picker.
+
+## Demo
+
+<FuiPreview template="f-time" height={220} />
+
+## Props
+
+<TypeTable
+  type={{
+    value: { description: "Giá trị giờ, định dạng HH:mm. Dùng qua v-model.", type: "String" },
+    label: { description: "Nhãn của ô nhập.", type: "String" },
+    required: {
+      description: "Bắt buộc nhập.",
+      type: "Boolean",
+      default: "true",
+    },
+    timeAdd: {
+      description: "Đặt sẵn giờ tương đối so với hiện tại, tính bằng phút. 30 = sau 30 phút.",
+      type: "Number",
+    },
+  }}
+/>
+
+**Event**: `input` — phát ra `HH:mm`, hoặc `null` khi ô trống.
+
+### Default FUI tự thêm
+
+```json
+{ ":hide-details": true, ":outlined": true, ":dense": true }
+```
+
+## Cách dùng
+
+<Tabs items={['Tối giản', 'Đầy đủ (demo)']}>
+
+<Tab value="Tối giản">
+```json
+{
+  "el": "f-time",
+  "w": 3,
+  "attr": { "v-model": "form.gioBatDau", "label": "Giờ bắt đầu", ":required": false }
+}
+```
+</Tab>
+
+<Tab value="Đầy đủ (demo)">
+JSON đang chạy trong demo ở trên:
+
+```json
+{
+  "el": "f-time",
+  "w": 4,
+  "attr": {
+    "v-model": "form.gioBatDau",
+    "label": "Giờ bắt đầu (sau 30 phút)",
+    ":required": false,
+    ":time-add": 30
+  }
+}
+```
+</Tab>
+
+</Tabs>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**`required` mặc định là `true`**, giống `f-date`. Ô không bắt buộc thì khai rõ
+`":required": false`.
+</Callout>
+
+<Callout type="warn">
+**Không khai `:required` thì `:rules` bị xoá.** `":required": false` là "bỏ hẳn rule", không phải
+"không validate". Runtime chạy `if (!c.attr[":required"]) delete c.attr[":rules"]`.
+</Callout>
+
+## Component liên quan
+
+- [`f-date`](/docs/fui/v2/components/f-date) — cùng cơ chế, dành cho ngày
+- `f-time-counter` — đếm ngược hoặc đồng hồ thời gian thực, không phải ô nhập
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi hai ô nhập giờ bắt đầu và giờ kết thúc ca làm việc.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-time`, không dùng `v-text-field` rồi tự parse giờ
+- Ô không bắt buộc thì phải khai `":required": false` — mặc định của `f-time` là `true`
+- Không khai lại `:hide-details`, `:outlined`, `:dense` — FUI đã tự thêm
+- Chia cột bằng khoá `w` (1–12); không tự thêm `class`/`style` để làm đẹp
+
+Trả về `controls` liên quan.
+</AiPrompt>

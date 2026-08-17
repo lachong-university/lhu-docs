@@ -1,0 +1,120 @@
+---
+title: Mở cửa sổ (openWindow)
+description: Mở một URL trong dialog/iframe, và trao đổi dữ liệu hai chiều với cửa sổ cha
+icon: AppWindow
+---
+
+Cần mở một trang khác trong dialog — chi tiết một dòng, form phụ, công cụ con — dùng
+`openWindow()`. **Không** đặt `f-window` trực tiếp trong `controls`: nó là component nội bộ,
+runtime tự dựng khi bạn gọi `openWindow`.
+
+## `openWindow()`
+
+```json
+{
+  "FUN": "openWindow",
+  "IN": {
+    "id": "`winChiTiet",
+    "url": "'/ex/donhang-chitiet?id=' + donHangChon.ID",
+    "title": "`Chi tiết đơn hàng",
+    "width": 1000
+  }
+}
+```
+
+| Tham số | Tác dụng |
+|---|---|
+| `id` | Định danh cửa sổ. Trùng `id` với cửa sổ đang mở thì bị bỏ qua (chống mở trùng) |
+| `url` | Đường dẫn nạp vào iframe |
+| `title` | Tiêu đề trên thanh toolbar của dialog |
+| `width` | Bề rộng, px. Bỏ trống = toàn màn hình |
+| `height` | Chiều cao, px. Bỏ trống = `100%` |
+| `onclose` | Action chạy khi người dùng đóng cửa sổ |
+| `button` | Mảng nút phụ trên toolbar (cấu trúc giống `f-button`) |
+
+<Callout>
+`id`, `title` là chuỗi không dấu cách nên phải bọc backtick —
+[quy tắc phân giải giá trị](/docs/fui/v2/kien-truc/value-resolution). `url` ghép động thì viết
+như một biểu thức nối chuỗi, ví dụ `"'/path?id=' + bienID"`.
+</Callout>
+
+## Chạy lại khi đóng
+
+```json
+{
+  "FUN": "openWindow",
+  "IN": {
+    "id": "`winThemNhanVien",
+    "url": "`/ex/nhanvien-them",
+    "title": "`Thêm nhân viên",
+    "onclose": { "CALL": "apiDanhSach" }
+  }
+}
+```
+
+`onclose` chạy ở cửa sổ **cha**, sau khi cửa sổ con đóng — dùng để tải lại danh sách.
+
+## Trao đổi dữ liệu hai chiều
+
+Cửa sổ con và cửa sổ cha là hai instance Vue tách biệt. Trao đổi dữ liệu qua key `#`:
+
+<Tabs items={['Con đọc dữ liệu của cha', 'Con ghi dữ liệu ngược về cha']}>
+
+<Tab value="Con đọc dữ liệu của cha">
+Trong `data[]` của module **con**:
+
+```json
+{ "user": "#PARENT.user" }
+```
+</Tab>
+
+<Tab value="Con ghi dữ liệu ngược về cha">
+Trong action của module **con**:
+
+```json
+{ "#PARENT.dsDonHang": "dsDonHang" }
+```
+
+Cửa sổ cha thấy `vueData.dsDonHang` cập nhật ngay, không cần đóng cửa sổ con.
+</Tab>
+
+</Tabs>
+
+`#Win1.field` (thay vì `#PARENT`) ghi vào một cửa sổ con cụ thể theo `id` — dùng khi cửa sổ cha
+mở nhiều cửa sổ con cùng lúc và cần nhắm đúng một cái.
+
+## Nút phụ trên toolbar
+
+```json
+{
+  "FUN": "openWindow",
+  "IN": {
+    "id": "`winXemTruoc",
+    "url": "`/ex/xem-truoc",
+    "title": "`Xem trước",
+    "button": [
+      { "label": "In", "icon-text": "mdi-printer", "action": { "EXE": "window.print()" } }
+    ]
+  }
+}
+```
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**Mở trùng `id` bị bỏ qua im lặng**, không báo lỗi. Cửa sổ động theo dòng dữ liệu thì ghép `id`
+với khoá của dòng đó: `` "id": "'winChiTiet' + item.ID" `` để mỗi dòng mở được cửa sổ riêng.
+</Callout>
+
+<Callout type="warn">
+**`#PARENT`/`#Win1` không hoạt động qua origin khác nhau theo cách thông thường** — khi bị chặn
+bởi same-origin policy, runtime tự chuyển sang `postMessage`. Không cần xử lý gì thêm, nhưng nếu
+thấy dữ liệu không đồng bộ giữa hai domain khác nhau thì đây là nguyên nhân đầu tiên cần kiểm tra.
+</Callout>
+
+## Component nội bộ đứng sau `openWindow`
+
+`f-window` là component runtime tự dựng để hiển thị iframe/dialog — bạn không bao giờ viết
+`{ "el": "f-window" }` trong `controls`. Cùng nhóm "nội bộ" còn có `header-bar` (khung menu trên
+cùng) và `fp-profile` (khối hồ sơ người dùng, hiện qua `set.userProfile` của project) — cả ba do
+runtime tự quản lý theo cấu hình, không đặt trực tiếp vào `controls`.

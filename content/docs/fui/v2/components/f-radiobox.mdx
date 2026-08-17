@@ -1,0 +1,131 @@
+---
+title: f-radiobox
+description: Nhóm radio dựng từ mảng items
+icon: CircleDot
+---
+
+`f-radiobox` bọc `v-radio-group`, dựng danh sách lựa chọn từ một mảng thay vì viết tay từng
+`v-radio`.
+
+## Demo
+
+<FuiPreview template="f-radiobox" height={220} />
+
+## Props
+
+<TypeTable
+  type={{
+    label: { description: "Nhãn của cả nhóm.", type: "String" },
+    items: {
+      description: "Danh sách lựa chọn.",
+      type: "Array",
+      default: "[]",
+    },
+    itemValue: {
+      description: "Tên field lấy làm giá trị khi chọn.",
+      type: "String",
+      default: "'value'",
+    },
+    itemText: {
+      description: "Tên field hiển thị làm nhãn.",
+      type: "String",
+      default: "'text'",
+    },
+  }}
+/>
+
+**Event**: `input` khi đổi lựa chọn.
+
+### Default FUI tự thêm
+
+```json
+{
+  "class": "mt-1",
+  ":hide-details": true,
+  ":required": true,
+  ":rules": "[v => (!!v || !isNaN(parseFloat(v)))]"
+}
+```
+
+## Cách dùng
+
+<Tabs items={['Tối giản', 'Đầy đủ (demo)']}>
+
+<Tab value="Tối giản">
+```json
+{
+  "el": "f-radiobox",
+  "w": 6,
+  "attr": {
+    "label": "Giới tính",
+    "v-model": "form.gioiTinh",
+    ":items": "dsGioiTinh",
+    "item-value": "`value",
+    "item-text": "`text"
+  }
+}
+```
+</Tab>
+
+<Tab value="Đầy đủ (demo)">
+JSON đang chạy trong demo ở trên:
+
+```json
+{
+  "el": "f-radiobox",
+  "w": 6,
+  "attr": {
+    "label": "Hình thức nhận hàng",
+    "v-model": "form.hinhThuc",
+    ":items": "dsHinhThuc",
+    "item-value": "`value",
+    "item-text": "`text"
+  }
+}
+```
+
+với `dsHinhThuc` khai trong `data[]`:
+
+```json
+{
+  "dsHinhThuc": [
+    { "value": "GIAO", "text": "Giao tận nơi" },
+    { "value": "NHAN", "text": "Nhận tại cửa hàng" }
+  ]
+}
+```
+</Tab>
+
+</Tabs>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**`item-value` và `item-text` thường bị quên bọc backtick.** `"value"` và `"text"` không có dấu
+cách nên sẽ bị eval như biến JS. Viết `` "`value" `` và `` "`text" ``.
+[Chi tiết →](/docs/fui/v2/kien-truc/value-resolution)
+</Callout>
+
+<Callout type="warn">
+**`:required` mặc định là `true`.** Nhóm radio không bắt buộc thì khai rõ `":required": false`,
+nếu không sẽ chặn submit form ở nơi khác trên trang.
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi một nhóm radio chọn [TÊN LỰA CHỌN], dữ liệu lấy từ mảng tĩnh khai trong `data[]`.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-radiobox`, không dùng `v-radio-group` tự viết
+- `item-value` và `item-text` phải bọc backtick ở đầu vì đây là tên field cố định không có dấu
+  cách — ví dụ `` "`value" ``
+- Nếu không bắt buộc chọn thì khai rõ `":required": false`
+- Chia cột bằng khoá `w` (1–12), không dùng `style="width:..."`
+- Không tự thêm `class` hay `style` để làm đẹp
+
+Trả về `data[]` và `controls` liên quan.
+</AiPrompt>

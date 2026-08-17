@@ -1,0 +1,107 @@
+---
+title: f-qrcode-reader
+description: Đọc mã QR bằng camera thiết bị, trong một dialog
+icon: ScanQrCode
+---
+
+`f-qrcode-reader` mở một dialog dùng camera của thiết bị để quét mã QR — thường dùng cho
+checkin, xác thực vé, tra cứu nhanh bằng mã in sẵn.
+
+## Import bắt buộc
+
+<Callout type="error">
+Thiếu import thì component không tồn tại.
+
+```text
+/include/qrcode/qrcode-reader.min.js
+```
+</Callout>
+
+## Demo
+
+Trình duyệt sẽ hỏi quyền truy cập camera khi mở dialog.
+
+<FuiPreview template="f-qrcode-reader" height={220} />
+
+## Props
+
+<TypeTable
+  type={{
+    value: {
+      description: "Điều khiển đóng/mở dialog quét. Dùng qua v-model.",
+      type: "Boolean",
+      default: "true",
+    },
+    label: { description: "Tiêu đề dialog.", type: "String", default: "'Đọc QRCode'" },
+    width: { description: "Bề rộng dialog, px.", type: "Number", default: "-50" },
+  }}
+/>
+
+**Event**: `input` (đóng dialog) · `update` (nội dung mã QR vừa đọc được)
+
+## Cách dùng
+
+```json
+{
+  "el": "f-qrcode-reader",
+  "w": 12,
+  "attr": {
+    "v-model": "dlQuetMa",
+    "label": "Quét mã checkin",
+    "v-on:update": "CALL(vueData.xuLyMaQuet, { item: $event })"
+  }
+}
+```
+
+```json
+{
+  "xuLyMaQuet": {
+    "API": "/api/checkin/xacnhan",
+    "IN": { "MaVe": "item" },
+    "CALLBACK": { "MESS": "Checkin thành công" }
+  }
+}
+```
+
+Mở dialog bằng cách gán `dlQuetMa = true`, thường từ một nút:
+
+```json
+{ "el": "f-button", "attr": {
+    "label": "Quét mã", "icon-text": "mdi-qrcode-scan",
+    ":checkvalid": false, ":action": { "dlQuetMa": true } } }
+```
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**Cần HTTPS.** Trình duyệt chỉ cấp quyền camera cho ngữ cảnh bảo mật (`https://` hoặc
+`localhost`) — quét không hoạt động trên `http://` thường.
+</Callout>
+
+<Callout type="warn">
+Người dùng từ chối quyền camera thì dialog vẫn mở nhưng không đọc được gì — nên có hướng dẫn dự
+phòng (nhập mã tay) cho trường hợp này.
+</Callout>
+
+## Component liên quan
+
+- `f-qrcode` — chiều ngược lại, vẽ mã QR
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi chức năng quét mã QR để checkin: nút mở dialog quét, quét xong tự gọi API xác
+nhận và báo thành công.
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-qrcode-reader`, bắt kết quả bằng `"v-on:update": "CALL(..., { item: $event })"`
+- Viết đầy đủ `v-on:`, không dùng `@`
+- Nhắc tôi đăng ký import `/include/qrcode/qrcode-reader.min.js`
+- Nhắc rằng tính năng này cần chạy trên HTTPS
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `data[]` và `controls` liên quan.
+</AiPrompt>

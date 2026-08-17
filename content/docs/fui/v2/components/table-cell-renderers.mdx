@@ -1,0 +1,269 @@
+---
+title: Renderer trong ô bảng (t-*)
+description: t-check, t-select, t-combobox, t-menu, t-link — sửa/thao tác ngay trong ô của f-table
+icon: TableProperties
+---
+
+12 renderer dùng trong `headers` của [`f-table`](/docs/fui/v2/components/f-table), khai qua khoá
+`el` của từng cột. Trang này đi sâu vào các renderer có **hành vi riêng** (nhận input, gọi
+action). Bốn renderer chỉ hiển thị (`t-html`, `t-label`, `t-num`, `t-time`, `t-boolean`) đã đủ ở
+[bảng tóm tắt trên trang f-table](/docs/fui/v2/components/f-table#renderer-trong-ô).
+
+## Demo
+
+Bảng dưới gộp `t-check` (tick để bật/tắt) và `t-menu` (nút "⋮" mở hành động) trên cùng dữ liệu.
+
+<FuiPreview template="table-cell-renderers" height={420} />
+
+## Cơ chế chung: `:action` + `tableActionEvent`
+
+Sáu renderer còn lại (`t-check`, `t-text`, `t-select`, `t-combobox`, `t-menu`, `t-button`,
+`t-link`) đều gọi chung một hàm nội bộ khi có tương tác — `tableActionEvent`. Hiểu cơ chế này một
+lần là hiểu được cả sáu.
+
+```json
+{ "text": "...", "value": "...", "el": "t-check", "attr": { ":action": { "API": "...", "IN": { "ID": "item.ID" } } } }
+```
+
+Khi người dùng tương tác (tick checkbox, chọn dropdown, bấm nút…), renderer chạy `:action` với
+ngữ cảnh:
+
+| Biến trong `:action` | Giá trị |
+|---|---|
+| `item` · `$row` | Object của dòng đang thao tác |
+| `index` | Vị trí dòng trong mảng `items` |
+
+<Callout type="warn">
+**Có `CONFIRM` mà người dùng bấm huỷ → giá trị tự phục hồi về trước khi thao tác.** Đây là hành
+vi có sẵn, không cần tự viết rollback: `t-check`/`t-select`/`t-combobox`/`t-text` đều tự lưu giá
+trị cũ và trả lại nếu `CONFIRM` bị huỷ.
+</Callout>
+
+## t-check — Toggle bật/tắt
+
+```json
+{
+  "text": "Kích hoạt", "value": "Active", "align": "center",
+  "el": "t-check",
+  "attr": {
+    ":action": {
+      "API": "/api/nhanvien/set-active",
+      "IN": { "ID": "item.ID", "Active": "item.Active" },
+      "CALLBACK": { "MESS": "Đã cập nhật" }
+    }
+  }
+}
+```
+
+Tick xong gọi `:action` ngay — không cần nút Lưu riêng. Props: `value` (giá trị hiện tại),
+`falseValue` (giá trị khi tắt, mặc định `false`).
+
+## t-text — Sửa text ngay trong ô
+
+```json
+{
+  "text": "Ghi chú", "value": "GhiChu",
+  "el": "t-text",
+  "attr": {
+    ":action": {
+      "API": "/api/nhanvien/update-note",
+      "IN": { "ID": "item.ID", "GhiChu": "item.GhiChu" }
+    }
+  }
+}
+```
+
+Action chạy khi rời ô (blur), không chạy theo từng phím gõ.
+
+## t-select — Dropdown ngay trong ô
+
+```json
+{
+  "text": "Chức vụ", "value": "ChucVuID", "width": "200px",
+  "el": "t-select",
+  "attr": {
+    "class": "flex-md-grow-0 my-2",
+    ":items": "vueData.dsChucVu",
+    "item-text": "`TenChucVu",
+    "item-value": "`ID",
+    ":action": {
+      "CONFIRM": "Xác nhận đổi chức vụ?",
+      "API": "/api/nhanvien/set-chucvu",
+      "IN": { "ID": "item.ID", "ChucVuID": "item.ChucVuID" },
+      "CALLBACK": { "MESS": "Đã cập nhật" }
+    }
+  }
+}
+```
+
+<Callout type="warn">
+`:items` tham chiếu state của trang thì cần prefix `vueData.` — cột đang chạy trong scope riêng
+của từng dòng, không tự thấy state cấp module như control ở `controls` thường.
+</Callout>
+
+## t-combobox — Dropdown có tìm kiếm qua API, ngay trong ô
+
+Cùng cơ chế với [`f-search`](/docs/fui/v2/components/f-search) nhưng đặt trong ô bảng:
+
+```json
+{
+  "text": "Người phụ trách", "value": "PhuTrachID",
+  "el": "t-combobox",
+  "attr": {
+    "api": "/api/nhanvien/search",
+    "item-text": "`HoTen", "item-value": "`ID",
+    ":action": { "API": "/api/donhang/set-phutrach", "IN": { "ID": "item.ID", "PhuTrachID": "item.PhuTrachID" } }
+  }
+}
+```
+
+Props: `value`, `text`, `items` (danh sách tĩnh), `api`, `apiData` — giống hệt `f-search`, chỉ
+khác nằm trong ô thay vì đứng riêng trên form.
+
+## t-menu — Menu ngữ cảnh (pattern `menuChucNang`)
+
+Dùng khi một dòng cần **nhiều hành động** thay vì một action đơn. Định nghĩa danh sách hành động
+trong `data[]`, tham chiếu qua `t-menu`.
+
+<Steps>
+
+<Step>
+### Định nghĩa `menuChucNang` trong `data[]`
+
+```json
+{
+  "menuChucNang": [
+    {
+      "color": "primary", "icon-text": "mdi-account-details", "text": "Xem chi tiết",
+      "action": [
+        { "nhanVienChon": "item" },
+        { "dlChiTiet": true }
+      ]
+    },
+    {
+      "color": "error", "icon-text": "mdi-delete", "text": "Xoá",
+      "action": {
+        "CONFIRM": "Xác nhận xoá {{item.HoTen}}?",
+        "API": "/api/nhanvien/delete", "IN": { "ID": "item.ID" },
+        "CALLBACK": { "CALL": "apiDanhSach" }
+      }
+    }
+  ]
+}
+```
+</Step>
+
+<Step>
+### Dùng `t-menu` trong `headers`
+
+```json
+{
+  "text": "Tác vụ", "value": "ctrl", "width": "100px", "align": "center",
+  "el": "t-menu",
+  "attr": { ":items": "vueData.menuChucNang" }
+}
+```
+</Step>
+
+</Steps>
+
+Trong mỗi mục của `menuChucNang`: `"key": "item"` sao chép cả object dòng vào state (đặt tên gì
+tuỳ bạn, ví dụ `nhanVienChon`), field khác kiểu `"sTen": "item.HoTen"` copy riêng lẻ, rồi
+`{ "dlXxx": true }` mở dialog sau khi state đã sẵn sàng.
+
+## t-link — Đường dẫn hoặc mở dialog
+
+```json
+{
+  "text": "Xem hồ sơ", "value": "HoSo",
+  "el": "t-link",
+  "attr": { ":url": "item.LinkHoSo", "target": "_blank" }
+}
+```
+
+Đặt `target: "dialog"` thì `t-link` gọi `openWindow()` thay vì điều hướng — dùng khi muốn mở chi
+tiết trong iframe thay vì tab mới:
+
+```json
+{
+  "text": "Chi tiết", "value": "ChiTiet",
+  "el": "t-link",
+  "attr": {
+    ":id": "'winDon' + item.ID",
+    "target": "dialog",
+    ":url": "'/ex/donhang-chitiet?id=' + item.ID",
+    ":title": "`Chi tiết đơn hàng"
+  }
+}
+```
+
+## Pattern liên quan trong `f-table`
+
+Những pattern này không phải renderer riêng nhưng hay đi kèm với chúng.
+
+<Tabs items={['show-select — chọn nhiều dòng', 'v-chip-group — nhiều tag trong ô']}>
+
+<Tab value="show-select — chọn nhiều dòng">
+```json
+{
+  "el": "f-table",
+  "attr": {
+    ":show-select": true,
+    "v-model": "dsDaChon",
+    ":items": "dsNhanVien",
+    "item-key": "ID",
+    ":items-per-page": -1,
+    ":hide-default-footer": true
+  }
+}
+```
+
+<Callout>
+`show-select` **không nằm trong danh sách prop của `f-table`** — nó rơi thẳng xuống
+`v-data-table` bên dưới qua `v-bind="$attrs"`. Cơ chế này áp dụng cho mọi attr Vuetify không
+được `f-table` khai riêng: cứ dùng như prop Vuetify gốc là chạy.
+</Callout>
+</Tab>
+
+<Tab value="v-chip-group — nhiều tag trong ô">
+```json
+{
+  "text": "Quyền chức năng", "value": "DsQuyen",
+  "el": "v-chip-group",
+  "attr": { "v-if": "item.DsQuyen", "column": true },
+  "innerHTML": [
+    { "el": "v-chip", "attr": {
+        ":small": true, "color": "primary", "outlined": "",
+        "v-for": "q in item.DsQuyen", ":key": "q.ID",
+        "v-on:click": "CALL(vueData.xemQuyen, { item: q })" },
+      "innerHTML": "{{q.TenQuyen}}" }
+  ]
+}
+```
+
+Dùng `v-chip-group` + `v-chip` thẳng (không qua `f-label`) khi mỗi chip cần tự bắt click riêng.
+</Tab>
+
+</Tabs>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`), có một `f-table` hiển thị [ĐỐI TƯỢNG].
+
+Hãy thêm cho tôi: một cột [Active] dùng `t-check` để bật/tắt ngay trong bảng, và một cột "Tác vụ"
+dùng `t-menu` với các hành động: [LIỆT KÊ HÀNH ĐỘNG].
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- `t-check`/`t-select`/`t-combobox`/`t-text` gọi `:action` ngay khi tương tác, có `CONFIRM` thì
+  tự rollback nếu người dùng huỷ — không cần tự viết logic khôi phục
+- `t-menu` cần định nghĩa mảng hành động trong `data[]` (ví dụ tên `menuChucNang`) rồi tham chiếu
+  qua `:items`, không nhồi cả danh sách hành động trực tiếp vào `attr`
+- `:action`/`:items` tham chiếu state cấp module phải có prefix `vueData.`
+- Chuỗi hằng không dấu cách phải bọc backtick, ví dụ `` "`ID" ``
+- Event viết đầy đủ `v-on:click`, không dùng `@click`
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `data[]` và đoạn `headers` liên quan.
+</AiPrompt>

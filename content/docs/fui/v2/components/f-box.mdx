@@ -1,0 +1,112 @@
+---
+title: f-box
+description: Hiển thị và sửa dữ liệu dạng key–value, không cần dựng form riêng
+icon: Rows3
+---
+
+`f-box` render một object thành các dòng nhãn–giá trị — hợp cho khối "thông tin chi tiết" mà
+không muốn dựng cả một form.
+
+## Demo
+
+<FuiPreview template="f-box" height={280} />
+
+## Props
+
+<TypeTable
+  type={{
+    label: { description: "Tiêu đề khối.", type: "String" },
+    items: {
+      description: "Object dữ liệu (tự wrap thành mảng 1 phần tử), hoặc mảng nhiều object.",
+      type: "Object | Array",
+    },
+    rowFormat: {
+      description: "Định nghĩa các dòng hiển thị: [{ text, value, noEdit }]. Bỏ trống thì tự suy từ key của items.",
+      type: "Array",
+    },
+    edit: {
+      description: "true = cho sửa trực tiếp trên khối (mỗi dòng thành ô nhập, trừ dòng có noEdit).",
+      type: "Boolean",
+    },
+    saveclick: { description: "Action chạy khi bấm nút lưu ở chế độ edit.", type: "Object" },
+  }}
+/>
+
+**Event**: `input` — khi dữ liệu nội bộ đổi (chế độ `edit`).
+
+### Default FUI tự thêm
+
+```json
+{ ":outlined": true }
+```
+
+## Cách dùng
+
+<Tabs items={['Chỉ xem (demo)', 'Cho sửa trực tiếp']}>
+
+<Tab value="Chỉ xem (demo)">
+```json
+{
+  "el": "f-box",
+  "w": 12,
+  "attr": {
+    "label": "Thông tin nhân viên",
+    ":items": "nhanVienChon",
+    ":row-format": [
+      { "text": "Mã NV", "value": "MaNV", "noEdit": true },
+      { "text": "Họ tên", "value": "HoTen" },
+      { "text": "Phòng ban", "value": "TenPhongBan" },
+      { "text": "Ngày vào", "value": "NgayVao" }
+    ]
+  }
+}
+```
+</Tab>
+
+<Tab value="Cho sửa trực tiếp">
+```json
+{
+  "el": "f-box",
+  "w": 12,
+  "attr": {
+    "label": "Thông tin nhân viên",
+    ":items": "nhanVienChon",
+    ":edit": true,
+    ":row-format": [
+      { "text": "Mã NV", "value": "MaNV", "noEdit": true },
+      { "text": "Họ tên", "value": "HoTen" },
+      { "text": "Điện thoại", "value": "DienThoai" }
+    ],
+    "v-on:input": "CALL(vueData.luuNhanVien)",
+    ":saveclick": { "CALL": "luuNhanVien" }
+  }
+}
+```
+</Tab>
+
+</Tabs>
+
+## Lỗi thường gặp
+
+<Callout type="warn">
+**Bỏ `:row-format`** thì `f-box` tự dựng dòng từ mọi key của `items` — kể cả field kỹ thuật
+(`ID`, cờ nội bộ) không nên hiện cho người dùng. Bảng thông tin hiển thị ra công khai nên luôn
+khai `:row-format` tường minh.
+</Callout>
+
+## Prompt cho AI
+
+<AiPrompt>
+Tôi đang viết một module FUI V2 (Vue 2 + Vuetify 2, cấu hình bằng JSON gồm 4 khối `data`,
+`watch`, `controls`, `set`).
+
+Hãy thêm cho tôi khối hiển thị thông tin chi tiết của [ĐỐI TƯỢNG], gồm các field: [LIỆT KÊ].
+
+Yêu cầu bắt buộc khi viết JSON FUI:
+- Dùng `f-box`, không tự viết bảng key-value bằng `v-simple-table`
+- Luôn khai `:row-format` tường minh, đừng để tự suy từ dữ liệu — tránh lộ field kỹ thuật
+- Field khoá chính đặt `"noEdit": true`
+- Không tự thêm `class`/`style` để làm đẹp
+
+Trả về `controls` liên quan.
+</AiPrompt>
