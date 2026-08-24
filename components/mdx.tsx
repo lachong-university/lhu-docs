@@ -31,6 +31,8 @@ export function getMDXComponents(components?: MDXComponents) {
     ...defaultMdxComponents,
     img: DocsImage,
     ...components,
+    IconItem,
+    InlineWrap,
   } satisfies MDXComponents;
 }
 

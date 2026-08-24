@@ -34,6 +34,16 @@ export default async function Layout({
                 "Learn how to use the AM Portal to manage admissions and student information",
               url: "/docs/am-system",
             },
+            {
+              text: "Work Manager",
+              description: "Work Manager",
+              url: "/docs/work-manager-gioi-thieu-phan-mem",
+            },
+            {
+              text: "Đăng ký nghỉ phép",
+              description: "Đăng ký nghỉ phép",
+              url: "/docs/dang-ky-nghi-phep-lhu",
+            },
           ],
         },
       ]}
