@@ -1,0 +1,10 @@
+{
+  "title": "Thi trắc nghiệm trực tuyến",
+  "description": "Hướng dẫn sử dụng thi trắc nghiệm trực tuyến",
+  "icon": "ClipboardCheck",
+  "root": true,
+  "pages": [
+    "tong-quan",
+    "huong-dan-chi-tiet"
+  ]
+}

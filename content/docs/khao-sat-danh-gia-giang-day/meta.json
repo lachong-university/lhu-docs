@@ -1,0 +1,10 @@
+{
+  "title": "Khảo sát đánh giá giảng dạy",
+  "description": "Hướng dẫn khảo sát đánh giá giảng dạy",
+  "icon": "ClipboardList",
+  "root": true,
+  "pages": [
+    "tong-quan",
+    "huong-dan"
+  ]
+}

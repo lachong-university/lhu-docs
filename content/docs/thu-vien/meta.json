@@ -1,0 +1,22 @@
+{
+  "title": "Thư viện",
+  "description": "Hướng dẫn sử dụng thư viện",
+  "icon": "BookOpen",
+  "root": true,
+  "pages": [
+    "---TỔNG QUAN---",
+    "tong-quan/1-gioi-thieu-he-thong",
+    "tong-quan/2-doi-tuong-su-dung",
+    "tong-quan/3-dieu-kien-va-truy-cap",
+    "tong-quan/4-quy-dinh",
+    "---HỆ THỐNG THƯ VIỆN ĐIỆN TỬ---",
+    "he-thong-thu-vien-dien-tu/1-gioi-thieu-chung",
+    "he-thong-thu-vien-dien-tu/2-cach-tra-cuu-va-muon-tai-lieu",
+    "he-thong-thu-vien-dien-tu/3-xem-lich-su-thong-tin-muon-tra-sach",
+    "---THƯ VIỆN SỐ---",
+    "thu-vien-so/1-gioi-thieu-chung",
+    "thu-vien-so/2-huong-dan-su-dung",
+    "---CÁC CÂU HỎI THƯỜNG GẶP---",
+    "cac-cau-hoi-thuong-gap/ban-hoi-lhu-tra-loi"
+  ]
+}

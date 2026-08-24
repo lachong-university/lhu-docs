@@ -1,0 +1,13 @@
+{
+  "title": "Hệ thống mạng wifi, phòng máy",
+  "description": "Hướng dẫn sử dụng hệ thống mạng wifi và phòng máy",
+  "icon": "Wifi",
+  "root": true,
+  "pages": [
+    "index",
+    "---Wifi---",
+    "wifi/he-thong-mang-wifi",
+    "---Phòng máy---",
+    "phong-may/he-thong-phong-may"
+  ]
+}

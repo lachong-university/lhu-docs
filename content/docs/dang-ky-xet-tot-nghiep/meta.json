@@ -1,0 +1,14 @@
+{
+  "title": "Đăng ký xét tốt nghiệp",
+  "description": "Hướng dẫn đăng ký xét tốt nghiệp",
+  "icon": "GraduationCap",
+  "root": true,
+  "pages": [
+    "---GIỚI THIỆU---",
+    "gioi-thieu/he-thong-dang-ky-xet-tot-nghiep",
+    "---HƯỚNG DẪN---",
+    "huong-dan/1-website-dang-ky-xet-tot-nghiep",
+    "huong-dan/2-cap-nhat-thong-tin-chung-chi",
+    "huong-dan/3-dang-ky-xet-tot-nghiep"
+  ]
+}

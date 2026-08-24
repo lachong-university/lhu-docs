@@ -1,3 +1,97 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
+
+img {
+  display: inline;
+}
+
+/* xoa margin hinh trong the <p> */
+p img {
+  display: inline;
+  margin: 0px;
+}
+
+.prose p:has(> img:only-child),
+.prose p:has(> span > img:only-child) {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose ul,
+.prose ol {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-inline-start: 1.35rem;
+}
+
+.prose li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding-inline-start: 0.15rem;
+}
+
+.prose li > p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.prose li > p + p {
+  margin-top: 0.35rem;
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.prose li::marker {
+  color: var(--tw-prose-bullets);
+  font-weight: 400;
+}
+
+.prose blockquote > p {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.prose em,
+.prose i,
+.prose blockquote {
+  font-style: normal;
+}
+
+.prose li img,
+.prose p img,
+.prose blockquote img,
+.prose li [data-rmiz],
+.prose p [data-rmiz],
+.prose blockquote [data-rmiz] {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.prose .doc-inline-icon {
+  display: inline-block !important;
+  width: auto;
+  max-width: min(100%, 22rem);
+  max-height: 3rem;
+  margin-right: 0.2rem;
+  margin-left: 0.2rem;
+  vertical-align: middle;
+}
+
+.prose p:has(.doc-inline-icon) {
+  text-align: start;
+}
+
+.prose > p > img:only-child,
+.prose > p > span:has(> img:only-child),
+.prose > p > [data-rmiz]:only-child {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+}

@@ -1,0 +1,21 @@
+{
+  "title": "Dự trù kinh phí LHU",
+  "description": "Hướng dẫn dự trù kinh phí lhu",
+  "icon": "BadgeDollarSign",
+  "root": true,
+  "pages": [
+    "---TỔNG QUAN---",
+    "1-tong-quan/1-1-gioi-thieu-he-thong",
+    "1-tong-quan/1-2-doi-tuong-su-dung",
+    "1-tong-quan/1-3-dieu-kien-va-truy-cap",
+    "1-tong-quan/1-4-chuc-nang",
+    "---CHỨC NĂNG HỆ THỐNG---",
+    "2-chuc-nang-he-thong/2-1-xem-du-tru-kinh-phi-cua-don-vi-theo-nam-hoc",
+    "2-chuc-nang-he-thong/2-2-them-hieu-chinh-xoa-du-tru-kinh-phi",
+    "2-chuc-nang-he-thong/2-3-import-du-lieu-tu-file-mau-excel",
+    "2-chuc-nang-he-thong/2-4-lay-du-lieu-sinh-vien",
+    "2-chuc-nang-he-thong/2-5-luan-chuyen-du-tru-kinh-phi",
+    "2-chuc-nang-he-thong/2-6-xem-nhat-ky-hieu-chinh-du-lieu-cua-01-du-tru-kinh-phi",
+    "2-chuc-nang-he-thong/2-7-theo-doi-nhung-du-tru-can-phai-xu-ly-hoac-luu-y"
+  ]
+}
